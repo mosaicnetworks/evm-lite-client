@@ -1,0 +1,61 @@
+interface BaseTX {
+    gas?: number,
+    gasPrice?: number,
+}
+
+export interface TX extends BaseTX {
+    from: string,
+    to?: string,
+    value?: number,
+    data?: string
+}
+
+export interface ContractOptions extends BaseTX {
+    from?: string,
+    address?: string,
+    data?: string,
+    jsonInterface: ABI[]
+}
+
+export interface Input {
+    name: string,
+    type: string,
+}
+
+export interface ABI {
+    constant?: any,
+    inputs: Input[],
+    name?: any,
+    outputs?: any[],
+    payable: any,
+    stateMutability: any,
+    type: any
+}
+
+export interface Account {
+    address: string,
+    balance: number,
+    nonce: number,
+}
+
+export interface TXReceipt {
+    root: string,
+    transactionHash: string,
+    from: string,
+    to?: string,
+    gasUsed: number,
+    cumulativeGasUsed: number,
+    contractAddress: string,
+    logs: [],
+    logsBloom: string
+}
+
+export interface SolidityCompilerOutput {
+    contracts: {},
+    errors: string[],
+    sourceList: string[],
+    sources: {}
+}
+
+
+

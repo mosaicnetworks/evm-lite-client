@@ -1,0 +1,21 @@
+{
+  "name": "evm-lite-sdk",
+  "version": "0.1.0",
+  "description": "A Node.js module for interacting with EVM-Lite.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Danu Kumanan",
+  "license": "MIT",
+  "dependencies": {
+    "json-bigint": "^0.3.0",
+    "prompt": "^1.0.0",
+    "solc": "^0.4.24",
+    "web3": "github:ethereum/web3.js",
+    "web3-eth-accounts": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^10.7.0"
+  }
+}
