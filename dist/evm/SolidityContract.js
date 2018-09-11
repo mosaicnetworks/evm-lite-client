@@ -9,8 +9,17 @@ const SolidityFunction_1 = require("./SolidityFunction");
 const Transaction_1 = require("./Transaction");
 const web3 = new Web3();
 class SolidityContract {
-    constructor(monetNode, options) {
-        this.monetNode = monetNode;
+    /**
+     * Javascript Object representation of a Solidity contract.
+     *
+     * Can either be used to deploy a contract or interact with a contract already deployed.
+     *
+     * @param {Controller} controller Controller Javascript object
+     * @param {ContractOptions} options The options of the contract. eg. gas price, gas, address
+     * @constructor
+     */
+    constructor(controller, options) {
+        this.controller = controller;
         this.options = options;
         if (options.address === undefined)
             this.options.address = '';
@@ -20,6 +29,16 @@ class SolidityContract {
         if (this.options.address !== undefined)
             this._attachMethodsToContract();
     }
+
+    /**
+     * Deploy contract to the blockchain.
+     *
+     * Deploys contract to the blockchain and sets the newly acquired address of the new contract.
+     * Also assigns the transaction receipt to this.
+     *
+     * @param {Object} options The options for the contract. eg. constructor params, gas, gas price, data
+     * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
+     */
     deploy(options) {
         if (this.options.address !== '')
             throw errors.ContractAddressFieldSetAndDeployed();
@@ -36,52 +55,73 @@ class SolidityContract {
             if (options.parameters)
                 encodedData = this.options.data + this._encodeConstructorParams(options.parameters);
             return new Transaction_1.default({
-                from: this.monetNode.defaultAddress,
+                from: this.controller.defaultAddress,
                 data: encodedData
-            }, this.monetNode)
+            }, this.controller)
                 .send({
-                gas: options.gas,
-                gasPrice: options.gasPrice
-            })
+                    gas: options.gas,
+                    gasPrice: options.gasPrice
+                })
                 .then((receipt) => {
-                this.receipt = receipt;
-                this.at(this.receipt.contractAddress);
-                return this;
-            });
+                    this.receipt = receipt;
+                    this.at(this.receipt.contractAddress);
+                    return this;
+                });
         }
         else {
             throw errors.InvalidDataFieldInOptions();
         }
     }
-    clone() {
+
+    /**
+     * Sets the address of the contract and populates Solidity functions.
+     *
+     * @param {string} address The address to assign to the contract
+     * @returns {SolidityContract} The contract
+     */
+    at(address) {
+        this.options.address = address;
+        this._attachMethodsToContract();
         return this;
     }
-    at(value) {
-        this.options.address = value;
-        this._attachMethodsToContract();
-    }
+
+    /**
+     * Attaches functions to contract.
+     *
+     * Parses function data from ABI and creates Javascript object representation then adds
+     * these functions to Contract.methods.
+     *
+     * @private
+     */
     _attachMethodsToContract() {
         this.options.jsonInterface.filter((json) => {
-            return json.type == 'function';
+            return json.type === 'function';
         })
             .map((funcJSON) => {
-            let solFunction = new SolidityFunction_1.default(funcJSON, this.options.address, this.monetNode);
-            this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction);
-            utils.log(utils.fgBlue, `Adding function: ${funcJSON.name}()`);
-        });
+                let solFunction = new SolidityFunction_1.default(funcJSON, this.options.address, this.controller);
+                this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction);
+                utils.log(utils.fgBlue, `Adding function: ${funcJSON.name}()`);
+            });
     }
+
+    /**
+     * Encodes constructor parameters.
+     *
+     * @param {Array} params The parameters to encode
+     * @private
+     */
     _encodeConstructorParams(params) {
         return this.options.jsonInterface.filter((json) => {
             return json.type === 'constructor' && json.inputs.length === params.length;
         })
             .map((json) => {
-            return json.inputs.map((input) => {
-                return input.type;
-            });
-        })
+                return json.inputs.map((input) => {
+                    return input.type;
+                });
+            })
             .map((types) => {
-            return coder.encodeParams(types, params);
-        })[0] || '';
+                return coder.encodeParams(types, params);
+            })[0] || '';
     }
 }
 exports.default = SolidityContract;

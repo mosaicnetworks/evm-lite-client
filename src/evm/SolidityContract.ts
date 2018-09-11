@@ -6,6 +6,7 @@ import * as utils from "../misc/utils";
 import * as checks from '../misc/checks';
 
 import {ABI, ContractOptions, TXReceipt} from "../misc/Interfaces";
+
 import SolidityFunction from "./SolidityFunction";
 import Controller from "../Controller";
 import Transaction from "./Transaction";
@@ -14,11 +15,21 @@ const web3 = new Web3();
 
 
 export default class SolidityContract {
+
     public methods: any;
     public web3Contract: any;
     public receipt: TXReceipt;
 
-    public constructor(readonly monetNode: Controller, public options: ContractOptions) {
+    /**
+     * Javascript Object representation of a Solidity contract.
+     *
+     * Can either be used to deploy a contract or interact with a contract already deployed.
+     *
+     * @param {Controller} controller Controller Javascript object
+     * @param {ContractOptions} options The options of the contract. eg. gas price, gas, address
+     * @constructor
+     */
+    constructor(readonly controller: Controller, public options: ContractOptions) {
         if (options.address === undefined)
             this.options.address = '';
 
@@ -30,7 +41,16 @@ export default class SolidityContract {
             this._attachMethodsToContract();
     }
 
-    public deploy(options: { parameters?: any[], gas: number, gasPrice: any, data?: string }): Promise<{}> {
+    /**
+     * Deploy contract to the blockchain.
+     *
+     * Deploys contract to the blockchain and sets the newly acquired address of the new contract.
+     * Also assigns the transaction receipt to this.
+     *
+     * @param {Object} options The options for the contract. eg. constructor params, gas, gas price, data
+     * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
+     */
+    deploy(options: { parameters?: any[], gas: number, gasPrice: any, data?: string }) {
         if (this.options.address !== '')
             throw errors.ContractAddressFieldSetAndDeployed();
 
@@ -51,9 +71,9 @@ export default class SolidityContract {
                 encodedData = this.options.data + this._encodeConstructorParams(options.parameters);
 
             return new Transaction({
-                from: this.monetNode.defaultAddress,
+                from: this.controller.defaultAddress,
                 data: encodedData
-            }, this.monetNode)
+            }, this.controller)
                 .send({
                     gas: options.gas,
                     gasPrice: options.gasPrice
@@ -68,26 +88,43 @@ export default class SolidityContract {
         }
     }
 
-    public clone(): SolidityContract {
+    /**
+     * Sets the address of the contract and populates Solidity functions.
+     *
+     * @param {string} address The address to assign to the contract
+     * @returns {SolidityContract} The contract
+     */
+    at(address: string): SolidityContract {
+        this.options.address = address;
+        this._attachMethodsToContract();
         return this
     }
 
-    public at(value: string) {
-        this.options.address = value;
-        this._attachMethodsToContract();
-    }
-
+    /**
+     * Attaches functions to contract.
+     *
+     * Parses function data from ABI and creates Javascript object representation then adds
+     * these functions to Contract.methods.
+     *
+     * @private
+     */
     private _attachMethodsToContract(): void {
         this.options.jsonInterface.filter((json) => {
             return json.type == 'function';
         })
             .map((funcJSON: ABI) => {
-                let solFunction = new SolidityFunction(funcJSON, this.options.address, this.monetNode);
+                let solFunction = new SolidityFunction(funcJSON, this.options.address, this.controller);
                 this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction);
                 utils.log(utils.fgBlue, `Adding function: ${funcJSON.name}()`);
             })
     }
 
+    /**
+     * Encodes constructor parameters.
+     *
+     * @param {Array} params The parameters to encode
+     * @private
+     */
     private _encodeConstructorParams(params: any[]): any {
         return this.options.jsonInterface.filter((json) => {
             return json.type === 'constructor' && json.inputs.length === params.length;

@@ -4,9 +4,17 @@ const SolFunction = require("web3/lib/web3/function.js");
 const checks = require("../misc/checks");
 const Transaction_1 = require("./Transaction");
 class SolidityFunction {
-    constructor(abi, contractAddress, monet) {
+    /**
+     * Javascript Object representation of a Solidity function.
+     *
+     * @param {ABI} abi JSON describing the function details
+     * @param {string} contractAddress The address of parent contract
+     * @param {Controller} controller The controller class
+     * @constructor
+     */
+    constructor(abi, contractAddress, controller) {
         this.contractAddress = contractAddress;
-        this.monet = monet;
+        this.controller = controller;
         this.name = abi.name;
         this._solFunction = new SolFunction('', abi, '');
         this._constant = (abi.stateMutability === "view" || abi.stateMutability === "pure" || abi.constant);
@@ -18,12 +26,20 @@ class SolidityFunction {
             return i.type;
         });
     }
+
+    /**
+     * Generates Transaction object to be sent or called.
+     *
+     * Creates the scaffolding needed for the transaction to be executed.
+     *
+     * @param {Array} funcArgs A list containing all the parameters of the function
+     */
     generateTransaction(funcArgs = []) {
         this._validateArgs(funcArgs);
         let callData = this._solFunction.getData();
         let transaction = !this._constant;
         let tx = {
-            from: this.monet.defaultAddress,
+            from: this.controller.defaultAddress,
             to: this.contractAddress
         };
         if (transaction) {
@@ -32,9 +48,18 @@ class SolidityFunction {
                 throw Error('Function is payable and requires `value` greater than 0.');
             else if (tx.value > 0 && !this._payable)
                 throw Error('Function is not payable. Required `value` is 0.');
-            return new Transaction_1.default(tx, this.monet);
+            return new Transaction_1.default(tx, this.controller);
         }
     }
+
+    /**
+     * Validates arguments to the function.
+     *
+     * This checks types as well as length of input arguments to required.
+     *
+     * @param {Array} args The list of arguments for the function
+     * @private
+     */
     _validateArgs(args) {
         checks.requireArgsLength(this._inputTypes.length, args.length);
         args.map((a, i) => {

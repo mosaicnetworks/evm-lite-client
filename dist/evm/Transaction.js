@@ -3,11 +3,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const utils = require("../misc/utils");
 class Transaction {
-    constructor(options, monetNode) {
-        this.monetNode = monetNode;
+    /**
+     * Transaction object to be sent or called.
+     *
+     * @param {TX} options The transaction options eg. gas, gas price, value...
+     * @param {Controller} controller The controller class
+     */
+    constructor(options, controller) {
+        this.controller = controller;
         this.tx = options;
         this.receipt = undefined;
     }
+
+    /**
+     * Send transaction.
+     *
+     * This function will mutate the state of the EVM.
+     *
+     * @param {Object} options
+     */
     send(options) {
         if (options.gas !== undefined || options.gasPrice !== undefined) {
             this.tx.gas = options.gas;
@@ -23,22 +37,30 @@ class Transaction {
         if (options.value !== undefined)
             this.tx.value = options.value;
         utils.log(utils.fgGreen, JSONBig.stringify(this.tx, null, 2));
-        return this.monetNode.api.sendTx(JSONBig.stringify(this.tx))
+        return this.controller.api.sendTx(JSONBig.stringify(this.tx))
             .then((res) => {
-            let response = JSONBig.parse(res);
-            return response.txHash;
-        })
+                let response = JSONBig.parse(res);
+                return response.txHash;
+            })
             .then((txHash) => {
-            return utils.sleep(2000).then(() => {
-                utils.log(utils.fgBlue, 'Requesting Receipt');
-                return this.monetNode.api.getReceipt(txHash);
-            });
-        })
+                return utils.sleep(2000).then(() => {
+                    utils.log(utils.fgBlue, 'Requesting Receipt');
+                    return this.controller.api.getReceipt(txHash);
+                });
+            })
             .then((resp) => {
-            this.receipt = JSONBig.parse(resp);
-            return this.receipt;
-        });
+                this.receipt = JSONBig.parse(resp);
+                return this.receipt;
+            });
     }
+
+    /**
+     * Call transaction.
+     *
+     * This function will not mutate the state of the EVM.
+     *
+     * @param {Object} options
+     */
     call(options) {
         this.tx.gas = options.gas;
         this.tx.gasPrice = options.gasPrice;

@@ -1,3 +1,3 @@
-# EVM-Babble SDK (Javascript)
+# EVM-Lite SDK (Javascript)
 
-An SDK to help interact with EVM-Babble written in Javascript.
+An SDK to help interact with EVM-Lite written in Javascript.
