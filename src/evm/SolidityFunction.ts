@@ -46,7 +46,7 @@ export default class SolidityFunction {
      *
      * @param {Array} funcArgs A list containing all the parameters of the function
      */
-    generateTransaction(funcArgs: any[] = []): Transaction {
+    generateTransaction(...funcArgs: any[]): Transaction {
         this._validateArgs(funcArgs);
 
         let callData = this._solFunction.getData();

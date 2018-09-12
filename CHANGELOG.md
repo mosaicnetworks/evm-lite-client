@@ -5,9 +5,10 @@ FEATURES:
 IMPROVEMENTS:
 
 * Testing Capabilities
-* Documentation for classes and functions (WiP)
+* Documentation for classes and functions
 * Functions to set transaction attributes
-* User experience improvements in contract
+* User experience improvements (SolidityContract.ts, SolidityFunction.ts)
+* Type definitions (WiP)
 
 SECURITY:
 

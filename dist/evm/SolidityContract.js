@@ -80,7 +80,6 @@ class SolidityContract {
         this._attachMethodsToContract();
         return this;
     }
-
     /**
      * Sets the gas of the contract.
      *
@@ -91,7 +90,6 @@ class SolidityContract {
         this.options.gas = gas;
         return this;
     }
-
     /**
      * Sets the gas price for deploying the contract.
      *
@@ -102,18 +100,16 @@ class SolidityContract {
         this.options.gasPrice = gasPrice;
         return this;
     }
-
     /**
      * Sets the data for deploying the contract.
      *
-     * @param {string} data The gas to assign to the contract
+     * @param {string} data The data of the contract
      * @returns {SolidityContract} The contract
      */
     data(data) {
         this.options.data = data;
         return this;
     }
-
     /**
      * Sets the JSON Interface of the contract.
      *

@@ -33,7 +33,7 @@ class SolidityFunction {
      *
      * @param {Array} funcArgs A list containing all the parameters of the function
      */
-    generateTransaction(funcArgs = []) {
+    generateTransaction(...funcArgs) {
         this._validateArgs(funcArgs);
         let callData = this._solFunction.getData();
         let transaction = !this._constant;
