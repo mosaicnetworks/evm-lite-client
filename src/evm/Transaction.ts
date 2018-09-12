@@ -37,14 +37,9 @@ export default class Transaction {
             throw Error('Gas or Gas Price not set!')
         }
 
-        if (options.to !== undefined)
-            this.tx.to = options.to;
-
-        if (options.from !== undefined)
-            this.tx.from = options.from;
-
-        if (options.value !== undefined)
-            this.tx.value = options.value;
+        this.tx.to = options.to || this.tx.to;
+        this.tx.from = options.from || this.tx.from;
+        this.tx.value = options.value || this.tx.value;
 
         utils.log(utils.fgGreen, JSONBig.stringify(this.tx, null, 2));
 

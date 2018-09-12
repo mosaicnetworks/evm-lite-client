@@ -26,7 +26,6 @@ class SolidityFunction {
             return i.type;
         });
     }
-
     /**
      * Generates Transaction object to be sent or called.
      *
@@ -51,7 +50,6 @@ class SolidityFunction {
             return new Transaction_1.default(tx, this.controller);
         }
     }
-
     /**
      * Validates arguments to the function.
      *

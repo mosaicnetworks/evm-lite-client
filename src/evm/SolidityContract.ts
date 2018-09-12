@@ -11,8 +11,6 @@ import SolidityFunction from "./SolidityFunction";
 import Controller from "../Controller";
 import Transaction from "./Transaction";
 
-const web3 = new Web3();
-
 
 export default class SolidityContract {
 
@@ -29,10 +27,10 @@ export default class SolidityContract {
      * @param {ContractOptions} options The options of the contract. eg. gas price, gas, address
      * @constructor
      */
-    constructor(readonly controller: Controller, public options: ContractOptions) {
-        if (options.address === undefined)
-            this.options.address = '';
+    constructor(public options: ContractOptions, readonly controller: Controller) {
+        const web3 = new Web3();
 
+        this.options.address = options.address || '';
         this.web3Contract = web3.eth.contract(this.options.jsonInterface).at(this.options.address);
         this.receipt = undefined;
         this.methods = {};
@@ -50,7 +48,7 @@ export default class SolidityContract {
      * @param {Object} options The options for the contract. eg. constructor params, gas, gas price, data
      * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
      */
-    deploy(options: { parameters?: any[], gas: number, gasPrice: any, data?: string }) {
+    deploy(options?: { parameters?: any[], gas?: number, gasPrice?: any, data?: string }) {
         if (this.options.address !== '')
             throw errors.ContractAddressFieldSetAndDeployed();
 
@@ -80,8 +78,7 @@ export default class SolidityContract {
                 })
                 .then((receipt: TXReceipt) => {
                     this.receipt = receipt;
-                    this.at(this.receipt.contractAddress);
-                    return this
+                    return this.address(this.receipt.contractAddress);
                 })
         } else {
             throw errors.InvalidDataFieldInOptions();
@@ -94,9 +91,53 @@ export default class SolidityContract {
      * @param {string} address The address to assign to the contract
      * @returns {SolidityContract} The contract
      */
-    at(address: string): SolidityContract {
+    address(address: string): SolidityContract {
         this.options.address = address;
         this._attachMethodsToContract();
+        return this
+    }
+
+    /**
+     * Sets the gas of the contract.
+     *
+     * @param {number} gas The gas to assign to the contract
+     * @returns {SolidityContract} The contract
+     */
+    gas(gas: number): SolidityContract {
+        this.options.gas = gas;
+        return this
+    }
+
+    /**
+     * Sets the gas price for deploying the contract.
+     *
+     * @param {number} gasPrice The gas price to assign to the contract
+     * @returns {SolidityContract} The contract
+     */
+    gasPrice(gasPrice: number): SolidityContract {
+        this.options.gasPrice = gasPrice;
+        return this
+    }
+
+    /**
+     * Sets the data for deploying the contract.
+     *
+     * @param {string} data The gas to assign to the contract
+     * @returns {SolidityContract} The contract
+     */
+    data(data: string): SolidityContract {
+        this.options.data = data;
+        return this
+    }
+
+    /**
+     * Sets the JSON Interface of the contract.
+     *
+     * @param {ABI[]} abis The JSON Interface of contract
+     * @returns {SolidityContract} The contract
+     */
+    JSONInterface(abis: ABI[]): SolidityContract {
+        this.options.jsonInterface = abis;
         return this
     }
 

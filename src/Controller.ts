@@ -49,10 +49,10 @@ export default class Controller {
         let byteCode = output.contracts[`:${contractName}`].bytecode;
         let abi = JSONBig.parse(output.contracts[`:${contractName}`].interface);
 
-        return new SolidityContract(this, {
+        return new SolidityContract({
             jsonInterface: abi,
             data: byteCode,
-        })
+        }, this)
     };
 
     /**
@@ -66,9 +66,9 @@ export default class Controller {
      * @returns {SolidityContract} A Javascript object representation of solidity contract
      */
     ContractFromABI(abi: ABI[]): SolidityContract {
-        return new SolidityContract(this, {
+        return new SolidityContract({
             jsonInterface: abi,
-        });
+        }, this);
     }
 
     /**

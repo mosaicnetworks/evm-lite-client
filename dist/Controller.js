@@ -41,13 +41,12 @@ class Controller {
         let output = solidityCompiler.compile(input, 1);
         let byteCode = output.contracts[`:${contractName}`].bytecode;
         let abi = JSONBig.parse(output.contracts[`:${contractName}`].interface);
-        return new SolidityContract_1.default(this, {
+        return new SolidityContract_1.default({
             jsonInterface: abi,
             data: byteCode,
-        });
+        }, this);
     }
     ;
-
     /**
      * Generates Contract Javascript object from Solidity Contract File.
      *
@@ -59,11 +58,10 @@ class Controller {
      * @returns {SolidityContract} A Javascript object representation of solidity contract
      */
     ContractFromABI(abi) {
-        return new SolidityContract_1.default(this, {
+        return new SolidityContract_1.default({
             jsonInterface: abi,
-        });
+        }, this);
     }
-
     /**
      * Transfer a specified value to the desired address.
      *
