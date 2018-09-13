@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const Web3 = require("web3");
 const coder = require("web3/lib/solidity/coder.js");
 const errors = require("../misc/errors");
@@ -7,6 +7,7 @@ const utils = require("../misc/utils");
 const checks = require("../misc/checks");
 const SolidityFunction_1 = require("./SolidityFunction");
 const Transaction_1 = require("./Transaction");
+
 class SolidityContract {
     /**
      * Javascript Object representation of a Solidity contract.
@@ -28,6 +29,7 @@ class SolidityContract {
         if (this.options.address !== undefined)
             this._attachMethodsToContract();
     }
+
     /**
      * Deploy contract to the blockchain.
      *
@@ -69,6 +71,7 @@ class SolidityContract {
             throw errors.InvalidDataFieldInOptions();
         }
     }
+
     /**
      * Sets the address of the contract and populates Solidity functions.
      *
@@ -80,6 +83,7 @@ class SolidityContract {
         this._attachMethodsToContract();
         return this;
     }
+
     /**
      * Sets the gas of the contract.
      *
@@ -90,6 +94,7 @@ class SolidityContract {
         this.options.gas = gas;
         return this;
     }
+
     /**
      * Sets the gas price for deploying the contract.
      *
@@ -100,6 +105,7 @@ class SolidityContract {
         this.options.gasPrice = gasPrice;
         return this;
     }
+
     /**
      * Sets the data for deploying the contract.
      *
@@ -110,6 +116,7 @@ class SolidityContract {
         this.options.data = data;
         return this;
     }
+
     /**
      * Sets the JSON Interface of the contract.
      *
@@ -120,6 +127,7 @@ class SolidityContract {
         this.options.jsonInterface = abis;
         return this;
     }
+
     /**
      * Attaches functions to contract.
      *
@@ -138,6 +146,7 @@ class SolidityContract {
                 utils.log(utils.fgBlue, `Adding function: ${funcJSON.name}()`);
             });
     }
+
     /**
      * Encodes constructor parameters.
      *
@@ -158,4 +167,5 @@ class SolidityContract {
             })[0] || '';
     }
 }
+
 exports.default = SolidityContract;

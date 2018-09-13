@@ -1,3 +1,7 @@
+// Type definitions for evmlsdk 0.1.0
+// Project: EVM Lite SDK
+// Definitions by: Danu Kumanan <https://github.com/danu3006>
+
 declare module 'evmlsdk' {
 
     interface BaseTX {

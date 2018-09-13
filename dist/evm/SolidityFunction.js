@@ -1,8 +1,9 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const SolFunction = require("web3/lib/web3/function.js");
 const checks = require("../misc/checks");
 const Transaction_1 = require("./Transaction");
+
 class SolidityFunction {
     /**
      * Javascript Object representation of a Solidity function.
@@ -26,6 +27,7 @@ class SolidityFunction {
             return i.type;
         });
     }
+
     /**
      * Generates Transaction object to be sent or called.
      *
@@ -50,6 +52,7 @@ class SolidityFunction {
             return new Transaction_1.default(tx, this.controller);
         }
     }
+
     /**
      * Validates arguments to the function.
      *
@@ -65,4 +68,5 @@ class SolidityFunction {
         });
     }
 }
+
 exports.default = SolidityFunction;
