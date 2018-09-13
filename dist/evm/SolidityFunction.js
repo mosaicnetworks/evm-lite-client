@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const SolFunction = require("web3/lib/web3/function.js");
 const checks = require("../misc/checks");
 const Transaction_1 = require("./Transaction");

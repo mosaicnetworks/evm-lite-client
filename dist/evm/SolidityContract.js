@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const Web3 = require("web3");
 const coder = require("web3/lib/solidity/coder.js");
 const errors = require("../misc/errors");

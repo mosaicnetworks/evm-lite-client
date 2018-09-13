@@ -1,11 +1,12 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const JSONBig = require("json-bigint");
 const fs = require("fs");
 const solidityCompiler = require("solc");
 const SolidityContract_1 = require("./evm/SolidityContract");
 const EVMLiteClient_1 = require("./evm/EVMLiteClient");
 const Transaction_1 = require("./evm/Transaction");
+const u = require("./misc/utils");
 class Controller {
     /**
      * Creates a controller instance.
@@ -22,6 +23,7 @@ class Controller {
         this.defaultAddress = null;
         this.accounts = [];
         this.api = new EVMLiteClient_1.default(host, port);
+        u.log(u.fgGreen, `Connected to ${host}:${port}.`);
     }
     /**
      * Generates Javascript object from Solidity Contract File.
@@ -37,6 +39,7 @@ class Controller {
      * @returns {SolidityContract} A Javascript object representation of solidity contract
      */
     ContractFromSolidityFile(contractName, filePath) {
+        this._requireDefaultFromAddress();
         let input = fs.readFileSync(filePath).toString();
         let output = solidityCompiler.compile(input, 1);
         let byteCode = output.contracts[`:${contractName}`].bytecode;
@@ -58,6 +61,7 @@ class Controller {
      * @returns {SolidityContract} A Javascript object representation of solidity contract
      */
     ContractFromABI(abi) {
+        this._requireDefaultFromAddress();
         return new SolidityContract_1.default({
             jsonInterface: abi,
         }, this);
@@ -73,11 +77,18 @@ class Controller {
      * @returns {Transaction} the required Transaction object for transfer request
      */
     transfer(address, value) {
+        this._requireDefaultFromAddress();
         return new Transaction_1.default({
             from: this.defaultAddress,
             to: address,
             value: value
         }, this);
     }
+
+    _requireDefaultFromAddress() {
+        if (this.defaultAddress == null)
+            throw new Error('Please set default from address.');
+    }
+    ;
 }
 exports.default = Controller;

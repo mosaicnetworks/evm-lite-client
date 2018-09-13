@@ -7,6 +7,7 @@ import {ABI, Account, SolidityCompilerOutput} from "./misc/Interfaces";
 import SolidityContract from "./evm/SolidityContract";
 import EVMLiteClient from "./evm/EVMLiteClient";
 import Transaction from "./evm/Transaction";
+import * as u from "./misc/utils";
 
 
 export default class Controller {
@@ -28,6 +29,8 @@ export default class Controller {
         this.defaultAddress = null;
         this.accounts = [];
         this.api = new EVMLiteClient(host, port);
+
+        u.log(u.fgGreen, `Connected to ${host}:${port}.`)
     }
 
     /**
@@ -44,6 +47,8 @@ export default class Controller {
      * @returns {SolidityContract} A Javascript object representation of solidity contract
      */
     ContractFromSolidityFile(contractName: string, filePath: string): SolidityContract {
+        this._requireDefaultFromAddress();
+
         let input = fs.readFileSync(filePath).toString();
         let output: SolidityCompilerOutput = solidityCompiler.compile(input, 1);
         let byteCode = output.contracts[`:${contractName}`].bytecode;
@@ -66,6 +71,8 @@ export default class Controller {
      * @returns {SolidityContract} A Javascript object representation of solidity contract
      */
     ContractFromABI(abi: ABI[]): SolidityContract {
+        this._requireDefaultFromAddress();
+
         return new SolidityContract({
             jsonInterface: abi,
         }, this);
@@ -82,6 +89,8 @@ export default class Controller {
      * @returns {Transaction} the required Transaction object for transfer request
      */
     transfer(address: string, value: number): Transaction {
+        this._requireDefaultFromAddress();
+
         return new Transaction({
             from: this.defaultAddress,
             to: address,
@@ -89,4 +98,8 @@ export default class Controller {
         }, this)
     }
 
+    private _requireDefaultFromAddress(): void {
+        if (this.defaultAddress == null)
+            throw new Error('Please set default from address.');
+    };
 }

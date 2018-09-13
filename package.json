@@ -1,5 +1,5 @@
 {
-  "name": "evmlsdk",
+  "name": "evml",
   "version": "0.1.0",
   "description": "A Node.js module for interacting with EVM-Lite.",
   "main": "index.js",

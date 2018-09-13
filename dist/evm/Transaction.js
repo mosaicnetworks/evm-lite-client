@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const JSONBig = require("json-bigint");
 const utils = require("../misc/utils");
 class Transaction {
