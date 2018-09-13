@@ -2,6 +2,10 @@
 
 FEATURES:
 
+* Contract abstraction
+* Transfer
+* HTTP Handler
+
 IMPROVEMENTS:
 
 * Testing Capabilities

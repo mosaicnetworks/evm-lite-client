@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const Web3 = require("web3");
 const coder = require("web3/lib/solidity/coder.js");
 const errors = require("../misc/errors");
@@ -7,7 +7,6 @@ const utils = require("../misc/utils");
 const checks = require("../misc/checks");
 const SolidityFunction_1 = require("./SolidityFunction");
 const Transaction_1 = require("./Transaction");
-
 class SolidityContract {
     /**
      * Javascript Object representation of a Solidity contract.
@@ -29,7 +28,6 @@ class SolidityContract {
         if (this.options.address !== undefined)
             this._attachMethodsToContract();
     }
-
     /**
      * Deploy contract to the blockchain.
      *
@@ -48,8 +46,11 @@ class SolidityContract {
                     checks.requireArgsLength(abi.inputs.length, options.parameters.length);
             }
         });
-        if (options.data)
-            this.options.data = options.data;
+        if (options) {
+            this.options.data = options.data || this.options.data;
+            this.options.gas = options.gas || this.options.gas;
+            this.options.gasPrice = options.gasPrice || this.options.gasPrice;
+        }
         if (this.options.data) {
             let encodedData;
             if (options.parameters)
@@ -58,22 +59,31 @@ class SolidityContract {
                 from: this.controller.defaultAddress,
                 data: encodedData
             }, this.controller)
-                .send({
-                    gas: options.gas,
-                    gasPrice: options.gasPrice
-                })
+                .gas(this.options.gas)
+                .gasPrice(this.options.gas)
+                .send()
                 .then((receipt) => {
-                    this.receipt = receipt;
-                    return this.address(this.receipt.contractAddress);
-                });
+                this.receipt = receipt;
+                return this.setAddressAndPopulate(this.receipt.contractAddress);
+            });
         }
         else {
             throw errors.InvalidDataFieldInOptions();
         }
     }
-
     /**
      * Sets the address of the contract and populates Solidity functions.
+     *
+     * @param {string} address The address to assign to the contract
+     * @returns {SolidityContract} The contract
+     */
+    setAddressAndPopulate(address) {
+        this.options.address = address;
+        this._attachMethodsToContract();
+        return this;
+    }
+    /**
+     * Sets the address of the contract.
      *
      * @param {string} address The address to assign to the contract
      * @returns {SolidityContract} The contract
@@ -83,9 +93,8 @@ class SolidityContract {
         this._attachMethodsToContract();
         return this;
     }
-
     /**
-     * Sets the gas of the contract.
+     * Sets the default gas for the contract.
      *
      * @param {number} gas The gas to assign to the contract
      * @returns {SolidityContract} The contract
@@ -94,9 +103,8 @@ class SolidityContract {
         this.options.gas = gas;
         return this;
     }
-
     /**
-     * Sets the gas price for deploying the contract.
+     * Sets the default gas price for the contract.
      *
      * @param {number} gasPrice The gas price to assign to the contract
      * @returns {SolidityContract} The contract
@@ -105,7 +113,6 @@ class SolidityContract {
         this.options.gasPrice = gasPrice;
         return this;
     }
-
     /**
      * Sets the data for deploying the contract.
      *
@@ -116,7 +123,6 @@ class SolidityContract {
         this.options.data = data;
         return this;
     }
-
     /**
      * Sets the JSON Interface of the contract.
      *
@@ -127,7 +133,6 @@ class SolidityContract {
         this.options.jsonInterface = abis;
         return this;
     }
-
     /**
      * Attaches functions to contract.
      *
@@ -141,12 +146,11 @@ class SolidityContract {
             return json.type === 'function';
         })
             .map((funcJSON) => {
-                let solFunction = new SolidityFunction_1.default(funcJSON, this.options.address, this.controller);
-                this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction);
-                utils.log(utils.fgBlue, `Adding function: ${funcJSON.name}()`);
-            });
+            let solFunction = new SolidityFunction_1.default(funcJSON, this.options.address, this.controller);
+            this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction);
+            utils.log(utils.fgBlue, `Adding function: ${funcJSON.name}()`);
+        });
     }
-
     /**
      * Encodes constructor parameters.
      *
@@ -158,14 +162,13 @@ class SolidityContract {
             return json.type === 'constructor' && json.inputs.length === params.length;
         })
             .map((json) => {
-                return json.inputs.map((input) => {
-                    return input.type;
-                });
-            })
+            return json.inputs.map((input) => {
+                return input.type;
+            });
+        })
             .map((types) => {
-                return coder.encodeParams(types, params);
-            })[0] || '';
+            return coder.encodeParams(types, params);
+        })[0] || '';
     }
 }
-
 exports.default = SolidityContract;
