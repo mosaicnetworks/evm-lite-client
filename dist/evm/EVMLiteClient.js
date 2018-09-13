@@ -13,11 +13,13 @@ let request = (options, callback) => {
         });
     });
 };
+
 class EVMLiteClient {
     constructor(host, port) {
         this.host = host;
         this.port = port;
     }
+
     getAccount(address) {
         let options = this._constructOptions('GET', `/account/${address}`);
         return new Promise((resolve, reject) => {
@@ -26,6 +28,7 @@ class EVMLiteClient {
             req.end();
         });
     }
+
     getAccounts() {
         let options = this._constructOptions('GET', '/accounts');
         return new Promise((resolve, reject) => {
@@ -34,6 +37,7 @@ class EVMLiteClient {
             req.end();
         });
     }
+
     call(tx) {
         let options = this._constructOptions('POST', '/call');
         return new Promise((resolve, reject) => {
@@ -43,6 +47,7 @@ class EVMLiteClient {
             req.end();
         });
     }
+
     sendTx(tx) {
         let options = this._constructOptions('POST', '/tx');
         return new Promise((resolve, reject) => {
@@ -52,6 +57,7 @@ class EVMLiteClient {
             req.end();
         });
     }
+
     sendRawTx(tx) {
         let options = this._constructOptions('POST', '/rawtx');
         return new Promise((resolve, reject) => {
@@ -61,6 +67,7 @@ class EVMLiteClient {
             req.end();
         });
     }
+
     getReceipt(txHash) {
         let options = this._constructOptions('GET', `/tx/${txHash}`);
         return new Promise((resolve, reject) => {
@@ -69,6 +76,7 @@ class EVMLiteClient {
             req.end();
         });
     }
+
     _constructOptions(method, path) {
         return {
             host: this.host,
@@ -78,4 +86,5 @@ class EVMLiteClient {
         };
     }
 }
+
 exports.default = EVMLiteClient;

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", {value: true});
 const JSONBig = require("json-bigint");
 const utils = require("../misc/utils");
+
 class Transaction {
     /**
      * Transaction object to be sent or called.
@@ -14,6 +15,7 @@ class Transaction {
         this.tx = options;
         this.receipt = undefined;
     }
+
     /**
      * Send transaction.
      *
@@ -49,6 +51,7 @@ class Transaction {
                 return this.receipt;
             });
     }
+
     /**
      * Call transaction.
      *
@@ -64,4 +67,5 @@ class Transaction {
         });
     }
 }
+
 exports.default = Transaction;
