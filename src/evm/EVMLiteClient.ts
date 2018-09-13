@@ -13,11 +13,11 @@ let request = (options, callback) => {
     })
 };
 
-export default class EVMBabbleClient {
+export default class EVMLiteClient {
     public constructor(readonly host: string, readonly port: number) {
     }
 
-    public getAccount(address: string) {
+    public getAccount(address: string): Promise<String> {
         let options = this._constructOptions('GET', `/account/${address}`);
         return new Promise((resolve, reject) => {
             let req = request(options, resolve);
@@ -26,7 +26,7 @@ export default class EVMBabbleClient {
         });
     }
 
-    public getAccounts() {
+    public getAccounts(): Promise<string> {
         let options = this._constructOptions('GET', '/accounts');
         return new Promise((resolve, reject) => {
             let req = request(options, resolve);

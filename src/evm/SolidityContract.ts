@@ -122,7 +122,7 @@ export default class SolidityContract {
     /**
      * Sets the data for deploying the contract.
      *
-     * @param {string} data The gas to assign to the contract
+     * @param {string} data The data of the contract
      * @returns {SolidityContract} The contract
      */
     data(data: string): SolidityContract {
@@ -151,7 +151,7 @@ export default class SolidityContract {
      */
     private _attachMethodsToContract(): void {
         this.options.jsonInterface.filter((json) => {
-            return json.type == 'function';
+            return json.type === 'function';
         })
             .map((funcJSON: ABI) => {
                 let solFunction = new SolidityFunction(funcJSON, this.options.address, this.controller);

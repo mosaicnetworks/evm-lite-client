@@ -1,5 +1,2 @@
-const Controller = require('./dist/Controller');
-const utils = require('./dist/misc/utils');
-
-exports.Controller = Controller.default;
-exports.utils = utils;
+const Controller = require('./dist/Controller').default;
+exports.Controller = Controller;

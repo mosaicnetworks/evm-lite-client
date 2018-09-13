@@ -4,7 +4,7 @@ const JSONBig = require("json-bigint");
 const fs = require("fs");
 const solidityCompiler = require("solc");
 const SolidityContract_1 = require("./evm/SolidityContract");
-const EVMBabbleClient_1 = require("./evm/EVMBabbleClient");
+const EVMLiteClient_1 = require("./evm/EVMLiteClient");
 const Transaction_1 = require("./evm/Transaction");
 class Controller {
     /**
@@ -21,7 +21,7 @@ class Controller {
         this.port = port;
         this.defaultAddress = null;
         this.accounts = [];
-        this.api = new EVMBabbleClient_1.default(host, port);
+        this.api = new EVMLiteClient_1.default(host, port);
     }
     /**
      * Generates Javascript object from Solidity Contract File.

@@ -5,7 +5,7 @@ import * as solidityCompiler from 'solc'
 import {ABI, Account, SolidityCompilerOutput} from "./misc/Interfaces";
 
 import SolidityContract from "./evm/SolidityContract";
-import EVMBabbleClient from "./evm/EVMBabbleClient";
+import EVMLiteClient from "./evm/EVMLiteClient";
 import Transaction from "./evm/Transaction";
 
 
@@ -13,7 +13,7 @@ export default class Controller {
 
     public defaultAddress: string;
     public accounts: Account[];
-    readonly api: EVMBabbleClient;
+    readonly api: EVMLiteClient;
 
     /**
      * Creates a controller instance.
@@ -27,7 +27,7 @@ export default class Controller {
     constructor(readonly host: string, readonly port: number = 8080) {
         this.defaultAddress = null;
         this.accounts = [];
-        this.api = new EVMBabbleClient(host, port);
+        this.api = new EVMLiteClient(host, port);
     }
 
     /**

@@ -1,5 +1,5 @@
 {
-  "name": "evm-lite-sdk",
+  "name": "evmlsdk",
   "version": "0.1.0",
   "description": "A Node.js module for interacting with EVM-Lite.",
   "main": "index.js",
@@ -20,5 +20,10 @@
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "ts-node": "^7.0.1"
+  },
+  "typings": "typing/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mosaicnetworks/evm-lite-nodejs-sdk"
   }
 }
