@@ -1,29 +1,30 @@
 declare module 'evmlsdk' {
+
     interface BaseTX {
         gas?: number;
         gasPrice?: number;
     }
 
-    export interface TX extends BaseTX {
+    interface TX extends BaseTX {
         from: string;
         to?: string;
         value?: number;
         data?: string;
     }
 
-    export interface ContractOptions extends BaseTX {
+    interface ContractOptions extends BaseTX {
         from?: string;
         address?: string;
         data?: string;
         jsonInterface: ABI[];
     }
 
-    export interface Input {
+    interface Input {
         name: string;
         type: string;
     }
 
-    export interface ABI {
+    interface ABI {
         constant?: any;
         inputs: Input[];
         name?: any;
@@ -33,13 +34,13 @@ declare module 'evmlsdk' {
         type: any;
     }
 
-    export interface Account {
+    interface Account {
         address: string;
         balance: number;
         nonce: number;
     }
 
-    export interface TXReceipt {
+    interface TXReceipt {
         root: string;
         transactionHash: string;
         from: string;
@@ -51,14 +52,14 @@ declare module 'evmlsdk' {
         logsBloom: string;
     }
 
-    export interface SolidityCompilerOutput {
+    interface SolidityCompilerOutput {
         contracts: {};
         errors: string[];
         sourceList: string[];
         sources: {};
     }
 
-    export class EVMLiteClient {
+    class EVMLiteClient {
         readonly host: string;
         readonly port: number;
         private _constructOptions;
@@ -78,7 +79,7 @@ declare module 'evmlsdk' {
         getReceipt(txHash: string): Promise<{}>;
     }
 
-    export class Transaction {
+    class Transaction {
         readonly controller: Controller;
         tx: TX;
         receipt: TXReceipt;
@@ -120,12 +121,13 @@ declare module 'evmlsdk' {
     }
 
 
-    export class SolidityContract {
+    class SolidityContract {
         options: ContractOptions;
         readonly controller: Controller;
         methods: any;
         web3Contract: any;
         receipt: TXReceipt;
+
         /**
          * Attaches functions to contract.
          *
@@ -135,6 +137,7 @@ declare module 'evmlsdk' {
          * @private
          */
         private _attachMethodsToContract;
+
         /**
          * Encodes constructor parameters.
          *
@@ -267,4 +270,5 @@ declare module 'evmlsdk' {
          */
         transfer(address: string, value: number): Transaction;
     }
+
 }
