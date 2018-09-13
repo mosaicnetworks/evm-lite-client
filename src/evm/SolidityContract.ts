@@ -80,7 +80,7 @@ export default class SolidityContract {
                 .send()
                 .then((receipt: TXReceipt) => {
                     this.receipt = receipt;
-                    return this.address(this.receipt.contractAddress);
+                    return this.setAddressAndPopulate(this.receipt.contractAddress);
                 })
         } else {
             throw errors.InvalidDataFieldInOptions();
@@ -93,6 +93,18 @@ export default class SolidityContract {
      * @param {string} address The address to assign to the contract
      * @returns {SolidityContract} The contract
      */
+    setAddressAndPopulate(address: string): SolidityContract {
+        this.options.address = address;
+        this._attachMethodsToContract();
+        return this
+    }
+
+    /**
+     * Sets the address of the contract.
+     *
+     * @param {string} address The address to assign to the contract
+     * @returns {SolidityContract} The contract
+     */
     address(address: string): SolidityContract {
         this.options.address = address;
         this._attachMethodsToContract();
@@ -100,7 +112,7 @@ export default class SolidityContract {
     }
 
     /**
-     * Sets the gas of the contract.
+     * Sets the default gas for the contract.
      *
      * @param {number} gas The gas to assign to the contract
      * @returns {SolidityContract} The contract
@@ -111,7 +123,7 @@ export default class SolidityContract {
     }
 
     /**
-     * Sets the gas price for deploying the contract.
+     * Sets the default gas price for the contract.
      *
      * @param {number} gasPrice The gas price to assign to the contract
      * @returns {SolidityContract} The contract
