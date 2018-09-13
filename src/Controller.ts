@@ -40,8 +40,6 @@ export default class Controller {
      * name provided. The byte-code of the contract is auto-assigned to the data option field
      * for the contract.
      *
-     * TODO: Return multiple contracts from one solidity file.
-     *
      * @param {string} contractName Name of the Contract to get from Solidity file
      * @param {string} filePath Absolute or relative path of the Solidity file.
      * @returns {SolidityContract} A Javascript object representation of solidity contract
@@ -89,6 +87,7 @@ export default class Controller {
      * @returns {Transaction} the required Transaction object for transfer request
      */
     transfer(address: string, value: number): Transaction {
+
         this._requireDefaultFromAddress();
 
         return new Transaction({

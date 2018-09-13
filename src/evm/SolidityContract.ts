@@ -59,8 +59,11 @@ export default class SolidityContract {
             }
         });
 
-        if (options.data)
-            this.options.data = options.data;
+        if (options) {
+            this.options.data = options.data || this.options.data;
+            this.options.gas = options.gas || this.options.gas;
+            this.options.gasPrice = options.gasPrice || this.options.gasPrice;
+        }
 
         if (this.options.data) {
             let encodedData: string;
@@ -72,10 +75,9 @@ export default class SolidityContract {
                 from: this.controller.defaultAddress,
                 data: encodedData
             }, this.controller)
-                .send({
-                    gas: options.gas,
-                    gasPrice: options.gasPrice
-                })
+                .gas(this.options.gas)
+                .gasPrice(this.options.gas)
+                .send()
                 .then((receipt: TXReceipt) => {
                     this.receipt = receipt;
                     return this.address(this.receipt.contractAddress);

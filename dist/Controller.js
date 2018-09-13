@@ -7,7 +7,6 @@ const SolidityContract_1 = require("./evm/SolidityContract");
 const EVMLiteClient_1 = require("./evm/EVMLiteClient");
 const Transaction_1 = require("./evm/Transaction");
 const u = require("./misc/utils");
-
 class Controller {
     /**
      * Creates a controller instance.
@@ -26,15 +25,12 @@ class Controller {
         this.api = new EVMLiteClient_1.default(host, port);
         u.log(u.fgGreen, `Connected to ${host}:${port}.`);
     }
-
     /**
      * Generates Javascript object from Solidity Contract File.
      *
      * Takes a solidity file and generates corresponding functions associated with the contract
      * name provided. The byte-code of the contract is auto-assigned to the data option field
      * for the contract.
-     *
-     * TODO: Return multiple contracts from one solidity file.
      *
      * @param {string} contractName Name of the Contract to get from Solidity file
      * @param {string} filePath Absolute or relative path of the Solidity file.
@@ -52,7 +48,6 @@ class Controller {
         }, this);
     }
     ;
-
     /**
      * Generates Contract Javascript object from Solidity Contract File.
      *
@@ -69,7 +64,6 @@ class Controller {
             jsonInterface: abi,
         }, this);
     }
-
     /**
      * Transfer a specified value to the desired address.
      *
@@ -88,12 +82,10 @@ class Controller {
             value: value
         }, this);
     }
-
     _requireDefaultFromAddress() {
         if (this.defaultAddress == null)
             throw new Error('Please set default from address.');
     }
     ;
 }
-
 exports.default = Controller;
