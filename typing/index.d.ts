@@ -122,6 +122,54 @@ declare module 'evml' {
             gas: number;
             gasPrice: number;
         }): Promise<{}>;
+
+        /**
+         * Sets the from of the transaction.
+         *
+         * @param {string} from The from address
+         * @returns {Transaction} The transaction
+         */
+        from(from: string): Transaction;
+
+        /**
+         * Sets the to of the transaction.
+         *
+         * @param {string} to The to address
+         * @returns {Transaction} The transaction
+         */
+        to(to: string): Transaction;
+
+        /**
+         * Sets the value of the transaction.
+         *
+         * @param {number} value The value of tx
+         * @returns {Transaction} The transaction
+         */
+        value(value: number): Transaction;
+
+        /**
+         * Sets the gas of the transaction.
+         *
+         * @param {number} gas The gas of tx
+         * @returns {Transaction} The transaction
+         */
+        gas(gas: number): Transaction;
+
+        /**
+         * Sets the gas price of the transaction.
+         *
+         * @param {number} gasPrice The gas price of tx
+         * @returns {Transaction} The transaction
+         */
+        gasPrice(gasPrice: number): Transaction;
+
+        /**
+         * Sets the data of the transaction.
+         *
+         * @param {number} data The data of tx
+         * @returns {Transaction} The transaction
+         */
+        data(data: string): Transaction;
     }
 
 
@@ -183,10 +231,18 @@ declare module 'evml' {
          * @param {string} address The address to assign to the contract
          * @returns {SolidityContract} The contract
          */
+        setAddressAndPopulate(address: string): SolidityContract;
+
+        /**
+         * Sets the address of the contract.
+         *
+         * @param {string} address The address to assign to the contract
+         * @returns {SolidityContract} The contract
+         */
         address(address: string): SolidityContract;
 
         /**
-         * Sets the gas of the contract.
+         * Sets the default gas for the contract.
          *
          * @param {number} gas The gas to assign to the contract
          * @returns {SolidityContract} The contract
@@ -194,7 +250,7 @@ declare module 'evml' {
         gas(gas: number): SolidityContract;
 
         /**
-         * Sets the gas price for deploying the contract.
+         * Sets the default gas price for the contract.
          *
          * @param {number} gasPrice The gas price to assign to the contract
          * @returns {SolidityContract} The contract
