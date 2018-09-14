@@ -349,4 +349,19 @@ declare module 'evml' {
         private _requireDefaultFromAddress(): void;
     }
 
+    export class Utils {
+        static fgRed: string;
+        static fgGreen: string;
+        static fgBlue: string;
+        static fgMagenta: string;
+        static fgCyan: string;
+        static fgWhite: string;
+
+        static log(color: string, text: string);
+        static step(message: string);
+        static explain(message: string);
+        static space();
+        static sleep(time: number);
+    }
+
 }

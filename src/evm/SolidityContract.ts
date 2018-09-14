@@ -2,7 +2,7 @@ import * as Web3 from 'web3'
 import * as coder from 'web3/lib/solidity/coder.js'
 
 import * as errors from "../misc/errors"
-import * as utils from "../misc/utils";
+import utils from "../misc/utils";
 import * as checks from '../misc/checks';
 
 import {ABI, ContractOptions, TXReceipt} from "../misc/Interfaces";

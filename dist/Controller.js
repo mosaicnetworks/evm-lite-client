@@ -1,12 +1,12 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const fs = require("fs");
 const solidityCompiler = require("solc");
 const SolidityContract_1 = require("./evm/SolidityContract");
 const EVMLiteClient_1 = require("./evm/EVMLiteClient");
 const Transaction_1 = require("./evm/Transaction");
-const u = require("./misc/utils");
+const utils_1 = require("./misc/utils");
 class Controller {
     /**
      * Creates a controller instance.
@@ -23,7 +23,7 @@ class Controller {
         this.defaultAddress = null;
         this.accounts = [];
         this.api = new EVMLiteClient_1.default(host, port);
-        u.log(u.fgGreen, `Connected to ${host}:${port}.`);
+        utils_1.default.log(utils_1.default.fgGreen, `Connected to ${host}:${port}.`);
     }
     /**
      * Generates Javascript object from Solidity Contract File.
@@ -82,7 +82,6 @@ class Controller {
             value: value
         }, false, undefined, this);
     }
-
     /**
      * Require default from address to be set.
      *

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Web3 = require("web3");
 const coder = require("web3/lib/solidity/coder.js");
 const errors = require("../misc/errors");
-const utils = require("../misc/utils");
+const utils_1 = require("../misc/utils");
 const checks = require("../misc/checks");
 const SolidityFunction_1 = require("./SolidityFunction");
 const Transaction_1 = require("./Transaction");
@@ -152,16 +152,16 @@ class SolidityContract {
         })
             .map((funcJSON) => {
             let solFunction = new SolidityFunction_1.default(funcJSON, this.options.address, this.controller);
-                if (this.options.gas !== undefined && this.options.gasPrice !== undefined) {
-                    this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction, {
-                        gas: this.options.gas,
-                        gasPrice: this.options.gasPrice,
-                    });
-                }
-                else {
-                    this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction, {});
-                }
-            utils.log(utils.fgBlue, `Adding function: ${funcJSON.name}()`);
+            if (this.options.gas !== undefined && this.options.gasPrice !== undefined) {
+                this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction, {
+                    gas: this.options.gas,
+                    gasPrice: this.options.gasPrice,
+                });
+            }
+            else {
+                this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction, {});
+            }
+            utils_1.default.log(utils_1.default.fgBlue, `Adding function: ${funcJSON.name}()`);
         });
     }
     /**

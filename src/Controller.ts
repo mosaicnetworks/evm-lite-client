@@ -7,7 +7,7 @@ import {ABI, Account, SolidityCompilerOutput} from "./misc/Interfaces";
 import SolidityContract from "./evm/SolidityContract";
 import EVMLiteClient from "./evm/EVMLiteClient";
 import Transaction from "./evm/Transaction";
-import * as u from "./misc/utils";
+import u from "./misc/utils";
 
 
 export default class Controller {
