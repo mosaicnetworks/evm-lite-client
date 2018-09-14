@@ -1,6 +1,6 @@
 // Type definitions for evmlsdk 0.1.0
 // Project: EVM Lite SDK
-// Definitions by: Danu Kumanan <https://github.com/danu3006>
+// Definitions by: Mosaic Networks <https://github.com/mosaicnetworks>
 
 declare module 'evml' {
 
@@ -358,9 +358,13 @@ declare module 'evml' {
         static fgWhite: string;
 
         static log(color: string, text: string);
+
         static step(message: string);
+
         static explain(message: string);
+
         static space();
+
         static sleep(time: number);
     }
 

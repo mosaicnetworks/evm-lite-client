@@ -1,6 +1,6 @@
 import * as JSONBig from 'json-bigint'
 
-import * as utils from "../misc/utils";
+import utils from "../misc/utils";
 
 import {TX, TXReceipt} from "../misc/Interfaces";
 
@@ -100,7 +100,6 @@ export default class Transaction {
                         return JSONBig.parse(response);
                     })
                     .then((obj) => {
-                        console.log(this.unpackfn);
                         return this.unpackfn(Buffer.from(obj.data).toString());
                     });
             } else {

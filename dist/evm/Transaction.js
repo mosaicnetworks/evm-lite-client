@@ -1,7 +1,7 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
-const utils = require("../misc/utils");
+const utils_1 = require("../misc/utils");
 class Transaction {
     /**
      * Transaction object to be sent or called.
@@ -20,7 +20,6 @@ class Transaction {
         if (!constant)
             this.unpackfn = undefined;
     }
-
     /**
      * Send transaction.
      *
@@ -39,23 +38,23 @@ class Transaction {
                     this.tx.gasPrice = options.gasPrice;
                 }
             }
-            utils.log(utils.fgGreen, JSONBig.stringify(this.tx, null, 2));
+            utils_1.default.log(utils_1.default.fgGreen, JSONBig.stringify(this.tx, null, 2));
             if (this.tx.gas != null && this.tx.gasPrice != null) {
                 return this.controller.api.sendTx(JSONBig.stringify(this.tx))
                     .then((res) => {
-                        let response = JSONBig.parse(res);
-                        return response.txHash;
-                    })
+                    let response = JSONBig.parse(res);
+                    return response.txHash;
+                })
                     .then((txHash) => {
-                        return utils.sleep(2000).then(() => {
-                            utils.log(utils.fgBlue, 'Requesting Receipt');
-                            return this.controller.api.getReceipt(txHash);
-                        });
-                    })
-                    .then((resp) => {
-                        this.receipt = JSONBig.parse(resp);
-                        return this.receipt;
+                    return utils_1.default.sleep(2000).then(() => {
+                        utils_1.default.log(utils_1.default.fgBlue, 'Requesting Receipt');
+                        return this.controller.api.getReceipt(txHash);
                     });
+                })
+                    .then((resp) => {
+                    this.receipt = JSONBig.parse(resp);
+                    return this.receipt;
+                });
             }
             else {
                 throw new Error('gas & gas price not set');
@@ -65,7 +64,6 @@ class Transaction {
             throw new Error('Transaction does not mutate state. Use `call()` instead');
         }
     }
-
     /**
      * Call transaction.
      *
@@ -83,16 +81,15 @@ class Transaction {
                     this.tx.gasPrice = options.gasPrice;
                 }
             }
-            utils.log(utils.fgGreen, JSONBig.stringify(this.tx, null, 2));
+            utils_1.default.log(utils_1.default.fgGreen, JSONBig.stringify(this.tx, null, 2));
             if (this.tx.gas != null && this.tx.gasPrice != null) {
                 return this.controller.api.call(JSONBig.stringify(this.tx))
                     .then((response) => {
-                        return JSONBig.parse(response);
-                    })
+                    return JSONBig.parse(response);
+                })
                     .then((obj) => {
-                        console.log(this.unpackfn);
-                        return this.unpackfn(Buffer.from(obj.data).toString());
-                    });
+                    return this.unpackfn(Buffer.from(obj.data).toString());
+                });
             }
             else {
                 throw new Error('gas & gas price not set');
