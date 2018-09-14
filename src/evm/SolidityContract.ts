@@ -2,7 +2,7 @@ import * as Web3 from 'web3'
 import * as coder from 'web3/lib/solidity/coder.js'
 
 import * as errors from "../misc/errors"
-import * as utils from "../misc/utils";
+import utils from "../misc/utils";
 import * as checks from '../misc/checks';
 
 import {ABI, ContractOptions, TXReceipt} from "../misc/Interfaces";
@@ -42,8 +42,8 @@ export default class SolidityContract {
     /**
      * Deploy contract to the blockchain.
      *
-     * Deploys contract to the blockchain and sets the newly acquired address of the new contract.
-     * Also assigns the transaction receipt to this.
+     * Deploys contract to the blockchain and sets the newly acquired address of the contract.
+     * Also assigns the transaction receipt to this object..
      *
      * @param {Object} options The options for the contract. eg. constructor params, gas, gas price, data
      * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
@@ -74,9 +74,9 @@ export default class SolidityContract {
             return new Transaction({
                 from: this.controller.defaultAddress,
                 data: encodedData
-            }, this.controller)
+            }, false, undefined, this.controller)
                 .gas(this.options.gas)
-                .gasPrice(this.options.gas)
+                .gasPrice(this.options.gasPrice)
                 .send()
                 .then((receipt: TXReceipt) => {
                     this.receipt = receipt;
@@ -88,7 +88,7 @@ export default class SolidityContract {
     }
 
     /**
-     * Sets the address of the contract and populates Solidity functions.
+     * Sets the address of the contract and populates Solidity contract functions.
      *
      * @param {string} address The address to assign to the contract
      * @returns {SolidityContract} The contract
@@ -107,12 +107,14 @@ export default class SolidityContract {
      */
     address(address: string): SolidityContract {
         this.options.address = address;
-        this._attachMethodsToContract();
         return this
     }
 
     /**
      * Sets the default gas for the contract.
+     *
+     * Any functions from the this contract will inherit the `gas` value by default.
+     * You still have the option to override the value once the transaction object is instantiated.
      *
      * @param {number} gas The gas to assign to the contract
      * @returns {SolidityContract} The contract
@@ -124,6 +126,9 @@ export default class SolidityContract {
 
     /**
      * Sets the default gas price for the contract.
+     *
+     * Any functions from the this contract will inherit the `gasPrice` value by default.
+     * You still have the option to override the value once the transaction object is instantiated.
      *
      * @param {number} gasPrice The gas price to assign to the contract
      * @returns {SolidityContract} The contract
@@ -169,7 +174,16 @@ export default class SolidityContract {
         })
             .map((funcJSON: ABI) => {
                 let solFunction = new SolidityFunction(funcJSON, this.options.address, this.controller);
-                this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction);
+
+                if (this.options.gas !== undefined && this.options.gasPrice !== undefined) {
+                    this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction, {
+                        gas: this.options.gas,
+                        gasPrice: this.options.gasPrice,
+                    });
+                } else {
+                    this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction, {});
+                }
+
                 utils.log(utils.fgBlue, `Adding function: ${funcJSON.name}()`);
             })
     }

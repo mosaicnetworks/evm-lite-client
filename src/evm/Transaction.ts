@@ -15,11 +15,100 @@ export default class Transaction {
      * Transaction object to be sent or called.
      *
      * @param {TX} options The transaction options eg. gas, gas price, value...
+     * @param {boolean} constant If the transaction is constant
+     * @param {Function} unpackfn If constant - unpack function
      * @param {Controller} controller The controller class
      */
-    constructor(options: TX, readonly controller: Controller) {
+    constructor(options: TX, readonly constant: boolean, readonly unpackfn: Function, readonly controller: Controller) {
         this.tx = options;
         this.receipt = undefined;
+
+        if (!constant)
+            this.unpackfn = undefined;
+    }
+
+    /**
+     * Send transaction.
+     *
+     * This function will mutate the state of the EVM.
+     *
+     * @param {Object} options
+     */
+    send(options?: { to?: string, from?: string, value?: number, gas?: number, gasPrice?: number }): any {
+        if (!this.constant) {
+            if (options) {
+                this.tx.to = options.to || this.tx.to;
+                this.tx.from = options.from || this.tx.from;
+                this.tx.gas = options.gas || this.tx.gas;
+                this.tx.value = options.value || this.tx.value;
+
+                if (options.gasPrice !== undefined && options.gasPrice >= 0) {
+                    this.tx.gasPrice = options.gasPrice;
+                }
+            }
+
+            utils.log(utils.fgGreen, JSONBig.stringify(this.tx, null, 2));
+
+            if (this.tx.gas != null && this.tx.gasPrice != null) {
+                return this.controller.api.sendTx(JSONBig.stringify(this.tx))
+                    .then((res: string) => {
+                        let response: { txHash: string } = JSONBig.parse(res);
+                        return response.txHash
+                    })
+                    .then((txHash) => {
+                        return utils.sleep(2000).then(() => {
+                            utils.log(utils.fgBlue, 'Requesting Receipt');
+                            return this.controller.api.getReceipt(txHash)
+                        })
+                    })
+                    .then((resp: string) => {
+                        this.receipt = JSONBig.parse(resp);
+                        return this.receipt;
+                    })
+            } else {
+                throw new Error('gas & gas price not set')
+            }
+        } else {
+            throw new Error('Transaction does not mutate state. Use `call()` instead')
+        }
+    }
+
+    /**
+     * Call transaction.
+     *
+     * This function will not mutate the state of the EVM.
+     *
+     */
+    call(options?: { to?: string, from?: string, value?: number, gas?: number, gasPrice?: number }) {
+        if (this.constant) {
+            if (options) {
+                this.tx.to = options.to || this.tx.to;
+                this.tx.from = options.from || this.tx.from;
+                this.tx.gas = options.gas || this.tx.gas;
+                this.tx.value = options.value || this.tx.value;
+
+                if (options.gasPrice !== undefined && options.gasPrice >= 0) {
+                    this.tx.gasPrice = options.gasPrice;
+                }
+            }
+
+            utils.log(utils.fgGreen, JSONBig.stringify(this.tx, null, 2));
+
+            if (this.tx.gas != null && this.tx.gasPrice != null) {
+                return this.controller.api.call(JSONBig.stringify(this.tx))
+                    .then((response) => {
+                        return JSONBig.parse(response);
+                    })
+                    .then((obj) => {
+                        console.log(this.unpackfn);
+                        return this.unpackfn(Buffer.from(obj.data).toString());
+                    });
+            } else {
+                throw new Error('gas & gas price not set')
+            }
+        } else {
+            throw new Error('Transaction mutates state. Use `send()` instead')
+        }
     }
 
     /**
@@ -86,63 +175,5 @@ export default class Transaction {
     data(data: string): Transaction {
         this.tx.data = data;
         return this
-    }
-
-    /**
-     * Send transaction.
-     *
-     * This function will mutate the state of the EVM.
-     *
-     * @param {Object} options
-     */
-    send(options?: { to?: string, from?: string, value?: number, gas?: number, gasPrice?: number }): any {
-        if (options) {
-            this.tx.to = options.to || this.tx.to;
-            this.tx.from = options.from || this.tx.from;
-            this.tx.gas = options.gas || this.tx.gas;
-
-            if (options.gasPrice !== undefined && options.gasPrice >= 0) {
-                this.tx.gasPrice = options.gasPrice;
-            }
-
-            this.tx.value = options.value || this.tx.value;
-        }
-
-        utils.log(utils.fgGreen, JSONBig.stringify(this.tx, null, 2));
-
-        if (this.tx.gas != null && this.tx.gasPrice != null) {
-            return this.controller.api.sendTx(JSONBig.stringify(this.tx))
-                .then((res: string) => {
-                    let response: { txHash: string } = JSONBig.parse(res);
-                    return response.txHash
-                })
-                .then((txHash) => {
-                    return utils.sleep(2000).then(() => {
-                        utils.log(utils.fgBlue, 'Requesting Receipt');
-                        return this.controller.api.getReceipt(txHash)
-                    })
-                })
-                .then((resp: string) => {
-                    this.receipt = JSONBig.parse(resp);
-                    return this.receipt;
-                })
-        } else {
-            throw new Error('gas & gas price not set')
-        }
-    }
-
-    /**
-     * Call transaction.
-     *
-     * This function will not mutate the state of the EVM.
-     *
-     * @param {Object} options
-     */
-    call(options: { gas: number, gasPrice: number }) {
-        this.tx.gas = options.gas;
-        this.tx.gasPrice = options.gasPrice;
-        return new Promise(resolve => {
-            resolve(JSON.stringify(this.tx));
-        })
     }
 }

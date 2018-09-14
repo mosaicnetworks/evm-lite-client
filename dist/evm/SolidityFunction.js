@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", {value: true});
 const SolFunction = require("web3/lib/web3/function.js");
+const coder = require("web3/lib/solidity/coder.js");
 const checks = require("../misc/checks");
 const Transaction_1 = require("./Transaction");
-
 class SolidityFunction {
     /**
      * Javascript Object representation of a Solidity function.
@@ -27,32 +27,46 @@ class SolidityFunction {
             return i.type;
         });
     }
-
     /**
      * Generates Transaction object to be sent or called.
      *
      * Creates the scaffolding needed for the transaction to be executed.
      *
+     * @param {Object} options The options for the transaction of this function
      * @param {Array} funcArgs A list containing all the parameters of the function
      */
-    generateTransaction(...funcArgs) {
+    generateTransaction(options, ...funcArgs) {
         this._validateArgs(funcArgs);
         let callData = this._solFunction.getData();
-        let transaction = !this._constant;
         let tx = {
             from: this.controller.defaultAddress,
-            to: this.contractAddress
+            to: this.contractAddress,
         };
-        if (transaction) {
-            tx.data = callData;
-            if (tx.value <= 0 && this._payable)
-                throw Error('Function is payable and requires `value` greater than 0.');
-            else if (tx.value > 0 && !this._payable)
-                throw Error('Function is not payable. Required `value` is 0.');
-            return new Transaction_1.default(tx, this.controller);
+        if (options && options.gas !== undefined && options.gasPrice !== undefined) {
+            tx.gas = options.gas;
+            tx.gasPrice = options.gasPrice;
         }
+        tx.data = callData;
+        if (tx.value <= 0 && this._payable)
+            throw Error('Function is payable and requires `value` greater than 0.');
+        else if (tx.value > 0 && !this._payable)
+            throw Error('Function is not payable. Required `value` is 0.');
+        let unpackfn = undefined;
+        if (this._constant)
+            unpackfn = this.unpackOutput.bind(this);
+        return new Transaction_1.default(tx, this._constant, unpackfn, this.controller);
     }
 
+    /**
+     * Decodes output with the corresponding return types.
+     *
+     * @param {string} output The output string to decode
+     */
+    unpackOutput(output) {
+        output = output.length >= 2 ? output.slice(2) : output;
+        let result = coder.decodeParams(this._outputTypes, output);
+        return result.length === 1 ? result[0] : result;
+    }
     /**
      * Validates arguments to the function.
      *
@@ -68,5 +82,4 @@ class SolidityFunction {
         });
     }
 }
-
 exports.default = SolidityFunction;

@@ -1,4 +1,5 @@
 import * as SolFunction from 'web3/lib/web3/function.js'
+import * as coder from 'web3/lib/solidity/coder.js'
 
 import * as checks from '../misc/checks'
 
@@ -44,28 +45,47 @@ export default class SolidityFunction {
      *
      * Creates the scaffolding needed for the transaction to be executed.
      *
+     * @param {Object} options The options for the transaction of this function
      * @param {Array} funcArgs A list containing all the parameters of the function
      */
-    generateTransaction(...funcArgs: any[]): Transaction {
+    generateTransaction(options: { gas?: number, gasPrice?: number }, ...funcArgs: any[]): Transaction {
         this._validateArgs(funcArgs);
 
         let callData = this._solFunction.getData();
-        let transaction = !this._constant;
         let tx: TX = {
             from: this.controller.defaultAddress,
-            to: this.contractAddress
+            to: this.contractAddress,
         };
 
-        if (transaction) {
-            tx.data = callData;
-
-            if (tx.value <= 0 && this._payable)
-                throw Error('Function is payable and requires `value` greater than 0.');
-            else if (tx.value > 0 && !this._payable)
-                throw Error('Function is not payable. Required `value` is 0.');
-
-            return new Transaction(tx, this.controller);
+        if (options && options.gas !== undefined && options.gasPrice !== undefined) {
+            tx.gas = options.gas;
+            tx.gasPrice = options.gasPrice;
         }
+
+        tx.data = callData;
+
+        if (tx.value <= 0 && this._payable)
+            throw Error('Function is payable and requires `value` greater than 0.');
+        else if (tx.value > 0 && !this._payable)
+            throw Error('Function is not payable. Required `value` is 0.');
+
+        let unpackfn: Function = undefined;
+
+        if (this._constant)
+            unpackfn = this.unpackOutput.bind(this);
+
+        return new Transaction(tx, this._constant, unpackfn, this.controller);
+    }
+
+    /**
+     * Decodes output with the corresponding return types.
+     *
+     * @param {string} output The output string to decode
+     */
+    unpackOutput(output: string): any {
+        output = output.length >= 2 ? output.slice(2) : output;
+        let result = coder.decodeParams(this._outputTypes, output);
+        return result.length === 1 ? result[0] : result;
     }
 
     /**

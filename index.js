@@ -1,5 +1,5 @@
 const Controller = require('./dist/Controller').default;
-const utils = require('./dist/misc/utils');
+const Utils = require('./dist/misc/utils').default;
 
 exports.Controller = Controller;
-exports.utils = utils;
+exports.Utils = Utils;

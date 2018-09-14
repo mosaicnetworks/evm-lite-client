@@ -87,14 +87,18 @@ declare module 'evml' {
         readonly controller: Controller;
         tx: TX;
         receipt: TXReceipt;
+        readonly unpackfn: Function;
+        readonly constant: boolean;
 
         /**
          * Transaction object to be sent or called.
          *
          * @param {TX} options The transaction options eg. gas, gas price, value...
+         * @param {boolean} constant If the transaction is constant
+         * @param {Function} unpackfn If constant - unpack function
          * @param {Controller} controller The controller class
          */
-        constructor(options: TX, controller: Controller);
+        constructor(options: TX, constant: boolean, unpackfn: Function, controller: Controller);
 
         /**
          * Send transaction.
@@ -119,11 +123,61 @@ declare module 'evml' {
          * @param {Object} options
          */
         call(options: {
-            gas: number;
-            gasPrice: number;
-        }): Promise<{}>;
-    }
+            to?: string;
+            from?: string;
+            value?: number;
+            gas?: number;
+            gasPrice?: any;
+        }): any;
 
+        /**
+         * Sets the from of the transaction.
+         *
+         * @param {string} from The from address
+         * @returns {Transaction} The transaction
+         */
+        from(from: string): Transaction;
+
+        /**
+         * Sets the to of the transaction.
+         *
+         * @param {string} to The to address
+         * @returns {Transaction} The transaction
+         */
+        to(to: string): Transaction;
+
+        /**
+         * Sets the value of the transaction.
+         *
+         * @param {number} value The value of tx
+         * @returns {Transaction} The transaction
+         */
+        value(value: number): Transaction;
+
+        /**
+         * Sets the gas of the transaction.
+         *
+         * @param {number} gas The gas of tx
+         * @returns {Transaction} The transaction
+         */
+        gas(gas: number): Transaction;
+
+        /**
+         * Sets the gas price of the transaction.
+         *
+         * @param {number} gasPrice The gas price of tx
+         * @returns {Transaction} The transaction
+         */
+        gasPrice(gasPrice: number): Transaction;
+
+        /**
+         * Sets the data of the transaction.
+         *
+         * @param {number} data The data of tx
+         * @returns {Transaction} The transaction
+         */
+        data(data: string): Transaction;
+    }
 
     class SolidityContract {
         options: ContractOptions;
@@ -164,8 +218,8 @@ declare module 'evml' {
         /**
          * Deploy contract to the blockchain.
          *
-         * Deploys contract to the blockchain and sets the newly acquired address of the new contract.
-         * Also assigns the transaction receipt to this.
+         * Deploys contract to the blockchain and sets the newly acquired address of the contract.
+         * Also assigns the transaction receipt to this object..
          *
          * @param {Object} options The options for the contract. eg. constructor params, gas, gas price, data
          * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
@@ -183,10 +237,21 @@ declare module 'evml' {
          * @param {string} address The address to assign to the contract
          * @returns {SolidityContract} The contract
          */
+        setAddressAndPopulate(address: string): SolidityContract;
+
+        /**
+         * Sets the address of the contract.
+         *
+         * @param {string} address The address to assign to the contract
+         * @returns {SolidityContract} The contract
+         */
         address(address: string): SolidityContract;
 
         /**
-         * Sets the gas of the contract.
+         * Sets the default gas for the contract.
+         *
+         * Any functions from the this contract will inherit the `gas` value by default.
+         * You still have the option to override the value once the transaction object is instantiated.
          *
          * @param {number} gas The gas to assign to the contract
          * @returns {SolidityContract} The contract
@@ -194,7 +259,10 @@ declare module 'evml' {
         gas(gas: number): SolidityContract;
 
         /**
-         * Sets the gas price for deploying the contract.
+         * Sets the default gas price for the contract.
+         *
+         * Any functions from the this contract will inherit the `gasPrice` value by default.
+         * You still have the option to override the value once the transaction object is instantiated.
          *
          * @param {number} gasPrice The gas price to assign to the contract
          * @returns {SolidityContract} The contract
@@ -217,7 +285,6 @@ declare module 'evml' {
          */
         JSONInterface(abis: ABI[]): SolidityContract;
     }
-
 
     export class Controller {
         readonly host: string;
@@ -273,6 +340,28 @@ declare module 'evml' {
          * @returns {Transaction} the required Transaction object for transfer request
          */
         transfer(address: string, value: number): Transaction;
+
+        /**
+         * Require default from address to be set.
+         *
+         * @private
+         */
+        private _requireDefaultFromAddress(): void;
+    }
+
+    export class Utils {
+        static fgRed: string;
+        static fgGreen: string;
+        static fgBlue: string;
+        static fgMagenta: string;
+        static fgCyan: string;
+        static fgWhite: string;
+
+        static log(color: string, text: string);
+        static step(message: string);
+        static explain(message: string);
+        static space();
+        static sleep(time: number);
     }
 
 }
