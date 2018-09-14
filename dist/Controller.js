@@ -80,8 +80,14 @@ class Controller {
             from: this.defaultAddress,
             to: address,
             value: value
-        }, this);
+        }, false, undefined, this);
     }
+
+    /**
+     * Require default from address to be set.
+     *
+     * @private
+     */
     _requireDefaultFromAddress() {
         if (this.defaultAddress == null)
             throw new Error('Please set default from address.');

@@ -87,16 +87,20 @@ export default class Controller {
      * @returns {Transaction} the required Transaction object for transfer request
      */
     transfer(address: string, value: number): Transaction {
-
         this._requireDefaultFromAddress();
 
         return new Transaction({
             from: this.defaultAddress,
             to: address,
             value: value
-        }, this)
+        }, false, undefined, this)
     }
 
+    /**
+     * Require default from address to be set.
+     *
+     * @private
+     */
     private _requireDefaultFromAddress(): void {
         if (this.defaultAddress == null)
             throw new Error('Please set default from address.');

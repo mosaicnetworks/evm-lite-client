@@ -5,7 +5,6 @@ const prompt = require("prompt");
 prompt.start();
 prompt.message = '';
 prompt.delimiter = '';
-
 /**
  *
  * @module
@@ -20,7 +19,6 @@ function parseInputs(input) {
         return 'number';
     }
 }
-
 exports.parseInputs = parseInputs;
 /**
  * Console Colours

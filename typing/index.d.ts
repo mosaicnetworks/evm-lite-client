@@ -87,14 +87,18 @@ declare module 'evml' {
         readonly controller: Controller;
         tx: TX;
         receipt: TXReceipt;
+        readonly unpackfn: Function;
+        readonly constant: boolean;
 
         /**
          * Transaction object to be sent or called.
          *
          * @param {TX} options The transaction options eg. gas, gas price, value...
+         * @param {boolean} constant If the transaction is constant
+         * @param {Function} unpackfn If constant - unpack function
          * @param {Controller} controller The controller class
          */
-        constructor(options: TX, controller: Controller);
+        constructor(options: TX, constant: boolean, unpackfn: Function, controller: Controller);
 
         /**
          * Send transaction.
@@ -119,9 +123,12 @@ declare module 'evml' {
          * @param {Object} options
          */
         call(options: {
-            gas: number;
-            gasPrice: number;
-        }): Promise<{}>;
+            to?: string;
+            from?: string;
+            value?: number;
+            gas?: number;
+            gasPrice?: any;
+        }): any;
 
         /**
          * Sets the from of the transaction.
@@ -172,7 +179,6 @@ declare module 'evml' {
         data(data: string): Transaction;
     }
 
-
     class SolidityContract {
         options: ContractOptions;
         readonly controller: Controller;
@@ -212,8 +218,8 @@ declare module 'evml' {
         /**
          * Deploy contract to the blockchain.
          *
-         * Deploys contract to the blockchain and sets the newly acquired address of the new contract.
-         * Also assigns the transaction receipt to this.
+         * Deploys contract to the blockchain and sets the newly acquired address of the contract.
+         * Also assigns the transaction receipt to this object..
          *
          * @param {Object} options The options for the contract. eg. constructor params, gas, gas price, data
          * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
@@ -244,6 +250,9 @@ declare module 'evml' {
         /**
          * Sets the default gas for the contract.
          *
+         * Any functions from the this contract will inherit the `gas` value by default.
+         * You still have the option to override the value once the transaction object is instantiated.
+         *
          * @param {number} gas The gas to assign to the contract
          * @returns {SolidityContract} The contract
          */
@@ -251,6 +260,9 @@ declare module 'evml' {
 
         /**
          * Sets the default gas price for the contract.
+         *
+         * Any functions from the this contract will inherit the `gasPrice` value by default.
+         * You still have the option to override the value once the transaction object is instantiated.
          *
          * @param {number} gasPrice The gas price to assign to the contract
          * @returns {SolidityContract} The contract
@@ -273,7 +285,6 @@ declare module 'evml' {
          */
         JSONInterface(abis: ABI[]): SolidityContract;
     }
-
 
     export class Controller {
         readonly host: string;
@@ -329,6 +340,13 @@ declare module 'evml' {
          * @returns {Transaction} the required Transaction object for transfer request
          */
         transfer(address: string, value: number): Transaction;
+
+        /**
+         * Require default from address to be set.
+         *
+         * @private
+         */
+        private _requireDefaultFromAddress(): void;
     }
 
 }
