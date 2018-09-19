@@ -1,9 +1,9 @@
 import * as SolFunction from 'web3/lib/web3/function.js'
 import * as coder from 'web3/lib/solidity/coder.js'
 
-import * as checks from '../misc/checks'
+import * as checks from './utils/checks'
 
-import {ABI, Input, TX} from '../misc/Interfaces'
+import {ABI, Input, TX} from './utils/Interfaces'
 
 import Controller from "../Controller";
 import Transaction from "./Transaction";
@@ -22,9 +22,9 @@ export default class SolidityFunction {
     /**
      * Javascript Object representation of a Solidity function.
      *
-     * @param {ABI} abi JSON describing the function details
-     * @param {string} contractAddress The address of parent contract
-     * @param {Controller} controller The controller class
+     * @param {ABI} abi - JSON describing the function details
+     * @param {string} contractAddress - The address of parent contract
+     * @param {Controller} controller - The controller class
      * @constructor
      */
     constructor(abi: ABI, readonly contractAddress: string, readonly controller: Controller) {
@@ -45,15 +45,15 @@ export default class SolidityFunction {
      *
      * Creates the scaffolding needed for the transaction to be executed.
      *
-     * @param {Object} options The options for the transaction of this function
-     * @param {Array} funcArgs A list containing all the parameters of the function
+     * @param {Object} options - The options for the transaction of this function
+     * @param {Array} funcArgs - A list containing all the parameters of the function
      */
     generateTransaction(options: { gas?: number, gasPrice?: number }, ...funcArgs: any[]): Transaction {
         this._validateArgs(funcArgs);
 
         let callData = this._solFunction.getData();
         let tx: TX = {
-            from: this.controller.defaultAddress,
+            from: this.controller.defaultOptions.from,
             to: this.contractAddress,
         };
 
@@ -80,7 +80,7 @@ export default class SolidityFunction {
     /**
      * Decodes output with the corresponding return types.
      *
-     * @param {string} output The output string to decode
+     * @param {string} output - The output string to decode
      */
     unpackOutput(output: string): any {
         output = output.length >= 2 ? output.slice(2) : output;
@@ -93,7 +93,7 @@ export default class SolidityFunction {
      *
      * This checks types as well as length of input arguments to required.
      *
-     * @param {Array} args The list of arguments for the function
+     * @param {Array} args - The list of arguments for the function
      * @private
      */
     private _validateArgs(args: any[]): void {

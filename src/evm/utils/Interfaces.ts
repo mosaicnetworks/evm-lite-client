@@ -1,4 +1,4 @@
-interface BaseTX {
+export interface BaseTX {
     gas?: number,
     gasPrice?: number,
 }

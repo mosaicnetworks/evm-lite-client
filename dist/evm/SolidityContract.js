@@ -2,9 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Web3 = require("web3");
 const coder = require("web3/lib/solidity/coder.js");
-const errors = require("../misc/errors");
-const utils_1 = require("../misc/utils");
-const checks = require("../misc/checks");
+const errors = require("./utils/errors");
+const checks = require("./utils/checks");
 const SolidityFunction_1 = require("./SolidityFunction");
 const Transaction_1 = require("./Transaction");
 class SolidityContract {
@@ -13,8 +12,8 @@ class SolidityContract {
      *
      * Can either be used to deploy a contract or interact with a contract already deployed.
      *
-     * @param {Controller} controller Controller Javascript object
-     * @param {ContractOptions} options The options of the contract. eg. gas price, gas, address
+     * @param {Controller} controller - Controller Javascript object
+     * @param {ContractOptions} options - The options of the contract. eg. gas price, gas, address
      * @constructor
      */
     constructor(options, controller) {
@@ -34,7 +33,7 @@ class SolidityContract {
      * Deploys contract to the blockchain and sets the newly acquired address of the contract.
      * Also assigns the transaction receipt to this object..
      *
-     * @param {Object} options The options for the contract. eg. constructor params, gas, gas price, data
+     * @param {Object} options - The options for the contract. eg. constructor params, gas, gas price, data
      * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
      */
     deploy(options) {
@@ -56,7 +55,7 @@ class SolidityContract {
             if (options.parameters)
                 encodedData = this.options.data + this._encodeConstructorParams(options.parameters);
             return new Transaction_1.default({
-                from: this.controller.defaultAddress,
+                from: this.controller.defaultOptions.from,
                 data: encodedData
             }, false, undefined, this.controller)
                 .gas(this.options.gas)
@@ -74,7 +73,7 @@ class SolidityContract {
     /**
      * Sets the address of the contract and populates Solidity contract functions.
      *
-     * @param {string} address The address to assign to the contract
+     * @param {string} address - The address to assign to the contract
      * @returns {SolidityContract} The contract
      */
     setAddressAndPopulate(address) {
@@ -85,7 +84,7 @@ class SolidityContract {
     /**
      * Sets the address of the contract.
      *
-     * @param {string} address The address to assign to the contract
+     * @param {string} address - The address to assign to the contract
      * @returns {SolidityContract} The contract
      */
     address(address) {
@@ -98,7 +97,7 @@ class SolidityContract {
      * Any functions from the this contract will inherit the `gas` value by default.
      * You still have the option to override the value once the transaction object is instantiated.
      *
-     * @param {number} gas The gas to assign to the contract
+     * @param {number} gas - The gas to assign to the contract
      * @returns {SolidityContract} The contract
      */
     gas(gas) {
@@ -111,7 +110,7 @@ class SolidityContract {
      * Any functions from the this contract will inherit the `gasPrice` value by default.
      * You still have the option to override the value once the transaction object is instantiated.
      *
-     * @param {number} gasPrice The gas price to assign to the contract
+     * @param {number} gasPrice - The gas price to assign to the contract
      * @returns {SolidityContract} The contract
      */
     gasPrice(gasPrice) {
@@ -121,7 +120,7 @@ class SolidityContract {
     /**
      * Sets the data for deploying the contract.
      *
-     * @param {string} data The data of the contract
+     * @param {string} data - The data of the contract
      * @returns {SolidityContract} The contract
      */
     data(data) {
@@ -131,7 +130,7 @@ class SolidityContract {
     /**
      * Sets the JSON Interface of the contract.
      *
-     * @param {ABI[]} abis The JSON Interface of contract
+     * @param {ABI[]} abis - The JSON Interface of contract
      * @returns {SolidityContract} The contract
      */
     JSONInterface(abis) {
@@ -161,13 +160,12 @@ class SolidityContract {
             else {
                 this.methods[funcJSON.name] = solFunction.generateTransaction.bind(solFunction, {});
             }
-            utils_1.default.log(utils_1.default.fgBlue, `Adding function: ${funcJSON.name}()`);
         });
     }
     /**
      * Encodes constructor parameters.
      *
-     * @param {Array} params The parameters to encode
+     * @param {Array} params - The parameters to encode
      * @private
      */
     _encodeConstructorParams(params) {

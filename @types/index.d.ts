@@ -1,8 +1,8 @@
 // Type definitions for evmlsdk 0.1.0
-// Project: EVM Lite SDK
+// Project: https://github.com/mosaicnetworks/evml-client
 // Definitions by: Mosaic Networks <https://github.com/mosaicnetworks>
 
-declare module 'evml' {
+declare module 'evml-client' {
 
     interface BaseTX {
         gas?: number;
@@ -356,6 +356,7 @@ declare module 'evml' {
         static fgMagenta: string;
         static fgCyan: string;
         static fgWhite: string;
+        static fgOrange: string;
 
         static log(color: string, text: string);
 

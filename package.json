@@ -1,5 +1,5 @@
 {
-  "name": "evml",
+  "name": "evml-client",
   "version": "0.1.0",
   "description": "A Node.js module for interacting with EVM-Lite.",
   "main": "index.js",
@@ -9,6 +9,7 @@
   "author": "Danu Kumanan",
   "license": "MIT",
   "dependencies": {
+    "chalk": "^2.4.1",
     "json-bigint": "^0.3.0",
     "prompt": "^1.0.0",
     "solc": "^0.4.24",
@@ -21,7 +22,7 @@
     "mocha": "^5.2.0",
     "ts-node": "^7.0.1"
   },
-  "typings": "typing/index.d.ts",
+  "typings": "@types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/mosaicnetworks/evm-lite-nodejs-sdk"
