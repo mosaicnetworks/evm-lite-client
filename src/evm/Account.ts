@@ -10,6 +10,7 @@ interface Web3Account {
 
 
 export default class Account {
+
     readonly web3: Web3;
     readonly account: Web3Account;
 
@@ -36,10 +37,6 @@ export default class Account {
 
     get signTransaction() {
         return this.account.signTransaction;
-    }
-
-    get() {
-        return this.account;
     }
 
 }

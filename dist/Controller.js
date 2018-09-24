@@ -24,7 +24,6 @@ class Controller {
         this.accounts = [];
         this.api = new EVMLiteClient_1.default(host, port);
     }
-
     /**
      * Return default options
      *
@@ -33,7 +32,6 @@ class Controller {
     get defaultOptions() {
         return this._defaultTXOptions;
     }
-
     /**
      * Get default `from` address
      *
@@ -42,7 +40,6 @@ class Controller {
     get defaultFrom() {
         return this._defaultTXOptions.from;
     }
-
     /**
      * Set default `from` address
      *
@@ -51,7 +48,6 @@ class Controller {
     set defaultFrom(address) {
         this._defaultTXOptions.from = address;
     }
-
     /**
      * Get default `gas` value
      *
@@ -60,7 +56,6 @@ class Controller {
     get defaultGas() {
         return this._defaultTXOptions.gas;
     }
-
     /**
      * Set default `gas` value
      *
@@ -69,7 +64,6 @@ class Controller {
     set defaultGas(gas) {
         this._defaultTXOptions.gas = gas;
     }
-
     /**
      * Get default `gasPrice` value
      *
@@ -78,7 +72,6 @@ class Controller {
     get defaultGasPrice() {
         return this._defaultTXOptions.gasPrice;
     }
-
     /**
      * Set default `from` address
      *
@@ -92,7 +85,7 @@ class Controller {
      *
      * Takes a solidity file and generates corresponding functions associated with the contract
      * name provided. The byte-code of the contract is auto-assigned to the data option field
-     * for the contract.
+     * for contract deployment.
      *
      * @param {string} contractName - Name of the Contract to get from Solidity file
      * @param {string} filePath - Absolute or relative path of the Solidity file.

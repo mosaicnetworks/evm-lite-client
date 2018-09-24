@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const Web3 = require("web3");
 class Account {
     constructor() {
@@ -20,9 +20,6 @@ class Account {
     }
     get signTransaction() {
         return this.account.signTransaction;
-    }
-    get() {
-        return this.account;
     }
 }
 exports.default = Account;

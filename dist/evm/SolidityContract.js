@@ -31,7 +31,7 @@ class SolidityContract {
      * Deploy contract to the blockchain.
      *
      * Deploys contract to the blockchain and sets the newly acquired address of the contract.
-     * Also assigns the transaction receipt to this object..
+     * Also assigns the transaction receipt to this object.
      *
      * @param {Object} options - The options for the contract. eg. constructor params, gas, gas price, data
      * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
@@ -40,9 +40,8 @@ class SolidityContract {
         if (this.options.address !== '')
             throw errors.ContractAddressFieldSetAndDeployed();
         this.options.jsonInterface.filter((abi) => {
-            if (abi.type === "constructor") {
-                if (options.parameters)
-                    checks.requireArgsLength(abi.inputs.length, options.parameters.length);
+            if (abi.type === "constructor" && options.parameters) {
+                checks.requireArgsLength(abi.inputs.length, options.parameters.length);
             }
         });
         if (options) {
@@ -60,8 +59,7 @@ class SolidityContract {
             }, false, undefined, this.controller)
                 .gas(this.options.gas)
                 .gasPrice(this.options.gasPrice)
-                .send()
-                .then((receipt) => {
+                .send().then((receipt) => {
                 this.receipt = receipt;
                 return this.setAddressAndPopulate(this.receipt.contractAddress);
             });

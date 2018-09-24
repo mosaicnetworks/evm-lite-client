@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 function InvalidNumberOfSolidityArgs(expected, received) {
     return new Error(`Expected ${expected} but got ${received} arguments.`);
 }

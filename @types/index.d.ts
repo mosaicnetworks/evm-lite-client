@@ -2,6 +2,8 @@
 // Project: https://github.com/mosaicnetworks/evml-client
 // Definitions by: Mosaic Networks <https://github.com/mosaicnetworks>
 
+import {BaseTX} from "../src/evm/utils/Interfaces";
+
 declare module 'evml-client' {
 
     interface BaseTX {
@@ -114,6 +116,13 @@ declare module 'evml-client' {
             gas?: number;
             gasPrice?: any;
         }): any;
+
+        /**
+         * Return transaction as string.
+         *
+         * @returns {string} Transaction as string
+         */
+        toString(): string;
 
         /**
          * Call transaction.
@@ -285,12 +294,20 @@ declare module 'evml-client' {
          */
         JSONInterface(abis: ABI[]): SolidityContract;
     }
+interface DefaultTXOptions extends BaseTX {
+    from?: string,
+}
 
     export class Controller {
+        private _defaultTXOptions: DefaultTXOptions;
         readonly host: string;
         readonly port: number;
         defaultAddress: string;
         accounts: Account[];
+        defaultGas: number;
+        defaultGasPrice: number;
+        defaultFrom: string;
+
         readonly api: EVMLiteClient;
 
         /**
@@ -347,6 +364,7 @@ declare module 'evml-client' {
          * @private
          */
         private _requireDefaultFromAddress(): void;
+
     }
 
     export class Utils {

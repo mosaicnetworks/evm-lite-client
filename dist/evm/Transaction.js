@@ -7,7 +7,7 @@ class Transaction {
      *
      * @param {TX} _tx - The transaction options eg. gas, gas price, value...
      * @param {boolean} constant - If the transaction is constant
-     * @param {Function} unpackfn - If constant - unpack function
+     * @param {Function} unpackfn - If constant unpack function
      * @param {Controller} controller - The controller class
      */
     constructor(_tx, constant, unpackfn, controller) {
@@ -44,8 +44,8 @@ class Transaction {
                     return response.txHash;
                 })
                     .then((txHash) => {
-                        return new Promise((resolve) => setTimeout(resolve, 2000))
-                            .then(() => {
+                    return new Promise((resolve) => setTimeout(resolve, 2000))
+                        .then(() => {
                         return this.controller.api.getReceipt(txHash);
                     });
                 })
@@ -105,7 +105,6 @@ class Transaction {
     toString() {
         return JSONBig.stringify(this._tx);
     }
-
     /**
      * Sets the from of the transaction.
      *

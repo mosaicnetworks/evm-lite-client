@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const http = require("http");
 let request = (options, callback) => {
     return http.request(options, (response) => {

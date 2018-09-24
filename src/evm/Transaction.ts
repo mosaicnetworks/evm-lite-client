@@ -14,7 +14,7 @@ export default class Transaction {
      *
      * @param {TX} _tx - The transaction options eg. gas, gas price, value...
      * @param {boolean} constant - If the transaction is constant
-     * @param {Function} unpackfn - If constant - unpack function
+     * @param {Function} unpackfn - If constant unpack function
      * @param {Controller} controller - The controller class
      */
     constructor(private _tx: TX, readonly constant: boolean, readonly unpackfn: Function, readonly controller: Controller) {
@@ -178,4 +178,5 @@ export default class Transaction {
         this._tx.data = data;
         return this
     }
+
 }

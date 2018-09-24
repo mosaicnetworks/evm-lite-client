@@ -1,1 +1,2 @@
-export const Controller = require('./dist/Controller').default;
+const Controller = require('./dist/Controller').default;
+exports.Controller = Controller;
