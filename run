@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
+npm install
+cd cli
+npm install
+cd ../
 node ./cli/dist/evml.js
