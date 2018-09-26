@@ -1,3 +1,3 @@
-# EVML.js
+# EVML-Client (Javascript)
 
-An SDK to help interact with EVM-Lite written in Javascript.
+An Javascript client library to interact with EVM-Lite.

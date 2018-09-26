@@ -1,2 +1,5 @@
 node_modules
 .idea
+cli/node_modules
+cli/evml_cli_config.toml
+cli/acc_template.json

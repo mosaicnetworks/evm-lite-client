@@ -1,7 +1,7 @@
 node_modules
 .gitignore
 tsconfig.json
-test
+tests
 CHANGELOG.md
 src
 

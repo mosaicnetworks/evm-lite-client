@@ -1,4 +1,4 @@
-interface BaseTX {
+export interface BaseTX {
     gas?: number,
     gasPrice?: number,
 }
@@ -30,12 +30,6 @@ export interface ABI {
     payable: any,
     stateMutability: any,
     type: any
-}
-
-export interface Account {
-    address: string,
-    balance: number,
-    nonce: number,
 }
 
 export interface TXReceipt {

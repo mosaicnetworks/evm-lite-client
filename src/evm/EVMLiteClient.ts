@@ -17,7 +17,7 @@ export default class EVMLiteClient {
     public constructor(readonly host: string, readonly port: number) {
     }
 
-    public getAccount(address: string): Promise<String> {
+    public getAccount(address: string): Promise<string> {
         let options = this._constructOptions('GET', `/account/${address}`);
         return new Promise((resolve, reject) => {
             let req = request(options, resolve);
@@ -35,7 +35,7 @@ export default class EVMLiteClient {
         });
     }
 
-    public call(tx: string) {
+    public call(tx: string): Promise<string> {
         let options = this._constructOptions('POST', '/call');
         return new Promise((resolve, reject) => {
             let req = request(options, resolve);
@@ -45,7 +45,7 @@ export default class EVMLiteClient {
         });
     }
 
-    public sendTx(tx: string) {
+    public sendTx(tx: string): Promise<string> {
         let options = this._constructOptions('POST', '/tx');
         return new Promise((resolve, reject) => {
             let req = request(options, resolve);

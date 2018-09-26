@@ -1,8 +1,8 @@
 // Type definitions for evmlsdk 0.1.0
-// Project: EVM Lite SDK
-// Definitions by: Danu Kumanan <https://github.com/danu3006>
+// Project: https://github.com/mosaicnetworks/evml-client
+// Definitions by: Mosaic Networks <https://github.com/mosaicnetworks>
 
-declare module 'evml' {
+declare module 'evml-client' {
 
     interface BaseTX {
         gas?: number;
@@ -36,12 +36,6 @@ declare module 'evml' {
         payable: any;
         stateMutability: any;
         type: any;
-    }
-
-    interface Account {
-        address: string;
-        balance: number;
-        nonce: number;
     }
 
     interface TXReceipt {
@@ -114,6 +108,13 @@ declare module 'evml' {
             gas?: number;
             gasPrice?: any;
         }): any;
+
+        /**
+         * Return transaction as string.
+         *
+         * @returns {string} Transaction as string
+         */
+        toString(): string;
 
         /**
          * Call transaction.
@@ -286,12 +287,20 @@ declare module 'evml' {
         JSONInterface(abis: ABI[]): SolidityContract;
     }
 
+    interface DefaultTXOptions extends BaseTX {
+        from?: string,
+    }
+
     export class Controller {
         readonly host: string;
         readonly port: number;
         defaultAddress: string;
         accounts: Account[];
+        defaultGas: number;
+        defaultGasPrice: number;
+        defaultFrom: string;
         readonly api: EVMLiteClient;
+        private _defaultTXOptions: DefaultTXOptions;
 
         /**
          * Creates a controller instance.
@@ -347,6 +356,7 @@ declare module 'evml' {
          * @private
          */
         private _requireDefaultFromAddress(): void;
+
     }
 
     export class Utils {
@@ -356,12 +366,38 @@ declare module 'evml' {
         static fgMagenta: string;
         static fgCyan: string;
         static fgWhite: string;
+        static fgOrange: string;
 
         static log(color: string, text: string);
+
         static step(message: string);
+
         static explain(message: string);
+
         static space();
+
         static sleep(time: number);
+    }
+
+    interface Web3Account {
+        address: string,
+        privateKey: string,
+        sign: (data: string) => any,
+        encrypt: (password: string) => any,
+        signTransaction: (tx: string) => any,
+    }
+
+    export class Account {
+
+        address: string;
+        balance: number;
+        nonce: number;
+        privateKey: string;
+        sign: (data: string) => any;
+        encrypt: (password: string) => any;
+        signTransaction: (tx: string) => any;
+        private _account: Web3Account;
+
     }
 
 }

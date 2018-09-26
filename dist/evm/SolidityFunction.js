@@ -1,16 +1,16 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const SolFunction = require("web3/lib/web3/function.js");
 const coder = require("web3/lib/solidity/coder.js");
-const checks = require("../misc/checks");
+const checks = require("./utils/checks");
 const Transaction_1 = require("./Transaction");
 class SolidityFunction {
     /**
      * Javascript Object representation of a Solidity function.
      *
-     * @param {ABI} abi JSON describing the function details
-     * @param {string} contractAddress The address of parent contract
-     * @param {Controller} controller The controller class
+     * @param {ABI} abi - JSON describing the function details
+     * @param {string} contractAddress - The address of parent contract
+     * @param {Controller} controller - The controller class
      * @constructor
      */
     constructor(abi, contractAddress, controller) {
@@ -32,14 +32,14 @@ class SolidityFunction {
      *
      * Creates the scaffolding needed for the transaction to be executed.
      *
-     * @param {Object} options The options for the transaction of this function
-     * @param {Array} funcArgs A list containing all the parameters of the function
+     * @param {Object} options - The options for the transaction of this function
+     * @param {Array} funcArgs - A list containing all the parameters of the function
      */
     generateTransaction(options, ...funcArgs) {
         this._validateArgs(funcArgs);
         let callData = this._solFunction.getData();
         let tx = {
-            from: this.controller.defaultAddress,
+            from: this.controller.defaultOptions.from,
             to: this.contractAddress,
         };
         if (options && options.gas !== undefined && options.gasPrice !== undefined) {
@@ -56,11 +56,10 @@ class SolidityFunction {
             unpackfn = this.unpackOutput.bind(this);
         return new Transaction_1.default(tx, this._constant, unpackfn, this.controller);
     }
-
     /**
      * Decodes output with the corresponding return types.
      *
-     * @param {string} output The output string to decode
+     * @param {string} output - The output string to decode
      */
     unpackOutput(output) {
         output = output.length >= 2 ? output.slice(2) : output;
@@ -72,7 +71,7 @@ class SolidityFunction {
      *
      * This checks types as well as length of input arguments to required.
      *
-     * @param {Array} args The list of arguments for the function
+     * @param {Array} args - The list of arguments for the function
      * @private
      */
     _validateArgs(args) {
