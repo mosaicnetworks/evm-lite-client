@@ -2,8 +2,6 @@
 // Project: https://github.com/mosaicnetworks/evml-client
 // Definitions by: Mosaic Networks <https://github.com/mosaicnetworks>
 
-import {BaseTX} from "../src/evm/utils/Interfaces";
-
 declare module 'evml-client' {
 
     interface BaseTX {
@@ -38,12 +36,6 @@ declare module 'evml-client' {
         payable: any;
         stateMutability: any;
         type: any;
-    }
-
-    interface Account {
-        address: string;
-        balance: number;
-        nonce: number;
     }
 
     interface TXReceipt {
@@ -294,12 +286,12 @@ declare module 'evml-client' {
          */
         JSONInterface(abis: ABI[]): SolidityContract;
     }
-interface DefaultTXOptions extends BaseTX {
-    from?: string,
-}
+
+    interface DefaultTXOptions extends BaseTX {
+        from?: string,
+    }
 
     export class Controller {
-        private _defaultTXOptions: DefaultTXOptions;
         readonly host: string;
         readonly port: number;
         defaultAddress: string;
@@ -307,8 +299,8 @@ interface DefaultTXOptions extends BaseTX {
         defaultGas: number;
         defaultGasPrice: number;
         defaultFrom: string;
-
         readonly api: EVMLiteClient;
+        private _defaultTXOptions: DefaultTXOptions;
 
         /**
          * Creates a controller instance.
@@ -385,6 +377,27 @@ interface DefaultTXOptions extends BaseTX {
         static space();
 
         static sleep(time: number);
+    }
+
+    interface Web3Account {
+        address: string,
+        privateKey: string,
+        sign: (data: string) => any,
+        encrypt: (password: string) => any,
+        signTransaction: (tx: string) => any,
+    }
+
+    export class Account {
+
+        address: string;
+        balance: number;
+        nonce: number;
+        privateKey: string;
+        sign: (data: string) => any;
+        encrypt: (password: string) => any;
+        signTransaction: (tx: string) => any;
+        private _account: Web3Account;
+
     }
 
 }

@@ -1,4 +1,5 @@
-import * as Web3 from 'web3'
+import * as Web3Accounts from 'web3-eth-accounts';
+
 
 interface Web3Account {
     address: string,
@@ -11,32 +12,33 @@ interface Web3Account {
 
 export default class Account {
 
-    readonly web3: Web3;
-    readonly account: Web3Account;
+    balance: number = 0;
+    nonce: number = 0;
+    private _account: Web3Account;
+
 
     constructor() {
-        this.web3 = new Web3();
-        this.account = this.web3.eth.accounts.create();
-    }
-
-    get address() {
-        return this.account.address;
-    }
-
-    get privateKey() {
-        return this.account.privateKey;
+        this._account = new Web3Accounts().create();
     }
 
     get sign() {
-        return this.account.sign;
+        return this._account.sign
     }
 
     get encrypt() {
-        return this.account.encrypt;
+        return this._account.encrypt
     }
 
     get signTransaction() {
-        return this.account.signTransaction;
+        return this._account.signTransaction
+    }
+
+    get address() {
+        return this._account.address
+    }
+
+    get privateKey() {
+        return this._account.privateKey
     }
 
 }

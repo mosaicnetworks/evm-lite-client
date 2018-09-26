@@ -32,12 +32,6 @@ export interface ABI {
     type: any
 }
 
-export interface Account {
-    address: string,
-    balance: number,
-    nonce: number,
-}
-
 export interface TXReceipt {
     root: string,
     transactionHash: string,

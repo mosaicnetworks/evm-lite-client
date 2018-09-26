@@ -1,25 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Web3 = require("web3");
+const Web3Accounts = require("web3-eth-accounts");
 class Account {
     constructor() {
-        this.web3 = new Web3();
-        this.account = this.web3.eth.accounts.create();
-    }
-    get address() {
-        return this.account.address;
-    }
-    get privateKey() {
-        return this.account.privateKey;
+        this.balance = 0;
+        this.nonce = 0;
+        this._account = new Web3Accounts().create();
     }
     get sign() {
-        return this.account.sign;
+        return this._account.sign;
     }
     get encrypt() {
-        return this.account.encrypt;
+        return this._account.encrypt;
     }
     get signTransaction() {
-        return this.account.signTransaction;
+        return this._account.signTransaction;
+    }
+    get address() {
+        return this._account.address;
+    }
+    get privateKey() {
+        return this._account.privateKey;
     }
 }
 exports.default = Account;

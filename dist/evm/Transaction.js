@@ -158,7 +158,7 @@ class Transaction {
     /**
      * Sets the data of the transaction.
      *
-     * @param {number} data - The data of tx
+     * @param {string} data - The data of tx
      * @returns {Transaction} The transaction
      */
     data(data) {

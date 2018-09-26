@@ -9,12 +9,11 @@
   "author": "Danu Kumanan",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^2.4.1",
     "json-bigint": "^0.3.0",
     "prompt": "^1.0.0",
     "solc": "^0.4.24",
     "web3": "github:ethereum/web3.js",
-    "web3-eth-accounts": "latest"
+    "web3-eth-accounts": "^1.0.0-beta.36"
   },
   "devDependencies": {
     "@types/node": "^10.7.0",
