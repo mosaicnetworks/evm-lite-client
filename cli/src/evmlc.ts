@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as Vorpal from "vorpal";
 
 import {Account, Controller} from '../../index';
-import {error, warning} from "./utils/functions";
+import {error} from "./utils/functions";
 
 import commandAccountsCreate from './commands/AccountsCreate';
 import commandAccountsList from './commands/AccountsList';
@@ -17,9 +17,12 @@ import commandConfig from "./commands/Config";
 
 
 const evmlc = new Vorpal();
-let config: any;
 export let node: Controller = null;
-let path = `${__dirname}/evml_cli_config.toml`;
+
+let config: any;
+let evmlcDir = `${require('os').homedir()}/.evmlc`;
+let configDir = 'config';
+let path = `${evmlcDir}/${configDir}/evml_cli_config.toml`;
 let defaultContent =
     `title = "EVM-Lite CLI Config"
 
@@ -43,7 +46,13 @@ export const updateToConfigFile = (): void => {
 
 const writeToConfigFile = (content: string) => {
     return new Promise<void>((resolve) => {
-        fs.writeFileSync(path, content,);
+        if (!fs.existsSync(evmlcDir)) {
+            fs.mkdirSync(evmlcDir);
+        }
+        if (!fs.existsSync(evmlcDir + '/' + configDir)) {
+            fs.mkdirSync(evmlcDir + '/' + configDir);
+        }
+        fs.writeFileSync(path, content);
         config = toml.parse(content);
         resolve();
     })
@@ -102,6 +111,7 @@ createOrReadConfigFile().then(() => {
     }
 })
     .then(() => {
+        // console.log(require('os').homedir());
         evmlc.version("0.1.0");
         commandAccountsCreate(evmlc, config);
         commandAccountsList(evmlc, config);
@@ -111,7 +121,6 @@ createOrReadConfigFile().then(() => {
         evmlc.parse(process.argv);
     })
     .catch(() => {
-        warning(`Update global connection config using 
-    globals --host <host> --port <port>`);
+        error(`Could not connect.`);
     });
 

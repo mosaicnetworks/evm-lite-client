@@ -5,10 +5,9 @@ const functions_1 = require("../utils/functions");
 const index_1 = require("../../../index");
 const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
-
 function commandAccountsCreate(evmlc, config) {
     return evmlc.command('accounts create').alias('a c')
-        .description('create an account')
+        .description('Create an account.')
         .option('-l, --local', 'create account locally')
         .option('-p, --password <password>', 'provide password to encrypt password locally')
         .types({
@@ -45,6 +44,5 @@ function commandAccountsCreate(evmlc, config) {
             });
         });
 }
-
 exports.default = commandAccountsCreate;
 ;

@@ -4,10 +4,9 @@ const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
-
 function commandAccountsCreate(evmlc, config) {
     return evmlc.command('accounts list').alias('a l')
-        .description('list all accounts')
+        .description('List all accounts.')
         .action(() => {
             return evmlc_1.node.api.getAccounts().then((accounts) => {
                 let counter = 0;
@@ -28,6 +27,5 @@ function commandAccountsCreate(evmlc, config) {
             });
         });
 }
-
 exports.default = commandAccountsCreate;
 ;

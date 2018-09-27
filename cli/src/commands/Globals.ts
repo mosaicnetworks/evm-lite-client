@@ -1,11 +1,12 @@
 import * as Vorpal from "vorpal";
 import {Account} from '../../../index';
 import {updateToConfigFile} from "../evmlc";
+import {success} from "../utils/functions";
 
 
 export default function commandGlobals(evmlc: Vorpal, config) {
     return evmlc.command('globals ').alias('g')
-        .description('set default global values')
+        .description('Set default global values.')
         .option('-h, --host <host>', 'default host')
         .option('-p, --port <port>', 'default port')
         .option('--from <from>', 'default from')
@@ -20,14 +21,27 @@ export default function commandGlobals(evmlc: Vorpal, config) {
             return new Promise<void>(resolve => {
                 for (let prop in args.options) {
                     if (prop.toLowerCase() === 'host') {
+                        success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
                         config.connection.host = args.options[prop];
-                        updateToConfigFile();
                     }
                     if (prop.toLowerCase() === 'port') {
+                        success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
                         config.connection.port = args.options[prop];
-                        updateToConfigFile();
+                    }
+                    if (prop.toLowerCase() === 'from') {
+                        success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        config.defaults.from = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'gas') {
+                        success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        config.defaults.gas = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'gasprice') {
+                        success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        config.defaults.gasPrice = args.options[prop];
                     }
                 }
+                updateToConfigFile();
                 resolve();
             });
         });

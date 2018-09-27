@@ -8,7 +8,7 @@ import {info, warning} from "../utils/functions";
 
 export default function commandAccountsCreate(evmlc: Vorpal, config) {
     return evmlc.command('accounts list').alias('a l')
-        .description('list all accounts')
+        .description('List all accounts.')
         .action((): Promise<void> => {
             return node.api.getAccounts().then((accounts: string) => {
                 let counter: number = 0;

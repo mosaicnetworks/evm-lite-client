@@ -11,7 +11,7 @@ export default function commandTransfer(evmlc: Vorpal, config) {
         .option('-v, --value <value>', 'value to send')
         .option('-t, --to <address>', 'address to send to')
         .option('-f, --from <address>', 'address to send from')
-        .description('transfer <value> to <to> from <from>')
+        .description('Transfer token(s) to address.')
         .types({
             string: ['t', 'to', 'f', 'from'],
         })

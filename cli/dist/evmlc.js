@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const tomlify = require("tomlify-j0.4");
 const toml = require("toml");
 const JSONBig = require("json-bigint");
@@ -14,9 +14,11 @@ const Globals_1 = require("./commands/Globals");
 const Transfer_1 = require("./commands/Transfer");
 const Config_1 = require("./commands/Config");
 const evmlc = new Vorpal();
-let config;
 exports.node = null;
-let path = `${__dirname}/evml_cli_config.toml`;
+let config;
+let evmlcDir = `${require('os').homedir()}/.evmlc`;
+let configDir = 'config';
+let path = `${evmlcDir}/${configDir}/evml_cli_config.toml`;
 let defaultContent = `title = "EVM-Lite CLI Config"
 
 [connection]
@@ -32,11 +34,17 @@ gasPrice = 0
 keystore = "/Users/danu/Library/EVMLITE/eth/keystore"
 password = "/Users/danu/Library/EVMLITE/eth/pwd.txt"`;
 exports.updateToConfigFile = () => {
-    let toml = tomlify.toToml(config, {spaces: 2});
+    let toml = tomlify.toToml(config, { spaces: 2 });
     writeToConfigFile(toml).then();
 };
 const writeToConfigFile = (content) => {
     return new Promise((resolve) => {
+        if (!fs.existsSync(evmlcDir)) {
+            fs.mkdirSync(evmlcDir);
+        }
+        if (!fs.existsSync(evmlcDir + '/' + configDir)) {
+            fs.mkdirSync(evmlcDir + '/' + configDir);
+        }
         fs.writeFileSync(path, content);
         config = toml.parse(content);
         resolve();
@@ -72,10 +80,10 @@ const connect = () => {
                 resolve();
             })
                 .catch((err) => {
-                    exports.node = null;
-                    functions_1.error(err);
-                    reject();
-                });
+                exports.node = null;
+                functions_1.error(err);
+                reject();
+            });
         }
         else {
             resolve();
@@ -94,15 +102,15 @@ createOrReadConfigFile().then(() => {
     }
 })
     .then(() => {
-        evmlc.version("0.1.0");
-        AccountsCreate_1.default(evmlc, config);
-        AccountsList_1.default(evmlc, config);
-        Globals_1.default(evmlc, config);
-        Transfer_1.default(evmlc, config);
-        Config_1.default(evmlc, config);
-        evmlc.parse(process.argv);
-    })
+    // console.log(require('os').homedir());
+    evmlc.version("0.1.0");
+    AccountsCreate_1.default(evmlc, config);
+    AccountsList_1.default(evmlc, config);
+    Globals_1.default(evmlc, config);
+    Transfer_1.default(evmlc, config);
+    Config_1.default(evmlc, config);
+    evmlc.parse(process.argv);
+})
     .catch(() => {
-        functions_1.warning(`Update global connection config using 
-    globals --host <host> --port <port>`);
-    });
+    functions_1.error(`Could not connect.`);
+});

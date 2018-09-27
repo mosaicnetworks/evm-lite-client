@@ -8,7 +8,7 @@ import * as JSONBig from 'json-bigint';
 
 export default function commandAccountsCreate(evmlc: Vorpal, config) {
     return evmlc.command('accounts create').alias('a c')
-        .description('create an account')
+        .description('Create an account.')
         .option('-l, --local', 'create account locally')
         .option('-p, --password <password>', 'provide password to encrypt password locally')
         .types({

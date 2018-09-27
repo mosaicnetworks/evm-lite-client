@@ -3,13 +3,12 @@ Object.defineProperty(exports, "__esModule", {value: true});
 const JSONBig = require("json-bigint");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
-
 function commandTransfer(evmlc, config) {
     return evmlc.command('transfer').alias('t')
         .option('-v, --value <value>', 'value to send')
         .option('-t, --to <address>', 'address to send to')
         .option('-f, --from <address>', 'address to send from')
-        .description('transfer <value> to <to> from <from>')
+        .description('Transfer token(s) to address.')
         .types({
             string: ['t', 'to', 'f', 'from'],
         })
@@ -47,6 +46,5 @@ function commandTransfer(evmlc, config) {
             });
         });
 }
-
 exports.default = commandTransfer;
 ;
