@@ -5,7 +5,7 @@ import * as solidityCompiler from 'solc'
 import {ABI, BaseTX, SolidityCompilerOutput} from "./evm/utils/Interfaces";
 
 import SolidityContract from "./evm/SolidityContract";
-import EVMLiteClient from "./evm/EVMLiteClient";
+import Client from "./evm/Client";
 import Transaction from "./evm/Transaction";
 import Account from "./evm/Account"
 
@@ -16,7 +16,7 @@ interface DefaultTXOptions extends BaseTX {
 export default class Controller {
 
     public accounts: Account[];
-    readonly api: EVMLiteClient;
+    readonly api: Client;
 
     /**
      * Creates a controller instance.
@@ -30,7 +30,7 @@ export default class Controller {
      */
     constructor(readonly host: string, readonly port: number = 8080, private _defaultTXOptions: DefaultTXOptions = {}) {
         this.accounts = [];
-        this.api = new EVMLiteClient(host, port);
+        this.api = new Client(host, port);
     }
 
     /**

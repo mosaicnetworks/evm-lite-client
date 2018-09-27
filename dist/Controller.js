@@ -4,7 +4,7 @@ const JSONBig = require("json-bigint");
 const fs = require("fs");
 const solidityCompiler = require("solc");
 const SolidityContract_1 = require("./evm/SolidityContract");
-const EVMLiteClient_1 = require("./evm/EVMLiteClient");
+const Client_1 = require("./evm/Client");
 const Transaction_1 = require("./evm/Transaction");
 class Controller {
     /**
@@ -22,7 +22,7 @@ class Controller {
         this.port = port;
         this._defaultTXOptions = _defaultTXOptions;
         this.accounts = [];
-        this.api = new EVMLiteClient_1.default(host, port);
+        this.api = new Client_1.default(host, port);
     }
     /**
      * Return default options

@@ -2,10 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Web3Accounts = require("web3-eth-accounts");
 class Account {
-    constructor() {
+    constructor(create = true, aJSON = undefined) {
         this.balance = 0;
         this.nonce = 0;
-        this._account = new Web3Accounts().create();
+        if (create)
+            this._account = new Web3Accounts().create();
+        else {
+            if (aJSON) {
+                this._account = aJSON;
+            }
+            else {
+                throw new Error('Account JSON needs to be passed to construct class');
+            }
+        }
     }
     get sign() {
         return this._account.sign;
@@ -21,6 +30,15 @@ class Account {
     }
     get privateKey() {
         return this._account.privateKey;
+    }
+
+    static create() {
+        return new Account(true);
+    }
+
+    static decrypt(v3JSONKeyStore, password) {
+        let decryptedAccount = new Web3Accounts().decrypt(v3JSONKeyStore, password);
+        return new Account(false, decryptedAccount);
     }
 }
 exports.default = Account;

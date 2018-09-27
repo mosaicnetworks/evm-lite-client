@@ -3,3 +3,4 @@ node_modules
 cli/node_modules
 cli/evml_cli_config.toml
 cli/acc_template.json
+evml_cli_config.toml

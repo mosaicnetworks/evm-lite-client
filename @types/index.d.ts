@@ -57,7 +57,7 @@ declare module 'evml-client' {
         sources: {};
     }
 
-    class EVMLiteClient {
+    class Client {
         readonly host: string;
         readonly port: number;
         private _constructOptions;
@@ -299,7 +299,7 @@ declare module 'evml-client' {
         defaultGas: number;
         defaultGasPrice: number;
         defaultFrom: string;
-        readonly api: EVMLiteClient;
+        readonly api: Client;
         private _defaultTXOptions: DefaultTXOptions;
 
         /**
@@ -387,6 +387,31 @@ declare module 'evml-client' {
         signTransaction: (tx: string) => any,
     }
 
+    interface KDFEncryption {
+        ciphertext: string,
+        ciperparams: {
+            iv: string
+        }
+        cipher: string,
+        kdf: string,
+        kdfparams: {
+            dklen: number,
+            salt: string,
+            n: number,
+            r: number,
+            p: number
+        }
+        mac: string
+    }
+
+    interface v3JSONKeyStore {
+        version: number,
+        id: string,
+        address: string,
+        crypto: KDFEncryption,
+
+    }
+
     export class Account {
 
         address: string;
@@ -398,6 +423,8 @@ declare module 'evml-client' {
         signTransaction: (tx: string) => any;
         private _account: Web3Account;
 
-    }
+        static create(): Account;
 
+        static decrypt(v3JSONKeyStore: v3JSONKeyStore, password: string): Account;
+    }
 }
