@@ -1,20 +1,20 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
-function commandAccountsCreate(evmlc, config) {
+function commandAccountsList(evmlc, config) {
     return evmlc.command('accounts list').alias('a l')
-        .description('List all accounts.')
         .action(() => {
+        return evmlc_1.connect().then(() => {
             return evmlc_1.node.api.getAccounts().then((accounts) => {
                 let counter = 0;
                 let accountsTable = new ASCIITable();
                 evmlc_1.node.accounts = JSONBig.parse(accounts).accounts;
                 if (evmlc_1.node.accounts) {
                     accountsTable
-                        .setHeading('', 'Account Address', 'Balance', 'Nonce');
+                        .setHeading('#', 'Account Address', 'Balance', 'Nonce');
                     evmlc_1.node.accounts.map((account) => {
                         counter++;
                         accountsTable.addRow(counter, account.address, account.balance, account.nonce);
@@ -26,6 +26,8 @@ function commandAccountsCreate(evmlc, config) {
                 }
             });
         });
+    })
+        .description('List all accounts.');
 }
-exports.default = commandAccountsCreate;
+exports.default = commandAccountsList;
 ;

@@ -31,11 +31,9 @@ class Account {
     get privateKey() {
         return this._account.privateKey;
     }
-
     static create() {
         return new Account(true);
     }
-
     static decrypt(v3JSONKeyStore, password) {
         let decryptedAccount = new Web3Accounts().decrypt(v3JSONKeyStore, password);
         return new Account(false, decryptedAccount);

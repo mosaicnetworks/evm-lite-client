@@ -129,15 +129,18 @@ class Controller {
      * Sender address can be set after instantiating the Controller object (recommended) or
      * after the Transaction object has been created.
      *
-     * @param {string} address - The address of the receiver
+     * @param {string} to - The address of the sender
+     * @param {string} from - The address of the receiver
      * @param {number} value - The value to send the receiver
      * @returns {Transaction} the required Transaction object for transfer request
      */
-    transfer(address, value) {
-        this._requireDefaultFromAddress();
+    transfer(to, from, value) {
+        if (from === '') {
+            from = this.defaultOptions.from;
+        }
         return new Transaction_1.default({
-            from: this._defaultTXOptions.from,
-            to: address,
+            from: from,
+            to: to,
             value: value,
             gas: this._defaultTXOptions.gas || undefined,
             gasPrice: this._defaultTXOptions.gasPrice || undefined

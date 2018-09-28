@@ -10,68 +10,35 @@ const index_1 = require("../../index");
 const functions_1 = require("./utils/functions");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
+const AccountsGet_1 = require("./commands/AccountsGet");
 const Globals_1 = require("./commands/Globals");
 const Transfer_1 = require("./commands/Transfer");
 const Config_1 = require("./commands/Config");
-const evmlc = new Vorpal();
-exports.node = null;
 let config;
 let evmlcDir = `${require('os').homedir()}/.evmlc`;
 let configDir = 'config';
 let path = `${evmlcDir}/${configDir}/evml_cli_config.toml`;
-let defaultContent = `title = "EVM-Lite CLI Config"
-
-[connection]
-host = "127.0.0.1"
-port = 8080
-
-[defaults]
-from = ""
-gas = 0
-gasPrice = 0
-
-[storage]
-keystore = "/Users/danu/Library/EVMLITE/eth/keystore"
-password = "/Users/danu/Library/EVMLITE/eth/pwd.txt"`;
+let defaultConfig = {
+    title: 'EVM-Lite CLI Config',
+    connection: {
+        host: '127.0.0.1',
+        port: '8080'
+    },
+    defaults: {
+        from: '',
+        gas: 0,
+        gasPrice: 0
+    },
+    storage: {
+        keystore: '/Users/danu/Library/EVMLITE/eth/keystore',
+        password: '/Users/danu/Library/EVMLITE/eth/pwd.txt'
+    }
+};
+exports.node = null;
 exports.updateToConfigFile = () => {
-    let toml = tomlify.toToml(config, { spaces: 2 });
-    writeToConfigFile(toml).then();
+    writeToConfigFile(config).then();
 };
-const writeToConfigFile = (content) => {
-    return new Promise((resolve) => {
-        if (!fs.existsSync(evmlcDir)) {
-            fs.mkdirSync(evmlcDir);
-        }
-        if (!fs.existsSync(evmlcDir + '/' + configDir)) {
-            fs.mkdirSync(evmlcDir + '/' + configDir);
-        }
-        fs.writeFileSync(path, content);
-        config = toml.parse(content);
-        resolve();
-    });
-};
-const readConfigFile = () => {
-    return new Promise((resolve) => {
-        let tomlstring = fs.readFileSync(path, 'utf8');
-        config = toml.parse(tomlstring);
-        resolve();
-    });
-};
-const createOrReadConfigFile = () => {
-    return new Promise(resolve => {
-        if (fs.existsSync(path)) {
-            readConfigFile().then(() => {
-                resolve();
-            }).catch();
-        }
-        else {
-            writeToConfigFile(defaultContent).then(() => {
-                resolve();
-            }).catch();
-        }
-    });
-};
-const connect = () => {
+exports.connect = () => {
     return new Promise((resolve, reject) => {
         if (exports.node === null) {
             exports.node = new index_1.Controller(config.connection.host, config.connection.port || 8080);
@@ -90,26 +57,61 @@ const connect = () => {
         }
     });
 };
-// Start or catch CLI errors
-createOrReadConfigFile().then(() => {
-    if (process.argv[2]) {
-        if (['globals', 'config', 'help'].indexOf(process.argv[2]) < 0) {
-            return connect();
+const writeToConfigFile = (content) => {
+    let tomlified = tomlify.toToml(content, { spaces: 2 });
+    return new Promise((resolve) => {
+        if (!fs.existsSync(evmlcDir)) {
+            fs.mkdirSync(evmlcDir);
         }
-    }
-    else {
+        if (!fs.existsSync(evmlcDir + '/' + configDir)) {
+            fs.mkdirSync(evmlcDir + '/' + configDir);
+        }
+        fs.writeFileSync(path, tomlified);
+        config = toml.parse(tomlified);
+        resolve();
+    });
+};
+const readConfigFile = () => {
+    return new Promise((resolve) => {
+        let tomlstring = fs.readFileSync(path, 'utf8');
+        config = toml.parse(tomlstring);
+        resolve();
+    });
+};
+const createOrReadConfigFile = () => {
+    return new Promise(resolve => {
+        if (fs.existsSync(path)) {
+            readConfigFile().then(() => {
+                resolve();
+            }).catch();
+        }
+        else {
+            writeToConfigFile(defaultConfig).then(() => {
+                resolve();
+            }).catch();
+        }
+    });
+};
+createOrReadConfigFile().then(() => {
+    if (!process.argv[2]) {
         process.argv[2] = 'help';
     }
 })
     .then(() => {
-    // console.log(require('os').homedir());
-    evmlc.version("0.1.0");
+    const evmlc = new Vorpal().version("0.1.0");
+    // commands
     AccountsCreate_1.default(evmlc, config);
     AccountsList_1.default(evmlc, config);
+    AccountsGet_1.default(evmlc, config);
     Globals_1.default(evmlc, config);
     Transfer_1.default(evmlc, config);
     Config_1.default(evmlc, config);
-    evmlc.parse(process.argv);
+    if (process.argv[2] === 'interactive') {
+        evmlc.delimiter('evmlc$').show();
+    }
+    else {
+        evmlc.parse(process.argv);
+    }
 })
     .catch(() => {
     functions_1.error(`Could not connect.`);

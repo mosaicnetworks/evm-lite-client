@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const Chalk = require("chalk");
 const l = console.log;
 const chalk = Chalk.default;

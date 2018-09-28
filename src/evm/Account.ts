@@ -5,7 +5,7 @@ interface Web3Account {
     address: string,
     privateKey: string,
     sign: (data: string) => any,
-    encrypt: (password: string) => any,
+    encrypt: (password: string) => v3JSONKeyStore,
     signTransaction: (tx: string) => any,
 }
 
@@ -31,7 +31,6 @@ interface v3JSONKeyStore {
     id: string,
     address: string,
     crypto: KDFEncryption,
-
 }
 
 
@@ -54,27 +53,27 @@ export default class Account {
         }
     }
 
-    get sign() {
+    get sign(): (data: string) => any {
         return this._account.sign
     }
 
-    get encrypt() {
+    get encrypt(): (password: string) => v3JSONKeyStore {
         return this._account.encrypt
     }
 
-    get signTransaction() {
+    get signTransaction(): (tx: string) => any {
         return this._account.signTransaction
     }
 
-    get address() {
+    get address(): string {
         return this._account.address
     }
 
-    get privateKey() {
+    get privateKey(): string {
         return this._account.privateKey
     }
 
-    static create() {
+    static create(): Account {
         return new Account(true)
     }
 

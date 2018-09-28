@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
@@ -8,30 +8,30 @@ function commandTransfer(evmlc, config) {
         .option('-v, --value <value>', 'value to send')
         .option('-t, --to <address>', 'address to send to')
         .option('-f, --from <address>', 'address to send from')
-        .description('Transfer token(s) to address.')
         .types({
-            string: ['t', 'to', 'f', 'from'],
-        })
+        string: ['t', 'to', 'f', 'from'],
+    })
         .action((args) => {
+        return evmlc_1.connect().then(() => {
             return new Promise((resolve) => {
                 if (evmlc_1.node) {
                     if (args.options && args.options.from && args.options.to) {
                         if (evmlc_1.node) {
-                            config.defaults.from = args.options.from;
-                            evmlc_1.node.defaultAddress = config.defaults.from;
-                            let transaction = evmlc_1.node.transfer(args.options.to, args.options.value || 0).gas(1000000).gasPrice(0);
-                            if (config.defaults.gas && config.defaults.gasPrice) {
-                                // @ts-ignore
-                                transaction
-                                    .gas(config.defaults.gas)
-                                    .gasPrice(config.defaults.gasPrice)
-                                    .send()
-                                    .then((receipt) => {
-                                        functions_1.success(receipt.transactionHash);
-                                    });
-                            }
-                            functions_1.success(JSONBig.stringify(transaction.tx, null, 2));
-                            resolve();
+                            evmlc_1.node.defaultAddress = args.options.from;
+                            let transaction = evmlc_1.node
+                                .transfer(args.options.from, args.options.to, args.options.value || 0);
+                            transaction
+                                .gas(100000)
+                                .gasPrice(0)
+                                .send()
+                                .then((receipt) => {
+                                functions_1.success(receipt.transactionHash);
+                                resolve();
+                            })
+                                .catch((err) => {
+                                functions_1.error(JSONBig.stringify(err));
+                                resolve();
+                            });
                         }
                     }
                     else {
@@ -45,6 +45,8 @@ function commandTransfer(evmlc, config) {
                 }
             });
         });
+    })
+        .description('Transfer token(s) to address.');
 }
 exports.default = commandTransfer;
 ;
