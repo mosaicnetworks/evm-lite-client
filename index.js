@@ -1,2 +1,2 @@
-exports.Controller  =   require('./dist/Controller').default;
-exports.Account     =   require('./dist/evm/Account').default;
+exports.Controller = require('./lib/dist/Controller').default;
+exports.Account = require('./lib/dist/evm/Account').default;

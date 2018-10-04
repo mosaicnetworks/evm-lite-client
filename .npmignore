@@ -1,6 +1,6 @@
-node_modules
+lib/node_modules
 .gitignore
-tsconfig.json
+lib/tsconfig.json
 tests
 CHANGELOG.md
 src

@@ -409,7 +409,6 @@ declare module 'evml-client' {
         id: string,
         address: string,
         crypto: KDFEncryption,
-
     }
 
     export class Account {
@@ -419,12 +418,13 @@ declare module 'evml-client' {
         nonce: number;
         privateKey: string;
         sign: (data: string) => any;
-        encrypt: (password: string) => any;
         signTransaction: (tx: string) => any;
         private _account: Web3Account;
 
         static create(): Account;
 
         static decrypt(v3JSONKeyStore: v3JSONKeyStore, password: string): Account;
+
+        public encrypt(password: string): v3JSONKeyStore;
     }
 }

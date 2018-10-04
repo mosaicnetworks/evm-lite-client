@@ -4,10 +4,13 @@ import * as tomlify from 'tomlify-j0.4'
 import * as toml from 'toml';
 import * as JSONBig from 'json-bigint';
 import * as fs from 'fs';
+import * as path from "path";
 import * as Vorpal from "vorpal";
+import * as mkdir from 'mkdirp';
+
+import {error} from "./utils/functions";
 
 import {Account, Controller} from '../../index';
-import {error} from "./utils/functions";
 
 import commandAccountsCreate from './commands/AccountsCreate';
 import commandAccountsList from './commands/AccountsList';
@@ -15,13 +18,14 @@ import commandAccountsGet from './commands/AccountsGet';
 import commandGlobals from "./commands/Globals";
 import commandTransfer from "./commands/Transfer";
 import commandConfig from "./commands/Config";
+import commandInteractive from "./commands/Interactive";
 
 
-let config: any;
-let evmlcDir = `${require('os').homedir()}/.evmlc`;
-let configDir = 'config';
-let path = `${evmlcDir}/${configDir}/evml_cli_config.toml`;
-let defaultConfig = {
+export let interactive: boolean = false;
+let evmlcDir: string = path.join(require('os').homedir(), '.evmlc');
+let configDir: string = path.join(evmlcDir, 'config');
+let configFilePath: string = path.join(configDir, 'evml_cli_config.toml');
+let defaultConfig: any = {
     title: 'EVM-Lite CLI Config',
     connection: {
         host: '127.0.0.1',
@@ -33,19 +37,19 @@ let defaultConfig = {
         gasPrice: 0
     },
     storage: {
-        keystore: '/Users/danu/Library/EVMLITE/eth/keystore',
-        password: '/Users/danu/Library/EVMLITE/eth/pwd.txt'
+        keystore: path.join(evmlcDir, 'eth', 'keystore'),
+        password: path.join(evmlcDir, 'eth', 'pwd.txt')
     }
 };
 
 export let node: Controller = null;
-export const updateToConfigFile = (): void => {
-    writeToConfigFile(config).then();
+export const updateToConfigFile: Function = (): void => {
+    writeToConfigFile(defaultConfig).then();
 };
 export const connect = () => {
     return new Promise<void>((resolve, reject) => {
         if (node === null) {
-            node = new Controller(config.connection.host, config.connection.port || 8080);
+            node = new Controller(defaultConfig.connection.host, defaultConfig.connection.port || 8080);
             return node.api.getAccounts().then((accounts: string) => {
                 node.accounts = JSONBig.parse(accounts).accounts;
                 resolve();
@@ -66,27 +70,37 @@ const writeToConfigFile = (content: any) => {
 
     return new Promise<void>((resolve) => {
         if (!fs.existsSync(evmlcDir)) {
-            fs.mkdirSync(evmlcDir);
+            mkdir.mkdirp(evmlcDir);
         }
-        if (!fs.existsSync(evmlcDir + '/' + configDir)) {
-            fs.mkdirSync(evmlcDir + '/' + configDir);
-        }
-        fs.writeFileSync(path, tomlified);
 
-        config = toml.parse(tomlified);
+        if (!fs.existsSync(configDir)) {
+            mkdir.mkdirp(configDir);
+        }
+
+        if (!fs.existsSync(defaultConfig.storage.keystore)) {
+            mkdir.mkdirp(defaultConfig.storage.keystore);
+        }
+
+        if (!fs.existsSync(defaultConfig.storage.password)) {
+            fs.writeFileSync(defaultConfig.storage.password, 'supersecurepassword');
+        }
+
+        fs.writeFileSync(configFilePath, tomlified);
         resolve();
     })
 };
+
 const readConfigFile = () => {
     return new Promise<void>((resolve) => {
-        let tomlstring = fs.readFileSync(path, 'utf8');
-        config = toml.parse(tomlstring);
+        let tomlstring = fs.readFileSync(configFilePath, 'utf8');
+        defaultConfig = toml.parse(tomlstring);
         resolve();
     })
 };
+
 const createOrReadConfigFile = (): Promise<any> => {
     return new Promise(resolve => {
-        if (fs.existsSync(path)) {
+        if (fs.existsSync(configFilePath)) {
             readConfigFile().then(() => {
                 resolve();
             }).catch();
@@ -99,7 +113,6 @@ const createOrReadConfigFile = (): Promise<any> => {
 
 };
 
-
 createOrReadConfigFile().then(() => {
     if (!process.argv[2]) {
         process.argv[2] = 'help';
@@ -108,15 +121,16 @@ createOrReadConfigFile().then(() => {
     .then(() => {
         const evmlc = new Vorpal().version("0.1.0");
 
-        // commands
-        commandAccountsCreate(evmlc, config);
-        commandAccountsList(evmlc, config);
-        commandAccountsGet(evmlc, config);
-        commandGlobals(evmlc, config);
-        commandTransfer(evmlc, config);
-        commandConfig(evmlc, config);
+        commandAccountsCreate(evmlc, defaultConfig);
+        commandAccountsList(evmlc, defaultConfig);
+        commandAccountsGet(evmlc, defaultConfig);
+        commandInteractive(evmlc, defaultConfig);
+        commandGlobals(evmlc, defaultConfig);
+        commandTransfer(evmlc, defaultConfig);
+        commandConfig(evmlc, defaultConfig);
 
-        if (process.argv[2] === 'interactive') {
+        if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
+            interactive = true;
             evmlc.delimiter('evmlc$').show();
         } else {
             evmlc.parse(process.argv);

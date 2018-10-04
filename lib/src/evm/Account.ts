@@ -57,10 +57,6 @@ export default class Account {
         return this._account.sign
     }
 
-    get encrypt(): (password: string) => v3JSONKeyStore {
-        return this._account.encrypt
-    }
-
     get signTransaction(): (tx: string) => any {
         return this._account.signTransaction
     }
@@ -80,6 +76,10 @@ export default class Account {
     static decrypt(v3JSONKeyStore: v3JSONKeyStore, password: string) {
         let decryptedAccount = new Web3Accounts().decrypt(v3JSONKeyStore, password);
         return new Account(false, decryptedAccount);
+    }
+
+    encrypt(password: string): v3JSONKeyStore {
+        return this._account.encrypt(password);
     }
 
 }
