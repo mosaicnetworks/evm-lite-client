@@ -1,7 +1,7 @@
 import * as Vorpal from "vorpal";
 
 
-export default function commandGlobals(evmlc: Vorpal, config) {
+export default function commandConfig(evmlc: Vorpal, config) {
     return evmlc.command('config').alias('c')
         .description('Show config JSON.')
         .action((): Promise<void> => {

@@ -1,12 +1,23 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const JSONBig = require("json-bigint");
-const fs = require("fs");
-const solidityCompiler = require("solc");
-const SolidityContract_1 = require("./evm/SolidityContract");
-const Client_1 = require("./evm/Client");
-const Transaction_1 = require("./evm/Transaction");
-class Controller {
+import * as JSONBig from 'json-bigint'
+import * as fs from "fs";
+import * as solidityCompiler from 'solc'
+
+import {ABI, BaseTX, SolidityCompilerOutput} from "./evm/utils/Interfaces";
+
+import SolidityContract from "./evm/SolidityContract";
+import Client from "./evm/Client";
+import Transaction from "./evm/Transaction";
+import Account from "./evm/Account"
+
+interface DefaultTXOptions extends BaseTX {
+    from?: string,
+}
+
+export default class Controller {
+
+    public accounts: Account[];
+    readonly api: Client;
+
     /**
      * Creates a controller instance.
      *
@@ -17,69 +28,74 @@ class Controller {
      * @param {DefaultTXOptions} _defaultTXOptions - Default transaction options
      * @constructor
      */
-    constructor(host, port = 8080, _defaultTXOptions = {}) {
-        this.host = host;
-        this.port = port;
-        this._defaultTXOptions = _defaultTXOptions;
+    constructor(readonly host: string, readonly port: number = 8080, private _defaultTXOptions: DefaultTXOptions = {}) {
         this.accounts = [];
-        this.api = new Client_1.default(host, port);
+        this.api = new Client(host, port);
     }
+
     /**
      * Return default options
      *
      * @returns {DefaultTXOptions} A Javascript object with default transaction parameters
      */
-    get defaultOptions() {
+    get defaultOptions(): DefaultTXOptions {
         return this._defaultTXOptions;
     }
+
     /**
      * Get default `from` address
      *
      * @returns {string} The default `from` address
      */
-    get defaultFrom() {
+    get defaultFrom(): string {
         return this._defaultTXOptions.from;
     }
+
     /**
      * Set default `from` address
      *
      * @param {string} address - The address to set default `from` value
      */
-    set defaultFrom(address) {
+    set defaultFrom(address: string) {
         this._defaultTXOptions.from = address;
     }
+
     /**
      * Get default `gas` value
      *
      * @returns {number} The default `gas` value
      */
-    get defaultGas() {
+    get defaultGas(): number {
         return this._defaultTXOptions.gas;
     }
+
     /**
      * Set default `gas` value
      *
      * @param {number} gas - The gas value to set as default
      */
-    set defaultGas(gas) {
+    set defaultGas(gas: number) {
         this._defaultTXOptions.gas = gas;
     }
+
     /**
      * Get default `gasPrice` value
      *
      * @returns {number} The default `gasPrice` value
      */
-    get defaultGasPrice() {
+    get defaultGasPrice(): number {
         return this._defaultTXOptions.gasPrice;
     }
+
     /**
      * Set default `from` address
      *
      * @param {number} gasPrice - The gasPrice value to set as default
      */
-    set defaultGasPrice(gasPrice) {
+    set defaultGasPrice(gasPrice: number) {
         this._defaultTXOptions.gasPrice = gasPrice;
     }
+
     /**
      * Generates Javascript object from Solidity Contract File.
      *
@@ -91,20 +107,22 @@ class Controller {
      * @param {string} filePath - Absolute or relative path of the Solidity file.
      * @returns {SolidityContract} A Javascript object representation of solidity contract
      */
-    ContractFromSolidityFile(contractName, filePath) {
+    ContractFromSolidityFile(contractName: string, filePath: string): SolidityContract {
         this._requireDefaultFromAddress();
+
         let input = fs.readFileSync(filePath).toString();
-        let output = solidityCompiler.compile(input, 1);
+        let output: SolidityCompilerOutput = solidityCompiler.compile(input, 1);
         let byteCode = output.contracts[`:${contractName}`].bytecode;
         let abi = JSONBig.parse(output.contracts[`:${contractName}`].interface);
-        return new SolidityContract_1.default({
+
+        return new SolidityContract({
             jsonInterface: abi,
             data: byteCode,
             gas: this._defaultTXOptions.gas || undefined,
             gasPrice: this._defaultTXOptions.gasPrice || undefined
-        }, this);
-    }
-    ;
+        }, this)
+    };
+
     /**
      * Generates Contract Javascript object from Solidity Contract File.
      *
@@ -115,44 +133,54 @@ class Controller {
      * @param {ABI[]} abi - The Application Binary Interface of the Solidity contract
      * @returns {SolidityContract} A Javascript object representation of solidity contract
      */
-    ContractFromABI(abi) {
+    ContractFromABI(abi: ABI[]): SolidityContract {
         this._requireDefaultFromAddress();
-        return new SolidityContract_1.default({
+
+        return new SolidityContract({
             jsonInterface: abi,
             gas: this._defaultTXOptions.gas || undefined,
             gasPrice: this._defaultTXOptions.gasPrice || undefined
         }, this);
     }
+
     /**
      * Transfer a specified value to the desired address.
      *
      * Sender address can be set after instantiating the Controller object (recommended) or
      * after the Transaction object has been created.
      *
-     * @param {string} address - The address of the receiver
+     * @param {string} to - The address of the sender
+     * @param {string} from - The address of the receiver
      * @param {number} value - The value to send the receiver
      * @returns {Transaction} the required Transaction object for transfer request
      */
-    transfer(address, value) {
-        this._requireDefaultFromAddress();
-        return new Transaction_1.default({
-            from: this._defaultTXOptions.from,
-            to: address,
+    transfer(to: string, from: string, value: number): Transaction {
+        if (from === '') {
+            from = this.defaultOptions.from;
+        }
+
+        return new Transaction({
+            from: from,
+            to: to,
             value: value,
             gas: this._defaultTXOptions.gas || undefined,
             gasPrice: this._defaultTXOptions.gasPrice || undefined
-        }, false, undefined, this);
+        }, false, undefined, this)
     }
+
+
     /**
      * Require default from address to be set.
      *
      * @private
      */
-    _requireDefaultFromAddress() {
+    private _requireDefaultFromAddress(): void {
         if (this._defaultTXOptions.from == null) {
             throw new Error('Set default `from` address. use `EVML.defaultFrom(<address>)`');
         }
+    };
+
+    transferRaw(from: string, to: string, value: number) {
     }
-    ;
+
 }
-exports.default = Controller;

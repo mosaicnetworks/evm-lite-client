@@ -17,6 +17,7 @@
     "figlet": "^1.2.0",
     "inquirer": "latest",
     "json-bigint": "^0.3.0",
+    "mkdirp": "^0.5.1",
     "process": "latest",
     "random-hex": "^1.0.2",
     "toml": "^2.3.3",

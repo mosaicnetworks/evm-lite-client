@@ -1,48 +1,92 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
-const functions_1 = require("../utils/functions");
-const index_1 = require("../../../index");
-const ASCIITable = require("ascii-table");
+const path = require("path");
 const JSONBig = require("json-bigint");
+const inquirer = require("inquirer");
+const evmlc_1 = require("../evmlc");
+const functions_1 = require("../utils/functions");
+const lib_1 = require("../../../lib");
+/**
+ * Should return a Vorpal command instance used for creating an account.
+ *
+ * This function should return a Vorpal command which should create accounts locally
+ * and store v3JSONKeystore file in the desired keystore directory. Should also allow the option
+ * to provide a password file to encrypt an account file using -p or --password flag. If no
+ * password file is provided it will used the default password file specified in the config object.
+ *
+ * @param {Vorpal} evmlc - The command line object.
+ * @param {Object} config - A JSON of the TOML config file.
+ * @returns Vorpal Command instance
+ */
 function commandAccountsCreate(evmlc, config) {
     return evmlc.command('accounts create').alias('a c')
         .description('Create an account.')
-        .option('-l, --local', 'create account locally')
-        .option('-p, --password <password>', 'provide password to encrypt password locally')
+        .option('-o, --output <path>', 'provide output path')
+        .option('-p, --password <path>', 'provide password file path')
+        .option('-i, --interactive', 'use interactive mode')
         .types({
-            string: ['p', 'password']
-        })
+        string: ['p', 'password', 'o', 'output']
+    })
         .action((args) => {
-            return new Promise(resolve => {
-                let account = index_1.Account.create();
-                let getPassword = () => {
-                    return fs.readFileSync(config.storage.password, 'utf8');
-                };
-                if (!args.options.local && args.options.password) {
-                    // provided password but no local flag
-                    functions_1.error('Cannot use custom password without local flag.');
-                    resolve();
-                }
-                else if (args.options.local && !args.options.password) {
-                    // provided local flag but no password
-                    functions_1.error('Provide password to encrypt locally with -p, --password');
-                    resolve();
-                }
-                else if (!args.options.local && !args.options.password) {
-                    // create account remotely
-                    let encryptedAccount = account.encrypt(getPassword());
-                    let localPath = `${config.storage.keystore}/${account.address}`;
+        return new Promise(resolve => {
+            // connect to API endpoint
+            evmlc_1.connect(config)
+                .then((node) => {
+                // handles create account logic
+                let handleCreateAccount = () => {
+                    // create an account object without saving
+                    let account = lib_1.Account.create();
+                    let outputPath = args.options.output || config.storage.keystore;
+                    let password = functions_1.getPassword(args.options.password) || functions_1.getPassword(config.storage.password);
+                    // encrypt account with password
+                    let encryptedAccount = account.encrypt(password);
+                    // path to write account file with name
+                    let fileName = `UTC--date--timestamp--${account.address}`;
+                    let writePath = path.join(outputPath, fileName);
                     let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-                    let newAccountTable = new ASCIITable('New Account')
-                        .addRow('Address', account.address)
-                        .addRow('Private Key', account.privateKey);
-                    fs.writeFileSync(localPath, stringEncryptedAccount);
-                    functions_1.success(newAccountTable.toString());
+                    // write encrypted account data to file
+                    fs.writeFileSync(writePath, stringEncryptedAccount);
+                    // output data
+                    functions_1.success(JSONBig.stringify(encryptedAccount));
+                };
+                let i = args.options.interactive || evmlc_1.interactive;
+                // inquirer questions
+                let questions = [
+                    {
+                        name: 'outputPath',
+                        message: 'Enter keystore output path: ',
+                        default: config.storage.keystore,
+                        type: 'input'
+                    },
+                    {
+                        name: 'passwordPath',
+                        message: 'Enter password file path: ',
+                        default: config.storage.password,
+                        type: 'input'
+                    }
+                ];
+                if (i) {
+                    // prompt questions and wait for response
+                    inquirer.prompt(questions)
+                        .then((answers) => {
+                        args.options.output = answers.outputPath;
+                        args.options.password = answers.passwordPath;
+                    })
+                        .then(() => {
+                        handleCreateAccount();
+                        resolve();
+                    });
+                }
+                else {
+                    // if not interactive mode
+                    handleCreateAccount();
                     resolve();
                 }
-            });
+            })
+                .catch(err => functions_1.error(err));
         });
+    });
 }
 exports.default = commandAccountsCreate;
 ;
