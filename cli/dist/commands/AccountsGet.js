@@ -9,7 +9,8 @@ const functions_1 = require("../utils/functions");
  * Should return a Vorpal command instance used for getting an account.
  *
  * This function should return a Vorpal command which should get an account
- * from the `/account/<address>` endpoint and parse it into an ASCII table.
+ * from the `/account/<address>` endpoint and parse it into an ASCII table
+ * with --formatted flag or output raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
  * @param {Object} config - A JSON of the TOML config file.
@@ -25,50 +26,56 @@ function commandAccountsGet(evmlc, config) {
         .action((args) => {
             return new Promise(resolve => {
                 // connect to API endpoints
-                evmlc_1.connect().then((node) => {
-                    let handleAccountGet = () => {
-                        // request JSON from 'account/<address>'
-                        node.api.getAccount(args.address).then((a) => {
-                            let counter = 0;
-                            let accountsTable = new ASCIITable();
-                            let formatted = args.options.formatted || false;
-                            let account = JSONBig.parse(a);
-                            accountsTable
-                                .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                                .addRow(counter, account.address, account.balance, account.nonce);
-                            formatted ? functions_1.info(accountsTable.toString()) : functions_1.info(a);
-                            resolve();
-                        });
-                    };
-                    let i = args.options.interactive || evmlc_1.interactive;
-                    if (args.address) {
-                        handleAccountGet();
-                    }
-                    else if (i) {
-                        let questions = [
-                            {
-                                name: 'address',
-                                type: 'input',
-                                required: true,
-                                message: 'Address: '
-                            }
-                        ];
-                        inquirer.prompt(questions)
-                            .then(answers => {
-                                args.address = answers.address;
-                            })
-                            .then(() => {
-                                handleAccountGet();
+                evmlc_1.connect()
+                    .then((node) => {
+                        let handleAccountGet = () => {
+                            // request JSON from 'account/<address>'
+                            node.api.getAccount(args.address).then((a) => {
+                                let counter = 0;
+                                // blank ASCII table
+                                let accountsTable = new ASCIITable();
+                                let formatted = args.options.formatted || false;
+                                let account = JSONBig.parse(a);
+                                // add account details to ASCII table
+                                accountsTable
+                                    .setHeading('#', 'Account Address', 'Balance', 'Nonce')
+                                    .addRow(counter, account.address, account.balance, account.nonce);
+                                formatted ? functions_1.info(accountsTable.toString()) : functions_1.info(a);
+                                resolve();
                             });
-                    }
-                    else {
-                        // if -a or --address are not provided
-                        return new Promise(resolve => {
-                            functions_1.error('Provide an address. Usage: accounts get <address>');
-                            resolve();
-                        });
-                    }
-                });
+                        };
+                        let i = args.options.interactive || evmlc_1.interactive;
+                        if (args.address) {
+                            // address provided
+                            handleAccountGet();
+                        }
+                        else if (i) {
+                            // no address but interactive
+                            let questions = [
+                                {
+                                    name: 'address',
+                                    type: 'input',
+                                    required: true,
+                                    message: 'Address: '
+                                }
+                            ];
+                            inquirer.prompt(questions)
+                                .then(answers => {
+                                    args.address = answers.address;
+                                })
+                                .then(() => {
+                                    handleAccountGet();
+                                });
+                        }
+                        else {
+                            // if -a or --address are not provided
+                            return new Promise(resolve => {
+                                functions_1.error('Provide an address. Usage: accounts get <address>');
+                                resolve();
+                            });
+                        }
+                    })
+                    .catch(err => functions_1.error(err));
             });
         })
         .description('Get an account.');

@@ -12,7 +12,8 @@ const lib_1 = require("../../../lib");
  *
  * This function should return a Vorpal command which should create accounts locally
  * and store v3JSONKeystore file in the desired keystore directory. Should also allow the option
- * to provide a password file to encrypt an account file using -p or --password flag.
+ * to provide a password file to encrypt an account file using -p or --password flag. If no
+ * password file is provided it will used the default password file specified in the config object.
  *
  * @param {Vorpal} evmlc - The command line object.
  * @param {Object} config - A JSON of the TOML config file.
@@ -30,7 +31,8 @@ function commandAccountsCreate(evmlc, config) {
         .action((args) => {
             return new Promise(resolve => {
                 // connect to API endpoint
-                evmlc_1.connect().then((node) => {
+                evmlc_1.connect()
+                    .then((node) => {
                 // handles create account logic
                 let handleCreateAccount = () => {
                     // create an account object without saving
@@ -40,7 +42,7 @@ function commandAccountsCreate(evmlc, config) {
                     // encrypt account with password
                     let encryptedAccount = account.encrypt(password);
                     // path to write account file with name
-                    let fileName = `--UTC--${account.address}--`;
+                    let fileName = `UTC--date--timestamp--${account.address}`;
                     let writePath = path.join(outputPath, fileName);
                     let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
                     // write encrypted account data to file
@@ -49,6 +51,7 @@ function commandAccountsCreate(evmlc, config) {
                     functions_1.success(JSONBig.stringify(encryptedAccount));
                 };
                 let i = args.options.interactive || evmlc_1.interactive;
+                        // inquirer questions
                 let questions = [
                     {
                         name: 'outputPath',
@@ -80,7 +83,8 @@ function commandAccountsCreate(evmlc, config) {
                     handleCreateAccount();
                     resolve();
                 }
-            });
+                    })
+                    .catch(err => functions_1.error(err));
         });
         });
 }

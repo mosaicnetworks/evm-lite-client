@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function commandGlobals(evmlc, config) {
+
+function commandConfig(evmlc, config) {
     return evmlc.command('config').alias('c')
         .description('Show config JSON.')
         .action(() => {
@@ -10,5 +11,6 @@ function commandGlobals(evmlc, config) {
         });
     });
 }
-exports.default = commandGlobals;
+
+exports.default = commandConfig;
 ;

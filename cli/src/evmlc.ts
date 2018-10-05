@@ -20,10 +20,20 @@ import commandConfig from "./commands/Config";
 import commandInteractive from "./commands/Interactive";
 
 
+// global interactive mode
 export let interactive: boolean = false;
+
+// paths
 let evmlcDir: string = path.join(require('os').homedir(), '.evmlc');
 let configDir: string = path.join(evmlcDir, 'config');
-let configFilePath: string = path.join(configDir, 'evml_cli_config.toml');
+let configFilePath: string = path.join(configDir, 'evmlc.toml');
+
+// connection to node
+// when in interactive mode this is resolved instead
+// of connecting multiple times to improve console speed
+let node: Controller = null;
+
+// default config layout
 let defaultConfig: any = {
     title: 'EVM-Lite CLI Config',
     connection: {
@@ -36,21 +46,39 @@ let defaultConfig: any = {
         gasPrice: 0
     },
     storage: {
-        keystore: path.join(evmlcDir, 'eth', 'keystore'),
-        password: path.join(evmlcDir, 'eth', 'pwd.txt')
+        keystore: path.join(evmlcDir, 'keystore'),
+        password: path.join(evmlcDir, 'pwd.txt')
     }
 };
 
-let node: Controller = null;
-export const updateToConfigFile: Function = (config): void => {
-    writeToConfigFile(config).then();
-};
 
-export const connect = () => {
+/**
+ * Should update config file and set default config variable.
+ *
+ * @param {T} config - Config object to update file to.
+ * @returns void
+ */
+export function updateToConfigFile<T>(config: T): void {
+    writeToConfigFile(config)
+        .then((writtenConfig: T) => {
+            defaultConfig = writtenConfig;
+        });
+}
+
+
+/**
+ * Should attempt to connect to node with the config connection parameters
+ * then try and get accounts to make sure the connection is valid then
+ * return a promise which resolves the respective Controller object.
+ *
+ * @returns Promise<Controller>
+ */
+export const connect = (): Promise<Controller> => {
     return new Promise<Controller>((resolve, reject) => {
         if (!node) {
             node = new Controller(defaultConfig.connection.host, defaultConfig.connection.port || 8080);
-            node.api.getAccounts().then((accounts: string) => {
+
+            node.api.getAccounts().then(() => {
                 resolve(node);
             })
                 .catch((err) => {
@@ -59,15 +87,25 @@ export const connect = () => {
                     reject();
                 });
         } else {
-            resolve();
+            resolve(node);
         }
     });
 };
 
-const writeToConfigFile = (content: any) => {
+
+/**
+ * Should write a config object to the config file and then resolve a promise
+ * with the config object.
+ *
+ * @param {T} content - The content to write to config file.
+ * @returns Promise<{}>
+ */
+function writeToConfigFile<T>(content: T): Promise<T> {
+
+    // currently only supports {} to TOML
     let tomlified = tomlify.toToml(content, {spaces: 2});
 
-    return new Promise<void>((resolve) => {
+    return new Promise<T>((resolve) => {
         if (!fs.existsSync(evmlcDir)) {
             mkdir.mkdirp(evmlcDir);
         }
@@ -85,58 +123,95 @@ const writeToConfigFile = (content: any) => {
         }
 
         fs.writeFileSync(configFilePath, tomlified);
-        defaultConfig = content;
-        resolve();
-    })
-};
 
-const readConfigFile = () => {
-    return new Promise<void>((resolve) => {
+        resolve(content);
+    })
+}
+
+
+/**
+ * Should read from the config file and resolve a promise with an object
+ * representing the file.
+ *
+ * @returns Promise<{}>
+ */
+const readConfigFile = (): Promise<{}> => {
+    return new Promise<{}>((resolve) => {
         let tomlstring = fs.readFileSync(configFilePath, 'utf8');
-        defaultConfig = toml.parse(tomlstring);
-        resolve();
+        resolve(toml.parse(tomlstring));
     })
 };
 
-const createOrReadConfigFile = (): Promise<any> => {
-    return new Promise(resolve => {
+
+/**
+ * Should create or read config file depending on whether it exists or not
+ * then resolves a promise with the parsed config object.
+ *
+ * @returns Promise<{}>
+ */
+const createOrReadConfigFile = (): Promise<{}> => {
+    return new Promise<{}>(resolve => {
         if (fs.existsSync(configFilePath)) {
-            readConfigFile().then(() => {
-                resolve();
-            }).catch();
+            readConfigFile()
+                .then((config) => {
+                    resolve(config);
+                })
+                .catch(err => error(err));
         } else {
-            writeToConfigFile(defaultConfig).then(() => {
-                resolve()
-            }).catch();
+            writeToConfigFile(defaultConfig)
+                .then((config) => {
+                    resolve(config)
+                })
+                .catch(err => error(err));
         }
     });
-
 };
 
-createOrReadConfigFile().then(() => {
-    if (!process.argv[2]) {
-        process.argv[2] = 'help';
-    }
-})
-    .then(() => {
+
+/**
+ * Main Program
+ */
+createOrReadConfigFile()
+    .then((config) => {
+
+        // if no commands are given output help by default
+        if (!process.argv[2]) {
+            process.argv[2] = 'help';
+        }
+
+        return config;
+
+    })
+    .then((config) => {
+
+        // create new Vorpal instance
         const evmlc = new Vorpal().version("0.1.0");
 
-        commandAccountsCreate(evmlc, defaultConfig);
-        commandAccountsList(evmlc, defaultConfig);
-        commandAccountsGet(evmlc, defaultConfig);
-        commandInteractive(evmlc, defaultConfig);
-        commandGlobals(evmlc, defaultConfig);
-        commandTransfer(evmlc, defaultConfig);
-        commandConfig(evmlc, defaultConfig);
+        // commands: (Vorpal, {}) => Vorpal.Command
+        commandAccountsCreate(evmlc, config);
+        commandAccountsList(evmlc, config);
+        commandAccountsGet(evmlc, config);
+        commandInteractive(evmlc, config);
+        commandGlobals(evmlc, config);
+        commandTransfer(evmlc, config);
+        commandConfig(evmlc, config);
 
+        // manual processing of interactive mode
         if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
+
+            // set global interactive variable so all commands inherit interactive mode
             interactive = true;
+
+            // show interactive console
             evmlc.delimiter('evmlc$').show();
+
         } else {
+
+            // parse non-interactive command
             evmlc.parse(process.argv);
+
         }
+
     })
-    .catch(() => {
-        error(`Could not connect.`);
-    });
+    .catch(() => error(`Error reading config file.`));
 

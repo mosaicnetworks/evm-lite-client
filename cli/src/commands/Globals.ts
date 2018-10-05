@@ -5,7 +5,16 @@ import {interactive, updateToConfigFile} from "../evmlc";
 import {success} from "../utils/functions";
 
 
+/**
+ * Should return a Vorpal command instance used for updating the config file.
+ *
+ * @param {Vorpal} evmlc - The command line object.
+ * @param {Object} config - A JSON of the TOML config file.
+ * @returns Vorpal Command instance
+ */
+
 export default function commandGlobals(evmlc: Vorpal, config) {
+
     return evmlc.command('globals ').alias('g')
         .description('Set default global values.')
         .option('-i, --interactive', 'enter into interactive command')

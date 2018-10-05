@@ -3,7 +3,7 @@ import * as JSONBig from 'json-bigint';
 import * as ASCIITable from 'ascii-table';
 
 import {connect} from "../evmlc";
-import {BaseAccount, decryptLocalAccounts, info, success} from "../utils/functions";
+import {BaseAccount, decryptLocalAccounts, error, info, success} from "../utils/functions";
 
 import {Account} from '../../../lib';
 
@@ -12,7 +12,8 @@ import {Account} from '../../../lib';
  * Should return a Vorpal command instance used for listing all account.
  *
  * This function should return a Vorpal command which should get all accounts
- * from the `/accounts` endpoint and parse them into an ASCII table.
+ * from the local keystore directory and parse them into an ASCII table with the
+ * --formatted flag else outputs raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
  * @param {Object} config - A JSON of the TOML config file.
@@ -28,51 +29,52 @@ export default function commandAccountsList(evmlc: Vorpal, config) {
             return new Promise<void>(resolve => {
 
                 // connect to node
-                connect().then((node) => {
+                connect()
+                    .then((node) => {
 
-                    let formatted: boolean = args.options.formatted || false;
+                        let formatted: boolean = args.options.formatted || false;
 
-                    // once all promises have resolved
-                    decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
-                        .then((accounts) => {
-                            let counter = 0;
-                            let table = new ASCIITable()
-                                .setHeading('#', 'Account Address', 'Balance', 'Nonce');
+                        // get all local accounts
+                        decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                            .then((accounts) => {
+                                let counter = 0;
+                                let table = new ASCIITable()
+                                    .setHeading('#', 'Account Address', 'Balance', 'Nonce');
 
-                            if (formatted) {
+                                if (formatted) {
 
-                                //formatted accounts list
-                                accounts.forEach((account: Account) => {
-                                    counter++;
-                                    table.addRow(counter, account.address, account.balance, account.nonce)
-                                });
+                                    //formatted accounts list
+                                    accounts.forEach((account: Account) => {
+                                        counter++;
+                                        table.addRow(counter, account.address, account.balance, account.nonce)
+                                    });
 
-                                info(table.toString());
+                                    info(table.toString());
 
-                            } else {
+                                } else {
 
-                                let parsedAccounts: BaseAccount[] = [];
+                                    let parsedAccounts: BaseAccount[] = [];
 
-                                accounts.forEach(account => {
-                                    parsedAccounts.push({
-                                        address: account.address,
-                                        balance: account.balance,
-                                        nonce: account.nonce
-                                    })
-                                });
+                                    // parse each account into BaseAccount
+                                    accounts.forEach(account => {
+                                        parsedAccounts.push({
+                                            address: account.address,
+                                            balance: account.balance,
+                                            nonce: account.nonce
+                                        })
+                                    });
 
-                                success(JSONBig.stringify(parsedAccounts));
+                                    success(JSONBig.stringify(parsedAccounts));
 
-                            }
+                                }
 
-                            resolve();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                        })
+                                resolve();
+                            })
+                            .catch((err) => error(err));
 
 
-                });
+                    })
+                    .catch(err => error(err));
 
             });
 

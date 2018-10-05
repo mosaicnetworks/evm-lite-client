@@ -11,13 +11,15 @@ import {error, info} from "../utils/functions";
  * Should return a Vorpal command instance used for getting an account.
  *
  * This function should return a Vorpal command which should get an account
- * from the `/account/<address>` endpoint and parse it into an ASCII table.
+ * from the `/account/<address>` endpoint and parse it into an ASCII table
+ * with --formatted flag or output raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
  * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
 export default function commandAccountsGet(evmlc: Vorpal, config) {
+
     return evmlc.command('accounts get [address]').alias('a g')
         .option('-f, --formatted', 'format output')
         .option('-i, --interactive', 'use interactive mode')
@@ -29,71 +31,80 @@ export default function commandAccountsGet(evmlc: Vorpal, config) {
             return new Promise<void>(resolve => {
 
                 // connect to API endpoints
-                connect().then((node) => {
+                connect()
+                    .then((node) => {
 
-                    let handleAccountGet = (): void => {
+                        let handleAccountGet = (): void => {
 
-                        // request JSON from 'account/<address>'
-                        node.api.getAccount(args.address).then((a: string) => {
+                            // request JSON from 'account/<address>'
+                            node.api.getAccount(args.address).then((a: string) => {
 
-                            let counter: number = 0;
-                            let accountsTable: ASCIITable = new ASCIITable();
-                            let formatted = args.options.formatted || false;
+                                let counter: number = 0;
 
-                            let account: {
-                                address: string,
-                                balance: number,
-                                nonce: number
-                            } = JSONBig.parse(a);
+                                // blank ASCII table
+                                let accountsTable: ASCIITable = new ASCIITable();
 
-                            accountsTable
-                                .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                                .addRow(counter, account.address, account.balance, account.nonce);
+                                let formatted = args.options.formatted || false;
 
-                            formatted ? info(accountsTable.toString()) : info(a);
-                            resolve();
-                        });
+                                let account: {
+                                    address: string,
+                                    balance: number,
+                                    nonce: number
+                                } = JSONBig.parse(a);
 
-                    };
+                                // add account details to ASCII table
+                                accountsTable
+                                    .setHeading('#', 'Account Address', 'Balance', 'Nonce')
+                                    .addRow(counter, account.address, account.balance, account.nonce);
 
-                    let i = args.options.interactive || interactive;
+                                formatted ? info(accountsTable.toString()) : info(a);
 
-                    if (args.address) {
-
-                        handleAccountGet();
-
-                    } else if (i) {
-
-                        let questions = [
-                            {
-                                name: 'address',
-                                type: 'input',
-                                required: true,
-                                message: 'Address: '
-                            }
-                        ];
-
-                        inquirer.prompt(questions)
-                            .then(answers => {
-                                args.address = answers.address;
-                            })
-                            .then(() => {
-                                handleAccountGet();
+                                resolve();
                             });
 
-                    } else {
+                        };
 
-                        // if -a or --address are not provided
-                        return new Promise<void>(resolve => {
+                        let i = args.options.interactive || interactive;
 
-                            error('Provide an address. Usage: accounts get <address>');
-                            resolve();
+                        if (args.address) {
 
-                        });
+                            // address provided
+                            handleAccountGet();
 
-                    }
+                        } else if (i) {
 
-                });
+                            // no address but interactive
+                            let questions = [
+                                {
+                                    name: 'address',
+                                    type: 'input',
+                                    required: true,
+                                    message: 'Address: '
+                                }
+                            ];
+
+                            inquirer.prompt(questions)
+                                .then(answers => {
+                                    args.address = answers.address;
+                                })
+                                .then(() => {
+                                    handleAccountGet();
+                                });
+
+                        } else {
+
+                            // if -a or --address are not provided
+                            return new Promise<void>(resolve => {
+
+                                error('Provide an address. Usage: accounts get <address>');
+                                resolve();
+
+                            });
+
+                        }
+
+                    })
+                    .catch(err => error(err));
 
             });
         })
