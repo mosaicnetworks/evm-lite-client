@@ -43,7 +43,6 @@ let defaultConfig = {
         password: path.join(evmlcDir, 'pwd.txt')
     }
 };
-
 /**
  * Should update config file and set default config variable.
  *
@@ -53,22 +52,22 @@ let defaultConfig = {
 function updateToConfigFile(config) {
     writeToConfigFile(config)
         .then((writtenConfig) => {
-            defaultConfig = writtenConfig;
-        });
+        defaultConfig = writtenConfig;
+    });
 }
-
 exports.updateToConfigFile = updateToConfigFile;
 /**
  * Should attempt to connect to node with the config connection parameters
  * then try and get accounts to make sure the connection is valid then
  * return a promise which resolves the respective Controller object.
  *
+ * @param {{}} config - The config object
  * @returns Promise<Controller>
  */
-exports.connect = () => {
+exports.connect = (config) => {
     return new Promise((resolve, reject) => {
         if (!node) {
-            node = new lib_1.Controller(defaultConfig.connection.host, defaultConfig.connection.port || 8080);
+            node = new lib_1.Controller(config.connection.host, config.connection.port || 8080);
             node.api.getAccounts().then(() => {
                 resolve(node);
             })
@@ -83,7 +82,6 @@ exports.connect = () => {
         }
     });
 };
-
 /**
  * Should write a config object to the config file and then resolve a promise
  * with the config object.
@@ -111,7 +109,6 @@ function writeToConfigFile(content) {
         resolve(content);
     });
 }
-
 /**
  * Should read from the config file and resolve a promise with an object
  * representing the file.
@@ -135,15 +132,15 @@ const createOrReadConfigFile = () => {
         if (fs.existsSync(configFilePath)) {
             readConfigFile()
                 .then((config) => {
-                    resolve(config);
-                })
+                resolve(config);
+            })
                 .catch(err => functions_1.error(err));
         }
         else {
             writeToConfigFile(defaultConfig)
                 .then((config) => {
-                    resolve(config);
-                })
+                resolve(config);
+            })
                 .catch(err => functions_1.error(err));
         }
     });
@@ -153,24 +150,24 @@ const createOrReadConfigFile = () => {
  */
 createOrReadConfigFile()
     .then((config) => {
-        // if no commands are given output help by default
+    // if no commands are given output help by default
     if (!process.argv[2]) {
         process.argv[2] = 'help';
     }
-        return config;
-    })
+    return config;
+})
     .then((config) => {
-        // create new Vorpal instance
+    // create new Vorpal instance
     const evmlc = new Vorpal().version("0.1.0");
-        // commands: (Vorpal, {}) => Vorpal.Command
-        AccountsCreate_1.default(evmlc, config);
-        AccountsList_1.default(evmlc, config);
-        AccountsGet_1.default(evmlc, config);
-        Interactive_1.default(evmlc, config);
-        Globals_1.default(evmlc, config);
-        Transfer_1.default(evmlc, config);
-        Config_1.default(evmlc, config);
-        // manual processing of interactive mode
+    // commands: (Vorpal, {}) => Vorpal.Command
+    AccountsCreate_1.default(evmlc, config);
+    AccountsList_1.default(evmlc, config);
+    AccountsGet_1.default(evmlc, config);
+    Interactive_1.default(evmlc, config);
+    Globals_1.default(evmlc, config);
+    Transfer_1.default(evmlc, config);
+    Config_1.default(evmlc, config);
+    // manual processing of interactive mode
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
         // set global interactive variable so all commands inherit interactive mode
         exports.interactive = true;

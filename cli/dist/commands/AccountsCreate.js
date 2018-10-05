@@ -26,13 +26,13 @@ function commandAccountsCreate(evmlc, config) {
         .option('-p, --password <path>', 'provide password file path')
         .option('-i, --interactive', 'use interactive mode')
         .types({
-            string: ['p', 'password', 'o', 'output']
+        string: ['p', 'password', 'o', 'output']
     })
         .action((args) => {
-            return new Promise(resolve => {
-                // connect to API endpoint
-                evmlc_1.connect()
-                    .then((node) => {
+        return new Promise(resolve => {
+            // connect to API endpoint
+            evmlc_1.connect(config)
+                .then((node) => {
                 // handles create account logic
                 let handleCreateAccount = () => {
                     // create an account object without saving
@@ -51,7 +51,7 @@ function commandAccountsCreate(evmlc, config) {
                     functions_1.success(JSONBig.stringify(encryptedAccount));
                 };
                 let i = args.options.interactive || evmlc_1.interactive;
-                        // inquirer questions
+                // inquirer questions
                 let questions = [
                     {
                         name: 'outputPath',
@@ -70,23 +70,23 @@ function commandAccountsCreate(evmlc, config) {
                     // prompt questions and wait for response
                     inquirer.prompt(questions)
                         .then((answers) => {
-                            args.options.output = answers.outputPath;
-                            args.options.password = answers.passwordPath;
-                        })
+                        args.options.output = answers.outputPath;
+                        args.options.password = answers.passwordPath;
+                    })
                         .then(() => {
-                            handleCreateAccount();
-                            resolve();
-                        });
+                        handleCreateAccount();
+                        resolve();
+                    });
                 }
                 else {
                     // if not interactive mode
                     handleCreateAccount();
                     resolve();
                 }
-                    })
-                    .catch(err => functions_1.error(err));
+            })
+                .catch(err => functions_1.error(err));
         });
-        });
+    });
 }
 exports.default = commandAccountsCreate;
 ;

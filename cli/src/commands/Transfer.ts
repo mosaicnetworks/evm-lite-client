@@ -33,7 +33,7 @@ export default function commandTransfer(evmlc: Vorpal, config) {
             return new Promise<void>((resolve) => {
 
                 // connect to API endpoints
-                connect()
+                connect(config)
                     .then((node: Controller) => {
 
                         decryptLocalAccounts(node, config.storage.keystore, config.storage.password)

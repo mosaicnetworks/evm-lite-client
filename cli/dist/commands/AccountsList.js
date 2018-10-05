@@ -20,44 +20,44 @@ function commandAccountsList(evmlc, config) {
         .option('-f, --formatted', 'format output')
         .description('List all accounts.')
         .action((args) => {
-            return new Promise(resolve => {
-                // connect to node
-                evmlc_1.connect()
-                    .then((node) => {
-                        let formatted = args.options.formatted || false;
-                        // get all local accounts
-                        functions_1.decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
-                            .then((accounts) => {
-                                let counter = 0;
-                                let table = new ASCIITable()
-                                    .setHeading('#', 'Account Address', 'Balance', 'Nonce');
-                                if (formatted) {
-                                    //formatted accounts list
-                                    accounts.forEach((account) => {
-                                        counter++;
-                                        table.addRow(counter, account.address, account.balance, account.nonce);
-                                    });
-                                    functions_1.info(table.toString());
-                                }
-                                else {
-                                    let parsedAccounts = [];
-                                    // parse each account into BaseAccount
-                                    accounts.forEach(account => {
-                                        parsedAccounts.push({
-                                            address: account.address,
-                                            balance: account.balance,
-                                            nonce: account.nonce
-                                        });
-                                    });
-                                    functions_1.success(JSONBig.stringify(parsedAccounts));
-                                }
-                                resolve();
-                            })
-                            .catch((err) => functions_1.error(err));
-                    })
-                    .catch(err => functions_1.error(err));
-            });
+        return new Promise(resolve => {
+            // connect to node
+            evmlc_1.connect(config)
+                .then((node) => {
+                let formatted = args.options.formatted || false;
+                // get all local accounts
+                functions_1.decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                    .then((accounts) => {
+                    let counter = 0;
+                    let table = new ASCIITable()
+                        .setHeading('#', 'Account Address', 'Balance', 'Nonce');
+                    if (formatted) {
+                        //formatted accounts list
+                        accounts.forEach((account) => {
+                            counter++;
+                            table.addRow(counter, account.address, account.balance, account.nonce);
+                        });
+                        functions_1.info(table.toString());
+                    }
+                    else {
+                        let parsedAccounts = [];
+                        // parse each account into BaseAccount
+                        accounts.forEach(account => {
+                            parsedAccounts.push({
+                                address: account.address,
+                                balance: account.balance,
+                                nonce: account.nonce
+                            });
+                        });
+                        functions_1.success(JSONBig.stringify(parsedAccounts));
+                    }
+                    resolve();
+                })
+                    .catch((err) => functions_1.error(err));
+            })
+                .catch(err => functions_1.error(err));
         });
+    });
 }
 exports.default = commandAccountsList;
 ;

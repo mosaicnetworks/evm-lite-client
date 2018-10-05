@@ -21,63 +21,63 @@ function commandAccountsGet(evmlc, config) {
         .option('-f, --formatted', 'format output')
         .option('-i, --interactive', 'use interactive mode')
         .types({
-            string: ['_']
-        })
+        string: ['_']
+    })
         .action((args) => {
-            return new Promise(resolve => {
-                // connect to API endpoints
-                evmlc_1.connect()
-                    .then((node) => {
-                        let handleAccountGet = () => {
-                            // request JSON from 'account/<address>'
-                            node.api.getAccount(args.address).then((a) => {
-                                let counter = 0;
-                                // blank ASCII table
-                                let accountsTable = new ASCIITable();
-                                let formatted = args.options.formatted || false;
-                                let account = JSONBig.parse(a);
-                                // add account details to ASCII table
-                                accountsTable
-                                    .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                                    .addRow(counter, account.address, account.balance, account.nonce);
-                                formatted ? functions_1.info(accountsTable.toString()) : functions_1.info(a);
-                                resolve();
-                            });
-                        };
-                        let i = args.options.interactive || evmlc_1.interactive;
-                        if (args.address) {
-                            // address provided
-                            handleAccountGet();
+        return new Promise(resolve => {
+            // connect to API endpoints
+            evmlc_1.connect(config)
+                .then((node) => {
+                let handleAccountGet = () => {
+                    // request JSON from 'account/<address>'
+                    node.api.getAccount(args.address).then((a) => {
+                        let counter = 0;
+                        // blank ASCII table
+                        let accountsTable = new ASCIITable();
+                        let formatted = args.options.formatted || false;
+                        let account = JSONBig.parse(a);
+                        // add account details to ASCII table
+                        accountsTable
+                            .setHeading('#', 'Account Address', 'Balance', 'Nonce')
+                            .addRow(counter, account.address, account.balance, account.nonce);
+                        formatted ? functions_1.info(accountsTable.toString()) : functions_1.info(a);
+                        resolve();
+                    });
+                };
+                let i = args.options.interactive || evmlc_1.interactive;
+                if (args.address) {
+                    // address provided
+                    handleAccountGet();
+                }
+                else if (i) {
+                    // no address but interactive
+                    let questions = [
+                        {
+                            name: 'address',
+                            type: 'input',
+                            required: true,
+                            message: 'Address: '
                         }
-                        else if (i) {
-                            // no address but interactive
-                            let questions = [
-                                {
-                                    name: 'address',
-                                    type: 'input',
-                                    required: true,
-                                    message: 'Address: '
-                                }
-                            ];
-                            inquirer.prompt(questions)
-                                .then(answers => {
-                                    args.address = answers.address;
-                                })
-                                .then(() => {
-                                    handleAccountGet();
-                                });
-                        }
-                        else {
-                            // if -a or --address are not provided
-                            return new Promise(resolve => {
-                                functions_1.error('Provide an address. Usage: accounts get <address>');
-                                resolve();
-                            });
-                        }
+                    ];
+                    inquirer.prompt(questions)
+                        .then(answers => {
+                        args.address = answers.address;
                     })
-                    .catch(err => functions_1.error(err));
-            });
-        })
+                        .then(() => {
+                        handleAccountGet();
+                    });
+                }
+                else {
+                    // if -a or --address are not provided
+                    return new Promise(resolve => {
+                        functions_1.error('Provide an address. Usage: accounts get <address>');
+                        resolve();
+                    });
+                }
+            })
+                .catch(err => functions_1.error(err));
+        });
+    })
         .description('Get an account.');
 }
 exports.default = commandAccountsGet;

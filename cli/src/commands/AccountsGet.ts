@@ -31,7 +31,7 @@ export default function commandAccountsGet(evmlc: Vorpal, config) {
             return new Promise<void>(resolve => {
 
                 // connect to API endpoints
-                connect()
+                connect(config)
                     .then((node) => {
 
                         let handleAccountGet = (): void => {

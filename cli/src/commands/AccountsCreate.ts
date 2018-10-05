@@ -37,7 +37,7 @@ export default function commandAccountsCreate(evmlc: Vorpal, config) {
             return new Promise<void>(resolve => {
 
                 // connect to API endpoint
-                connect()
+                connect(config)
                     .then((node) => {
 
                         // handles create account logic

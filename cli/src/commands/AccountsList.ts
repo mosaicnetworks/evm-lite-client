@@ -29,7 +29,7 @@ export default function commandAccountsList(evmlc: Vorpal, config) {
             return new Promise<void>(resolve => {
 
                 // connect to node
-                connect()
+                connect(config)
                     .then((node) => {
 
                         let formatted: boolean = args.options.formatted || false;

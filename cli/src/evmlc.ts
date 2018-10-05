@@ -71,12 +71,13 @@ export function updateToConfigFile<T>(config: T): void {
  * then try and get accounts to make sure the connection is valid then
  * return a promise which resolves the respective Controller object.
  *
+ * @param {{}} config - The config object
  * @returns Promise<Controller>
  */
-export const connect = (): Promise<Controller> => {
+export const connect = (config: any): Promise<Controller> => {
     return new Promise<Controller>((resolve, reject) => {
         if (!node) {
-            node = new Controller(defaultConfig.connection.host, defaultConfig.connection.port || 8080);
+            node = new Controller(config.connection.host, config.connection.port || 8080);
 
             node.api.getAccounts().then(() => {
                 resolve(node);
