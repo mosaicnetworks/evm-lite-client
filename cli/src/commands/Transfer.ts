@@ -1,38 +1,10 @@
 import * as Vorpal from "vorpal";
-import * as JSONBig from 'json-bigint';
+import * as inquirer from 'inquirer';
 
-import {connect, node} from "../evmlc";
-import {error, success} from "../utils/functions";
+import {connect, interactive} from "../evmlc";
+import {decryptLocalAccounts, success} from "../utils/functions";
+import {Controller} from "../../../lib";
 
-import {Account} from '../../../index';
-
-
-let questions = [
-    {
-        name: 'from',
-        type: 'list',
-        choices: ['']
-    },
-    {
-        name: 'to',
-        type: 'input',
-    },
-    {
-        name: 'value',
-        type: 'input',
-        default: '100'
-    },
-    {
-        name: 'gas',
-        type: 'input',
-        default: '1000000'
-    },
-    {
-        name: 'gasPrice',
-        type: 'input',
-        default: '0'
-    }
-];
 
 /**
  * Should return a Vorpal command instance used for transferring tokens.
@@ -55,40 +27,96 @@ export default function commandTransfer(evmlc: Vorpal, config) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
 
-            // connect to API endpoints
-            return connect().then(() => {
+            return new Promise<void>((resolve) => {
 
-                return new Promise<void>((resolve) => {
+                // connect to API endpoints
+                return connect().then((node: Controller) => {
 
-                    if (args.options && args.options.from && args.options.to) {
+                    decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                        .then((accounts) => {
 
-                        // set default from address of the node object
-                        node.defaultAddress = args.options.from;
+                            let handleTransfer = (tx) => {
+                                let account = accounts.find((acc) => {
+                                    return acc.address === tx.from;
+                                });
 
-                        let transaction = node
-                            .transfer(args.options.from, args.options.to, args.options.value || 0);
+                                tx.chainId = 1;
+                                tx.nonce = account.nonce;
 
-                        // set gas, gasprice values and send transaction
-                        transaction
-                            .gas(100000)
-                            .gasPrice(0)
-                            .send()
-                            .then((receipt) => {
-                                success(receipt.transactionHash);
-                                resolve();
-                            })
-                            .catch((err) => {
-                                error(JSONBig.stringify(err));
-                                resolve();
+                                account.signTransaction(tx)
+                                    .then((signed: any) => {
+                                        node.api.sendRawTx(signed.rawTransaction)
+                                            .then(resp => {
+                                                success(`Transferred.`);
+                                                resolve();
+                                            })
+                                            .catch(err => {
+                                                console.log(err);
+                                                resolve();
+                                            })
+                                    });
+                            };
+
+                            let i = args.options.interactive || interactive;
+
+                            let choices: string[] = accounts.map((account) => {
+                                return account.address;
                             });
 
-                    } else {
+                            let questions = [
+                                {
+                                    name: 'from',
+                                    type: 'list',
+                                    message: 'From: ',
+                                    choices: choices
+                                },
+                                {
+                                    name: 'to',
+                                    type: 'input',
+                                    message: 'To'
+                                },
+                                {
+                                    name: 'value',
+                                    type: 'input',
+                                    default: '100',
+                                    message: 'Value: '
+                                },
+                                {
+                                    name: 'gas',
+                                    type: 'input',
+                                    default: '1000000',
+                                    message: 'Gas: '
+                                },
+                                {
+                                    name: 'gasPrice',
+                                    type: 'input',
+                                    default: '0',
+                                    message: 'Gas Price: '
+                                }
+                            ];
 
-                        // no options were provided
-                        error('Provide options.');
-                        resolve();
+                            if (i) {
+                                inquirer.prompt(questions)
+                                    .then(tx => {
+                                        handleTransfer(tx);
+                                    });
 
-                    }
+                            } else {
+                                let tx: any = {};
+
+                                tx.from = args.options.from || undefined;
+                                tx.to = args.options.to || undefined;
+                                tx.value = args.options.value || undefined;
+                                tx.gas = config.defaults.gas || 100000;
+                                tx.gasPrice = config.defaults.gasPrice || 0;
+
+                                if (tx.from && tx.to && tx.value) {
+                                    handleTransfer(tx);
+                                }
+
+                            }
+
+                        });
 
                 });
 

@@ -2,7 +2,7 @@
   "name": "evml-client",
   "version": "0.1.0",
   "description": "A Node.js module for interacting with EVM-Lite.",
-  "main": "../index.js",
+  "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
@@ -13,7 +13,7 @@
     "prompt": "^1.0.0",
     "solc": "^0.4.24",
     "web3": "github:ethereum/web3.js",
-    "web3-eth-accounts": "^1.0.0-beta.36"
+    "web3-eth-accounts": "^1.0.0-beta.26"
   },
   "devDependencies": {
     "@types/node": "^10.7.0",

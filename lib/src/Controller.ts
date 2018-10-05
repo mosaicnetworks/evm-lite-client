@@ -168,6 +168,7 @@ export default class Controller {
         }, false, undefined, this)
     }
 
+
     /**
      * Require default from address to be set.
      *
@@ -178,5 +179,8 @@ export default class Controller {
             throw new Error('Set default `from` address. use `EVML.defaultFrom(<address>)`');
         }
     };
+
+    transferRaw(from: string, to: string, value: number) {
+    }
 
 }

@@ -3,13 +3,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tomlify = require("tomlify-j0.4");
 const toml = require("toml");
-const JSONBig = require("json-bigint");
 const fs = require("fs");
 const path = require("path");
 const Vorpal = require("vorpal");
 const mkdir = require("mkdirp");
 const functions_1 = require("./utils/functions");
-const index_1 = require("../../index");
+const lib_1 = require("../../lib");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
 const AccountsGet_1 = require("./commands/AccountsGet");
@@ -37,21 +36,20 @@ let defaultConfig = {
         password: path.join(evmlcDir, 'eth', 'pwd.txt')
     }
 };
-exports.node = null;
-exports.updateToConfigFile = () => {
-    writeToConfigFile(defaultConfig).then();
+let node = null;
+exports.updateToConfigFile = (config) => {
+    writeToConfigFile(config).then();
 };
 exports.connect = () => {
     return new Promise((resolve, reject) => {
-        if (exports.node === null) {
-            exports.node = new index_1.Controller(defaultConfig.connection.host, defaultConfig.connection.port || 8080);
-            return exports.node.api.getAccounts().then((accounts) => {
-                exports.node.accounts = JSONBig.parse(accounts).accounts;
-                resolve();
+        if (!node) {
+            node = new lib_1.Controller(defaultConfig.connection.host, defaultConfig.connection.port || 8080);
+            node.api.getAccounts().then((accounts) => {
+                resolve(node);
             })
                 .catch((err) => {
-                exports.node = null;
-                functions_1.error(err);
+                node = null;
+                functions_1.warning(err);
                 reject();
             });
         }
@@ -76,6 +74,7 @@ const writeToConfigFile = (content) => {
             fs.writeFileSync(defaultConfig.storage.password, 'supersecurepassword');
         }
         fs.writeFileSync(configFilePath, tomlified);
+        defaultConfig = content;
         resolve();
     });
 };
@@ -107,15 +106,15 @@ createOrReadConfigFile().then(() => {
 })
     .then(() => {
     const evmlc = new Vorpal().version("0.1.0");
-        AccountsCreate_1.default(evmlc, defaultConfig);
-        AccountsList_1.default(evmlc, defaultConfig);
-        AccountsGet_1.default(evmlc, defaultConfig);
-        Interactive_1.default(evmlc, defaultConfig);
-        Globals_1.default(evmlc, defaultConfig);
-        Transfer_1.default(evmlc, defaultConfig);
-        Config_1.default(evmlc, defaultConfig);
-        if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-            exports.interactive = true;
+    AccountsCreate_1.default(evmlc, defaultConfig);
+    AccountsList_1.default(evmlc, defaultConfig);
+    AccountsGet_1.default(evmlc, defaultConfig);
+    Interactive_1.default(evmlc, defaultConfig);
+    Globals_1.default(evmlc, defaultConfig);
+    Transfer_1.default(evmlc, defaultConfig);
+    Config_1.default(evmlc, defaultConfig);
+    if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
+        exports.interactive = true;
         evmlc.delimiter('evmlc$').show();
     }
     else {

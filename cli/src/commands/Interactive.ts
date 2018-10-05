@@ -1,7 +1,5 @@
 import * as Vorpal from "vorpal";
 
-import {Account} from '../../../index';
-
 
 export default function commandInteractive(evmlc: Vorpal, config) {
     return evmlc.command('interactive').alias('i')

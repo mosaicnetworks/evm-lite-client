@@ -1,4 +1,4 @@
-lib/node_modules
+node_modules
 .gitignore
 lib/tsconfig.json
 tests

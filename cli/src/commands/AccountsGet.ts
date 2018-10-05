@@ -1,11 +1,10 @@
 import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
 import * as JSONBig from 'json-bigint';
+import * as inquirer from 'inquirer';
 
-import {connect, node} from "../evmlc";
+import {connect, interactive} from "../evmlc";
 import {error, info} from "../utils/functions";
-
-import {Account} from '../../../index';
 
 
 /**
@@ -19,49 +18,82 @@ import {Account} from '../../../index';
  * @returns Vorpal Command instance
  */
 export default function commandAccountsGet(evmlc: Vorpal, config) {
-    return evmlc.command('accounts get').alias('a g')
-        .option('-a, --address <address>', 'Address to fetch account of.')
+    return evmlc.command('accounts get [address]').alias('a g')
+        .option('-f, --formatted', 'format output')
+        .option('-i, --interactive', 'use interactive mode')
         .types({
-            string: ['a', 'address']
+            string: ['_']
         })
         .action((args: Vorpal.Args): Promise<void> => {
 
-            // connect to API endpoints
-            return connect().then(() => {
+            return new Promise<void>(resolve => {
 
-                if (args.options.address) {
+                // connect to API endpoints
+                connect().then((node) => {
 
-                    // request JSON from 'account/<address>'
-                    return node.api.getAccount(args.options.address).then((a: string) => {
+                    let handleAccountGet = (): void => {
 
-                        let counter: number = 0;
-                        let accountsTable: ASCIITable = new ASCIITable();
+                        // request JSON from 'account/<address>'
+                        node.api.getAccount(args.address).then((a: string) => {
 
-                        let account: {
-                            address: string,
-                            balance: number,
-                            nonce: number
-                        } = JSONBig.parse(a);
+                            let counter: number = 0;
+                            let accountsTable: ASCIITable = new ASCIITable();
+                            let formatted = args.options.formatted || false;
 
-                        accountsTable
-                            .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                            .addRow(counter, account.address, account.balance, account.nonce);
+                            let account: {
+                                address: string,
+                                balance: number,
+                                nonce: number
+                            } = JSONBig.parse(a);
 
-                        info(accountsTable.toString());
+                            accountsTable
+                                .setHeading('#', 'Account Address', 'Balance', 'Nonce')
+                                .addRow(counter, account.address, account.balance, account.nonce);
 
-                    });
+                            formatted ? info(accountsTable.toString()) : info(a);
+                            resolve();
+                        });
 
-                } else {
+                    };
 
-                    // if -a or --address are not provided
-                    return new Promise<void>(resolve => {
+                    let i = args.options.interactive || interactive;
 
-                        error('Provide address to get. -a, --address');
-                        resolve();
+                    if (args.address) {
 
-                    });
+                        handleAccountGet();
 
-                }
+                    } else if (i) {
+
+                        let questions = [
+                            {
+                                name: 'address',
+                                type: 'input',
+                                required: true,
+                                message: 'Address: '
+                            }
+                        ];
+
+                        inquirer.prompt(questions)
+                            .then(answers => {
+                                args.address = answers.address;
+                            })
+                            .then(() => {
+                                handleAccountGet();
+                            });
+
+                    } else {
+
+                        // if -a or --address are not provided
+                        return new Promise<void>(resolve => {
+
+                            error('Provide an address. Usage: accounts get <address>');
+                            resolve();
+
+                        });
+
+                    }
+
+                });
 
             });
         })

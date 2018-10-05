@@ -3,12 +3,11 @@ import * as fs from "fs";
 import * as path from "path";
 import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
-import * as ASCIITable from 'ascii-table';
 
 import {connect, interactive} from "../evmlc";
-import {info, success} from "../utils/functions";
+import {getPassword, success} from "../utils/functions";
 
-import {Account} from '../../../index';
+import {Account} from '../../../lib';
 
 
 /**
@@ -27,7 +26,6 @@ export default function commandAccountsCreate(evmlc: Vorpal, config) {
     return evmlc.command('accounts create').alias('a c')
         .description('Create an account.')
         .option('-o, --output <path>', 'provide output path')
-        .option('-f, --formatted', 'output formatted text')
         .option('-p, --password <path>', 'provide password file path')
         .option('-i, --interactive', 'use interactive mode')
         .types({
@@ -35,19 +33,10 @@ export default function commandAccountsCreate(evmlc: Vorpal, config) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
 
-            // connect to API endpoint
-            return connect().then(() => {
+            return new Promise<void>(resolve => {
 
-                return new Promise<void>(resolve => {
-
-                    // should read text from a specified path
-                    let getPassword = (path: string): string => {
-                        if (path) {
-                            return fs.readFileSync(path, 'utf8');
-                        } else {
-                            return undefined;
-                        }
-                    };
+                // connect to API endpoint
+                connect().then((node) => {
 
                     // handles create account logic
                     let handleCreateAccount = (): void => {
@@ -57,7 +46,6 @@ export default function commandAccountsCreate(evmlc: Vorpal, config) {
 
                         let outputPath: string = args.options.output || config.storage.keystore;
                         let password: string = getPassword(args.options.password) || getPassword(config.storage.password);
-                        let formatted: boolean = args.options.formatted || false;
 
                         // encrypt account with password
                         let encryptedAccount = account.encrypt(password);
@@ -65,18 +53,13 @@ export default function commandAccountsCreate(evmlc: Vorpal, config) {
                         // path to write account file with name
                         let fileName = `--UTC--${account.address}--`;
                         let writePath = path.join(outputPath, fileName);
-
                         let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-                        let newAccountTable = new ASCIITable('New Account')
-                            .addRow('Address', account.address)
-                            .addRow('Private Key', account.privateKey);
 
                         // write encrypted account data to file
                         fs.writeFileSync(writePath, stringEncryptedAccount);
 
-                        // output data either formatted or not
-                        formatted ? info(`Account created at ${outputPath} with name: ${fileName}`) : null;
-                        formatted ? success(newAccountTable.toString()) : success(JSONBig.stringify(encryptedAccount));
+                        // output data
+                        success(JSONBig.stringify(encryptedAccount));
 
                     };
 

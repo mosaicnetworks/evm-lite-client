@@ -57,8 +57,8 @@ export default class Account {
         return this._account.sign
     }
 
-    get signTransaction(): (tx: string) => any {
-        return this._account.signTransaction
+    signTransaction(tx: string): any {
+        return this._account.signTransaction(tx);
     }
 
     get address(): string {

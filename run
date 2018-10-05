@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-cd lib && npm install
-cd cli && npm install
-cd ../ && node ./cli/dist/evmlc.js interactive
+cd lib && npm install && cd ..
+cd cli && npm install && npm link
+evmlc

@@ -2,15 +2,14 @@
 
 import * as tomlify from 'tomlify-j0.4'
 import * as toml from 'toml';
-import * as JSONBig from 'json-bigint';
 import * as fs from 'fs';
 import * as path from "path";
 import * as Vorpal from "vorpal";
 import * as mkdir from 'mkdirp';
 
-import {error} from "./utils/functions";
+import {error, warning} from "./utils/functions";
 
-import {Account, Controller} from '../../index';
+import {Controller} from '../../lib';
 
 import commandAccountsCreate from './commands/AccountsCreate';
 import commandAccountsList from './commands/AccountsList';
@@ -42,21 +41,21 @@ let defaultConfig: any = {
     }
 };
 
-export let node: Controller = null;
-export const updateToConfigFile: Function = (): void => {
-    writeToConfigFile(defaultConfig).then();
+let node: Controller = null;
+export const updateToConfigFile: Function = (config): void => {
+    writeToConfigFile(config).then();
 };
+
 export const connect = () => {
-    return new Promise<void>((resolve, reject) => {
-        if (node === null) {
+    return new Promise<Controller>((resolve, reject) => {
+        if (!node) {
             node = new Controller(defaultConfig.connection.host, defaultConfig.connection.port || 8080);
-            return node.api.getAccounts().then((accounts: string) => {
-                node.accounts = JSONBig.parse(accounts).accounts;
-                resolve();
+            node.api.getAccounts().then((accounts: string) => {
+                resolve(node);
             })
                 .catch((err) => {
                     node = null;
-                    error(err);
+                    warning(err);
                     reject();
                 });
         } else {
@@ -86,6 +85,7 @@ const writeToConfigFile = (content: any) => {
         }
 
         fs.writeFileSync(configFilePath, tomlified);
+        defaultConfig = content;
         resolve();
     })
 };

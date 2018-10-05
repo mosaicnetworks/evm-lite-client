@@ -4,10 +4,9 @@ const fs = require("fs");
 const path = require("path");
 const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
-const ASCIITable = require("ascii-table");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
-const index_1 = require("../../../index");
+const lib_1 = require("../../../lib");
 /**
  * Should return a Vorpal command instance used for creating an account.
  *
@@ -23,46 +22,31 @@ function commandAccountsCreate(evmlc, config) {
     return evmlc.command('accounts create').alias('a c')
         .description('Create an account.')
         .option('-o, --output <path>', 'provide output path')
-        .option('-f, --formatted', 'output formatted text')
         .option('-p, --password <path>', 'provide password file path')
         .option('-i, --interactive', 'use interactive mode')
         .types({
             string: ['p', 'password', 'o', 'output']
     })
         .action((args) => {
-        // connect to API endpoint
-        return evmlc_1.connect().then(() => {
             return new Promise(resolve => {
-                // should read text from a specified path
-                let getPassword = (path) => {
-                    if (path) {
-                        return fs.readFileSync(path, 'utf8');
-                    }
-                    else {
-                        return undefined;
-                    }
-                };
+                // connect to API endpoint
+                evmlc_1.connect().then((node) => {
                 // handles create account logic
                 let handleCreateAccount = () => {
                     // create an account object without saving
-                    let account = index_1.Account.create();
+                    let account = lib_1.Account.create();
                     let outputPath = args.options.output || config.storage.keystore;
-                    let password = getPassword(args.options.password) || getPassword(config.storage.password);
-                    let formatted = args.options.formatted || false;
+                    let password = functions_1.getPassword(args.options.password) || functions_1.getPassword(config.storage.password);
                     // encrypt account with password
                     let encryptedAccount = account.encrypt(password);
                     // path to write account file with name
                     let fileName = `--UTC--${account.address}--`;
                     let writePath = path.join(outputPath, fileName);
                     let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-                    let newAccountTable = new ASCIITable('New Account')
-                        .addRow('Address', account.address)
-                        .addRow('Private Key', account.privateKey);
                     // write encrypted account data to file
                     fs.writeFileSync(writePath, stringEncryptedAccount);
-                    // output data either formatted or not
-                    formatted ? functions_1.info(`Account created at ${outputPath} with name: ${fileName}`) : null;
-                    formatted ? functions_1.success(newAccountTable.toString()) : functions_1.success(JSONBig.stringify(encryptedAccount));
+                    // output data
+                    functions_1.success(JSONBig.stringify(encryptedAccount));
                 };
                 let i = args.options.interactive || evmlc_1.interactive;
                 let questions = [

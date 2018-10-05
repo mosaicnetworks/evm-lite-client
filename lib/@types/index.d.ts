@@ -2,7 +2,7 @@
 // Project: https://github.com/mosaicnetworks/evml-client
 // Definitions by: Mosaic Networks <https://github.com/mosaicnetworks>
 
-declare module 'evml-client' {
+declare namespace EVMLClient {
 
     interface BaseTX {
         gas?: number;
@@ -64,7 +64,7 @@ declare module 'evml-client' {
 
         constructor(host: string, port: number);
 
-        getAccount(address: string): Promise<String>;
+        getAccount(address: string): Promise<string>;
 
         getAccounts(): Promise<string>;
 
@@ -101,7 +101,7 @@ declare module 'evml-client' {
          *
          * @param {Object} options
          */
-        send(options: {
+        send(options?: {
             to?: string;
             from?: string;
             value?: number;
@@ -344,11 +344,12 @@ declare module 'evml-client' {
          * Sender address can be set after instantiating the Controller object (recommended) or
          * after the Transaction object has been created.
          *
-         * @param {string} address The address of the receiver
-         * @param {number} value The value to send the receiver
+         * @param {string} to - The address of the sender
+         * @param {string} from - The address of the receiver
+         * @param {number} value - The value to send the receiver
          * @returns {Transaction} the required Transaction object for transfer request
          */
-        transfer(address: string, value: number): Transaction;
+        transfer(to: string, from: string, value: number): Transaction;
 
         /**
          * Require default from address to be set.
@@ -418,13 +419,16 @@ declare module 'evml-client' {
         nonce: number;
         privateKey: string;
         sign: (data: string) => any;
-        signTransaction: (tx: string) => any;
         private _account: Web3Account;
 
         static create(): Account;
 
         static decrypt(v3JSONKeyStore: v3JSONKeyStore, password: string): Account;
 
-        public encrypt(password: string): v3JSONKeyStore;
+        signTransaction(tx: string): any;
+
+        encrypt(password: string): v3JSONKeyStore;
     }
 }
+
+export = EVMLClient

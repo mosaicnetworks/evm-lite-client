@@ -1,35 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const JSONBig = require("json-bigint");
+const inquirer = require("inquirer");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
-let questions = [
-    {
-        name: 'from',
-        type: 'list',
-        choices: ['']
-    },
-    {
-        name: 'to',
-        type: 'input',
-    },
-    {
-        name: 'value',
-        type: 'input',
-        default: '100'
-    },
-    {
-        name: 'gas',
-        type: 'input',
-        default: '1000000'
-    },
-    {
-        name: 'gasPrice',
-        type: 'input',
-        default: '0'
-    }
-];
-
 /**
  * Should return a Vorpal command instance used for transferring tokens.
  *
@@ -50,33 +23,83 @@ function commandTransfer(evmlc, config) {
             string: ['t', 'to', 'f', 'from'],
         })
         .action((args) => {
-            // connect to API endpoints
-            return evmlc_1.connect().then(() => {
-                return new Promise((resolve) => {
-                    if (args.options && args.options.from && args.options.to) {
-                        // set default from address of the node object
-                        evmlc_1.node.defaultAddress = args.options.from;
-                        let transaction = evmlc_1.node
-                            .transfer(args.options.from, args.options.to, args.options.value || 0);
-                        // set gas, gasprice values and send transaction
-                        transaction
-                            .gas(100000)
-                            .gasPrice(0)
-                            .send()
-                            .then((receipt) => {
-                                functions_1.success(receipt.transactionHash);
-                                resolve();
-                            })
-                            .catch((err) => {
-                                functions_1.error(JSONBig.stringify(err));
-                                resolve();
+            return new Promise((resolve) => {
+                // connect to API endpoints
+                return evmlc_1.connect().then((node) => {
+                    functions_1.decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                        .then((accounts) => {
+                            let handleTransfer = (tx) => {
+                                let account = accounts.find((acc) => {
+                                    return acc.address === tx.from;
+                                });
+                                tx.chainId = 1;
+                                tx.nonce = account.nonce;
+                                account.signTransaction(tx)
+                                    .then((signed) => {
+                                        node.api.sendRawTx(signed.rawTransaction)
+                                            .then(resp => {
+                                                functions_1.success(`Transferred.`);
+                                                resolve();
+                                            })
+                                            .catch(err => {
+                                                console.log(err);
+                                                resolve();
+                                            });
+                                    });
+                            };
+                            let i = args.options.interactive || evmlc_1.interactive;
+                            let choices = accounts.map((account) => {
+                                return account.address;
                             });
-                    }
-                    else {
-                        // no options were provided
-                        functions_1.error('Provide options.');
-                        resolve();
-                    }
+                            let questions = [
+                                {
+                                    name: 'from',
+                                    type: 'list',
+                                    message: 'From: ',
+                                    choices: choices
+                                },
+                                {
+                                    name: 'to',
+                                    type: 'input',
+                                    message: 'To'
+                                },
+                                {
+                                    name: 'value',
+                                    type: 'input',
+                                    default: '100',
+                                    message: 'Value: '
+                                },
+                                {
+                                    name: 'gas',
+                                    type: 'input',
+                                    default: '1000000',
+                                    message: 'Gas: '
+                                },
+                                {
+                                    name: 'gasPrice',
+                                    type: 'input',
+                                    default: '0',
+                                    message: 'Gas Price: '
+                                }
+                            ];
+                            if (i) {
+                                inquirer.prompt(questions)
+                                    .then(tx => {
+                                        handleTransfer(tx);
+                                    });
+                            }
+                            else {
+                                let tx = {};
+                                tx.from = args.options.from || undefined;
+                                tx.to = args.options.to || undefined;
+                                tx.value = args.options.value || undefined;
+                                tx.gas = config.defaults.gas || 100000;
+                                tx.gasPrice = config.defaults.gasPrice || 0;
+                                if (tx.from && tx.to && tx.value) {
+                                    handleTransfer(tx);
+                                }
+                            }
+                        });
                 });
             });
         })

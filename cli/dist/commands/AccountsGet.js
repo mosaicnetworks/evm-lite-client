@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
+const inquirer = require("inquirer");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
-
 /**
  * Should return a Vorpal command instance used for getting an account.
  *
@@ -16,33 +16,59 @@ const functions_1 = require("../utils/functions");
  * @returns Vorpal Command instance
  */
 function commandAccountsGet(evmlc, config) {
-    return evmlc.command('accounts get').alias('a g')
-        .option('-a, --address <address>', 'Address to fetch account of.')
+    return evmlc.command('accounts get [address]').alias('a g')
+        .option('-f, --formatted', 'format output')
+        .option('-i, --interactive', 'use interactive mode')
         .types({
-            string: ['a', 'address']
+            string: ['_']
         })
         .action((args) => {
-            // connect to API endpoints
-            return evmlc_1.connect().then(() => {
-                if (args.options.address) {
-                    // request JSON from 'account/<address>'
-                    return evmlc_1.node.api.getAccount(args.options.address).then((a) => {
-                        let counter = 0;
-                        let accountsTable = new ASCIITable();
-                        let account = JSONBig.parse(a);
-                        accountsTable
-                            .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                            .addRow(counter, account.address, account.balance, account.nonce);
-                        functions_1.info(accountsTable.toString());
-                    });
-                }
-                else {
-                    // if -a or --address are not provided
-                    return new Promise(resolve => {
-                        functions_1.error('Provide address to get. -a, --address');
-                        resolve();
-                    });
-                }
+            return new Promise(resolve => {
+                // connect to API endpoints
+                evmlc_1.connect().then((node) => {
+                    let handleAccountGet = () => {
+                        // request JSON from 'account/<address>'
+                        node.api.getAccount(args.address).then((a) => {
+                            let counter = 0;
+                            let accountsTable = new ASCIITable();
+                            let formatted = args.options.formatted || false;
+                            let account = JSONBig.parse(a);
+                            accountsTable
+                                .setHeading('#', 'Account Address', 'Balance', 'Nonce')
+                                .addRow(counter, account.address, account.balance, account.nonce);
+                            formatted ? functions_1.info(accountsTable.toString()) : functions_1.info(a);
+                            resolve();
+                        });
+                    };
+                    let i = args.options.interactive || evmlc_1.interactive;
+                    if (args.address) {
+                        handleAccountGet();
+                    }
+                    else if (i) {
+                        let questions = [
+                            {
+                                name: 'address',
+                                type: 'input',
+                                required: true,
+                                message: 'Address: '
+                            }
+                        ];
+                        inquirer.prompt(questions)
+                            .then(answers => {
+                                args.address = answers.address;
+                            })
+                            .then(() => {
+                                handleAccountGet();
+                            });
+                    }
+                    else {
+                        // if -a or --address are not provided
+                        return new Promise(resolve => {
+                            functions_1.error('Provide an address. Usage: accounts get <address>');
+                            resolve();
+                        });
+                    }
+                });
             });
         })
         .description('Get an account.');

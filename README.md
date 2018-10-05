@@ -2,17 +2,14 @@
 
 An Javascript client library to interact with EVM-Lite.
 
-## Deploy
+## Deploy CLI
 
-Run
+To run the Command Line Interface, first make the run file executable using `chmod u+x run` then `./run`.
 
-```
-cd lib && npm install
-```
-then
+Now you should be able to use:
 
 ```
-cd ../cli && npm install && cd ../
+evmlc [command]
 ```
 
-then to run the Command Line Interface, first make the run file executable using `chmod u+x run` then `./run`
+
