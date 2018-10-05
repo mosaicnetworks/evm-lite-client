@@ -39,7 +39,7 @@ export const decryptLocalAccounts = (node: Controller, keystorePath: string, pas
             let keystoreFile = path.join(keystorePath, file);
             let password = getPassword(passwordPath);
             let v3JSONKeyStore = JSONBig.parse(fs.readFileSync(keystoreFile, 'utf8'));
-            let decryptedAccount = Account.decrypt(v3JSONKeyStore, password);
+            let decryptedAccount: Account = Account.decrypt(v3JSONKeyStore, password);
 
             promises.push(
                 node.api.getAccount(decryptedAccount.address).then((a) => {
@@ -60,8 +60,7 @@ export const decryptLocalAccounts = (node: Controller, keystorePath: string, pas
                 resolve(accounts);
             });
         })
-        .catch(err => {
-            error(err);
+        .catch(() => {
             return new Promise<Account[]>(resolve => {
                 resolve([])
             })

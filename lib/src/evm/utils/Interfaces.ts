@@ -1,3 +1,9 @@
+/**
+ * @file Interface.js
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 export interface BaseTX {
     gas?: number,
     gasPrice?: number,

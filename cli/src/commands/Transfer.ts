@@ -3,6 +3,7 @@ import * as inquirer from 'inquirer';
 
 import {connect, interactive} from "../evmlc";
 import {decryptLocalAccounts, error, success} from "../utils/functions";
+
 import {Controller} from "../../../lib";
 
 
@@ -133,7 +134,7 @@ export default function commandTransfer(evmlc: Vorpal, config) {
                             .catch(err => error(err));
 
                     })
-                    .then(err => error(err))
+                    .catch(err => error(err))
 
             });
 

@@ -1,3 +1,9 @@
+/**
+ * @file Account.js
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as Web3Accounts from 'web3-eth-accounts';
 
 

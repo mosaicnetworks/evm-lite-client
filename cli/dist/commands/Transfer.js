@@ -115,7 +115,7 @@ function commandTransfer(evmlc, config) {
                 })
                     .catch(err => functions_1.error(err));
             })
-                .then(err => functions_1.error(err));
+                .catch(err => functions_1.error(err));
         });
     })
         .description('Transfer token(s) to address.');

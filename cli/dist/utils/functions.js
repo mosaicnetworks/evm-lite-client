@@ -39,14 +39,13 @@ exports.decryptLocalAccounts = (node, keystorePath, passwordPath) => {
     });
     return Promise.all(promises)
         .then(() => {
-            return new Promise(resolve => {
-                resolve(accounts);
-            });
-        })
-        .catch(err => {
-            exports.error(err);
-            return new Promise(resolve => {
-                resolve([]);
-            });
+        return new Promise(resolve => {
+            resolve(accounts);
         });
+    })
+        .catch(() => {
+        return new Promise(resolve => {
+            resolve([]);
+        });
+    });
 };

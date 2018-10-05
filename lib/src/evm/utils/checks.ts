@@ -1,3 +1,9 @@
+/**
+ * @file checks.js
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as errors from "./errors";
 
 export const requireArgsLength = (expected: number, received: number): (boolean | Error) => {

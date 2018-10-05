@@ -69,7 +69,7 @@ export function updateToConfigFile<T>(config: T): void {
 /**
  * Should attempt to connect to node with the config connection parameters
  * then try and get accounts to make sure the connection is valid then
- * return a promise which resolves the respective Controller object.
+ * returns a promise which resolves the respective Controller object.
  *
  * @param {{}} config - The config object
  * @returns Promise<Controller>
