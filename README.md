@@ -1,6 +1,7 @@
-# EVML-Client (Javascript)
+# EVM-Lite Client (Javascript)
 
-An Javascript client library to interact with EVM-Lite.
+A Javascript client library and Command Line Interface to interact with 
+EVM-Lite.
 
 ## Deploy CLI
 
