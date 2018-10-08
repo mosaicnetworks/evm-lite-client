@@ -1,8 +1,10 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {interactive, updateToConfigFile} from "../evmlc";
+import {interactive} from "../evmlc";
 import {success} from "../utils/functions";
+
+import UserConfig from "../utils/UserConfig";
 
 
 /**
@@ -13,7 +15,7 @@ import {success} from "../utils/functions";
  * @returns Vorpal Command instance
  */
 
-export default function commandGlobals(evmlc: Vorpal, config) {
+export default function commandGlobals(evmlc: Vorpal, config: UserConfig) {
 
     return evmlc.command('globals ').alias('g')
         .description('Set default global values.')
@@ -36,69 +38,69 @@ export default function commandGlobals(evmlc: Vorpal, config) {
                 let handleGlobals = (): void => {
                     for (let prop in args.options) {
                         if (prop.toLowerCase() === 'host') {
-                            if (config.connection.host !== args.options[prop])
+                            if (config.data.connection.host !== args.options[prop])
                                 success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
-                            config.connection.host = args.options[prop];
+                            config.data.connection.host = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'port') {
-                            if (config.connection.port !== args.options[prop])
+                            if (config.data.connection.port !== args.options[prop])
                                 success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
-                            config.connection.port = args.options[prop];
+                            config.data.connection.port = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'from') {
-                            if (config.defaults.from !== args.options[prop])
+                            if (config.data.defaults.from !== args.options[prop])
                                 success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
-                            config.defaults.from = args.options[prop];
+                            config.data.defaults.from = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'gas') {
-                            if (config.defaults.gas !== args.options[prop])
+                            if (config.data.defaults.gas !== args.options[prop])
                                 success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
-                            config.defaults.gas = args.options[prop];
+                            config.data.defaults.gas = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'gasprice') {
-                            if (config.defaults.gasPrice !== args.options[prop])
+                            if (config.data.defaults.gasPrice !== args.options[prop])
                                 success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
-                            config.defaults.gasPrice = args.options[prop];
+                            config.data.defaults.gasPrice = args.options[prop];
                         }
                     }
 
-                    updateToConfigFile(config);
+                    config.save();
                 };
 
                 let i = args.options.interactive || interactive;
                 let questions = [
                     {
                         name: 'host',
-                        default: config.connection.host,
+                        default: config.data.connection.host,
                         type: 'input',
                         message: 'Host: '
                     },
                     {
                         name: 'port',
-                        default: config.connection.port,
+                        default: config.data.connection.port,
                         type: 'input',
                         message: 'Port: '
                     },
                     {
                         name: 'from',
-                        default: config.defaults.from,
+                        default: config.data.defaults.from,
                         type: 'input',
                         message: 'Default From Address: '
                     },
                     {
                         name: 'gas',
-                        default: config.defaults.gas,
+                        default: config.data.defaults.gas,
                         type: 'input',
                         message: 'Default Gas: '
                     },
                     {
                         name: 'gasPrice',
-                        default: config.defaults.gasPrice,
+                        default: config.data.defaults.gasPrice,
                         type: 'input',
                         message: 'Default Gas Price: '
                     },

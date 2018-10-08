@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
+const globals_1 = require("../utils/globals");
 /**
  * Should return a Vorpal command instance used for transferring tokens.
  *
@@ -27,9 +28,9 @@ function commandTransfer(evmlc, config) {
         .action((args) => {
         return new Promise((resolve) => {
             // connect to API endpoints
-            evmlc_1.connect(config)
+            globals_1.connect(config)
                 .then((node) => {
-                functions_1.decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                functions_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                     .then((accounts) => {
                     // handles signing and sending transaction
                     let handleTransfer = (tx) => {
@@ -102,8 +103,8 @@ function commandTransfer(evmlc, config) {
                         tx.from = args.options.from || undefined;
                         tx.to = args.options.to || undefined;
                         tx.value = args.options.value || undefined;
-                        tx.gas = args.options.gas || config.defaults.gas || 100000;
-                        tx.gasPrice = args.options.gasprice || config.defaults.gasPrice || 0;
+                        tx.gas = args.options.gas || config.data.defaults.gas || 100000;
+                        tx.gasPrice = args.options.gasprice || config.data.defaults.gasPrice || 0;
                         if (tx.from && tx.to && tx.value) {
                             handleTransfer(tx);
                         }

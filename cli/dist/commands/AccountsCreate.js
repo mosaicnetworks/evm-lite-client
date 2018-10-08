@@ -30,61 +30,56 @@ function commandAccountsCreate(evmlc, config) {
     })
         .action((args) => {
         return new Promise(resolve => {
-            // connect to API endpoint
-            evmlc_1.connect(config)
-                .then((node) => {
-                // handles create account logic
-                let handleCreateAccount = () => {
-                    // create an account object without saving
-                    let account = lib_1.Account.create();
-                    let outputPath = args.options.output || config.storage.keystore;
-                    let password = functions_1.getPassword(args.options.password) || functions_1.getPassword(config.storage.password);
-                    // encrypt account with password
-                    let encryptedAccount = account.encrypt(password);
-                    // path to write account file with name
-                    let fileName = `UTC--date--timestamp--${account.address}`;
-                    let writePath = path.join(outputPath, fileName);
-                    let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-                    // write encrypted account data to file
-                    fs.writeFileSync(writePath, stringEncryptedAccount);
-                    // output data
-                    functions_1.success(JSONBig.stringify(encryptedAccount));
-                };
-                let i = args.options.interactive || evmlc_1.interactive;
-                // inquirer questions
-                let questions = [
-                    {
-                        name: 'outputPath',
-                        message: 'Enter keystore output path: ',
-                        default: config.storage.keystore,
-                        type: 'input'
-                    },
-                    {
-                        name: 'passwordPath',
-                        message: 'Enter password file path: ',
-                        default: config.storage.password,
-                        type: 'input'
-                    }
-                ];
-                if (i) {
-                    // prompt questions and wait for response
-                    inquirer.prompt(questions)
-                        .then((answers) => {
-                        args.options.output = answers.outputPath;
-                        args.options.password = answers.passwordPath;
-                    })
-                        .then(() => {
-                        handleCreateAccount();
-                        resolve();
-                    });
+            // handles create account logic
+            let handleCreateAccount = () => {
+                // create an account object without saving
+                let account = lib_1.Account.create();
+                let outputPath = args.options.output || config.data.storage.keystore;
+                let password = functions_1.getPassword(args.options.password) || functions_1.getPassword(config.data.storage.password);
+                // encrypt account with password
+                let encryptedAccount = account.encrypt(password);
+                // path to write account file with name
+                let fileName = `UTC--date--timestamp--${account.address}`;
+                let writePath = path.join(outputPath, fileName);
+                let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
+                // write encrypted account data to file
+                fs.writeFileSync(writePath, stringEncryptedAccount);
+                // output data
+                functions_1.success(JSONBig.stringify(encryptedAccount));
+            };
+            let i = args.options.interactive || evmlc_1.interactive;
+            // inquirer questions
+            let questions = [
+                {
+                    name: 'outputPath',
+                    message: 'Enter keystore output path: ',
+                    default: config.data.storage.keystore,
+                    type: 'input'
+                },
+                {
+                    name: 'passwordPath',
+                    message: 'Enter password file path: ',
+                    default: config.data.storage.password,
+                    type: 'input'
                 }
-                else {
-                    // if not interactive mode
+            ];
+            if (i) {
+                // prompt questions and wait for response
+                inquirer.prompt(questions)
+                    .then((answers) => {
+                    args.options.output = answers.outputPath;
+                    args.options.password = answers.passwordPath;
+                })
+                    .then(() => {
                     handleCreateAccount();
                     resolve();
-                }
-            })
-                .catch(err => functions_1.error(err));
+                });
+            }
+            else {
+                // if not interactive mode
+                handleCreateAccount();
+                resolve();
+            }
         });
     });
 }

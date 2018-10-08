@@ -1,10 +1,13 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {connect, interactive} from "../evmlc";
+import {interactive} from "../evmlc";
 import {decryptLocalAccounts, error, success} from "../utils/functions";
+import {connect} from "../utils/globals";
 
 import {Controller} from "../../../lib";
+
+import UserConfig from "../utils/UserConfig";
 
 
 /**
@@ -17,7 +20,7 @@ import {Controller} from "../../../lib";
  * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandTransfer(evmlc: Vorpal, config) {
+export default function commandTransfer(evmlc: Vorpal, config: UserConfig) {
 
     return evmlc.command('transfer').alias('t')
         .option('-i, --interactive', 'value to send')
@@ -37,7 +40,7 @@ export default function commandTransfer(evmlc: Vorpal, config) {
                 connect(config)
                     .then((node: Controller) => {
 
-                        decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                        decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                             .then((accounts) => {
 
                                 // handles signing and sending transaction
@@ -118,8 +121,8 @@ export default function commandTransfer(evmlc: Vorpal, config) {
                                     tx.from = args.options.from || undefined;
                                     tx.to = args.options.to || undefined;
                                     tx.value = args.options.value || undefined;
-                                    tx.gas = args.options.gas || config.defaults.gas || 100000;
-                                    tx.gasPrice = args.options.gasprice || config.defaults.gasPrice || 0;
+                                    tx.gas = args.options.gas || config.data.defaults.gas || 100000;
+                                    tx.gasPrice = args.options.gasprice || config.data.defaults.gasPrice || 0;
 
                                     if (tx.from && tx.to && tx.value) {
                                         handleTransfer(tx);

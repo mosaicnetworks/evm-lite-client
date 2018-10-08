@@ -2,10 +2,12 @@ import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
 import * as ASCIITable from 'ascii-table';
 
-import {connect} from "../evmlc";
 import {BaseAccount, decryptLocalAccounts, error, info, success} from "../utils/functions";
 
 import {Account} from '../../../lib';
+import {connect} from "../utils/globals";
+
+import UserConfig from "../utils/UserConfig";
 
 
 /**
@@ -16,10 +18,10 @@ import {Account} from '../../../lib';
  * --formatted flag else outputs raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
+ * @param {UserConfig} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandAccountsList(evmlc: Vorpal, config) {
+export default function commandAccountsList(evmlc: Vorpal, config: UserConfig) {
 
     return evmlc.command('accounts list').alias('a l')
         .option('-f, --formatted', 'format output')
@@ -35,7 +37,7 @@ export default function commandAccountsList(evmlc: Vorpal, config) {
                         let formatted: boolean = args.options.formatted || false;
 
                         // get all local accounts
-                        decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                        decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                             .then((accounts) => {
                                 let counter = 0;
                                 let table = new ASCIITable()

@@ -5,6 +5,7 @@ const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
 const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
+const globals_1 = require("../utils/globals");
 /**
  * Should return a Vorpal command instance used for getting an account.
  *
@@ -13,7 +14,7 @@ const functions_1 = require("../utils/functions");
  * with --formatted flag or output raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
+ * @param {UserConfig} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
 function commandAccountsGet(evmlc, config) {
@@ -26,7 +27,7 @@ function commandAccountsGet(evmlc, config) {
         .action((args) => {
         return new Promise(resolve => {
             // connect to API endpoints
-            evmlc_1.connect(config)
+            globals_1.connect(config)
                 .then((node) => {
                 let handleAccountGet = () => {
                     // request JSON from 'account/<address>'

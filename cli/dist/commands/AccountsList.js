@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const ASCIITable = require("ascii-table");
-const evmlc_1 = require("../evmlc");
 const functions_1 = require("../utils/functions");
+const globals_1 = require("../utils/globals");
 /**
  * Should return a Vorpal command instance used for listing all account.
  *
@@ -12,7 +12,7 @@ const functions_1 = require("../utils/functions");
  * --formatted flag else outputs raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
+ * @param {UserConfig} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
 function commandAccountsList(evmlc, config) {
@@ -22,11 +22,11 @@ function commandAccountsList(evmlc, config) {
         .action((args) => {
         return new Promise(resolve => {
             // connect to node
-            evmlc_1.connect(config)
+            globals_1.connect(config)
                 .then((node) => {
                 let formatted = args.options.formatted || false;
                 // get all local accounts
-                functions_1.decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                functions_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                     .then((accounts) => {
                     let counter = 0;
                     let table = new ASCIITable()

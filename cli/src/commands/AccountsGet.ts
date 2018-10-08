@@ -3,8 +3,11 @@ import * as ASCIITable from 'ascii-table';
 import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 
-import {connect, interactive} from "../evmlc";
+import {interactive} from "../evmlc";
 import {error, info} from "../utils/functions";
+import {connect} from "../utils/globals";
+
+import UserConfig from "../utils/UserConfig";
 
 
 /**
@@ -15,10 +18,10 @@ import {error, info} from "../utils/functions";
  * with --formatted flag or output raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
+ * @param {UserConfig} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandAccountsGet(evmlc: Vorpal, config) {
+export default function commandAccountsGet(evmlc: Vorpal, config: UserConfig) {
 
     return evmlc.command('accounts get [address]').alias('a g')
         .option('-f, --formatted', 'format output')

@@ -4,10 +4,12 @@ import * as path from "path";
 import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 
-import {connect, interactive} from "../evmlc";
-import {error, getPassword, success} from "../utils/functions";
+import {interactive} from "../evmlc";
+import {getPassword, success} from "../utils/functions";
 
 import {Account} from '../../../lib';
+
+import UserConfig from "../utils/UserConfig";
 
 
 /**
@@ -22,7 +24,7 @@ import {Account} from '../../../lib';
  * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandAccountsCreate(evmlc: Vorpal, config) {
+export default function commandAccountsCreate(evmlc: Vorpal, config: UserConfig) {
 
     return evmlc.command('accounts create').alias('a c')
         .description('Create an account.')
@@ -36,78 +38,71 @@ export default function commandAccountsCreate(evmlc: Vorpal, config) {
 
             return new Promise<void>(resolve => {
 
-                // connect to API endpoint
-                connect(config)
-                    .then((node) => {
+                // handles create account logic
+                let handleCreateAccount = (): void => {
 
-                        // handles create account logic
-                        let handleCreateAccount = (): void => {
+                    // create an account object without saving
+                    let account: Account = Account.create();
 
-                            // create an account object without saving
-                            let account: Account = Account.create();
+                    let outputPath: string = args.options.output || config.data.storage.keystore;
+                    let password: string = getPassword(args.options.password) || getPassword(config.data.storage.password);
 
-                            let outputPath: string = args.options.output || config.storage.keystore;
-                            let password: string = getPassword(args.options.password) || getPassword(config.storage.password);
+                    // encrypt account with password
+                    let encryptedAccount = account.encrypt(password);
 
-                            // encrypt account with password
-                            let encryptedAccount = account.encrypt(password);
+                    // path to write account file with name
+                    let fileName = `UTC--date--timestamp--${account.address}`;
+                    let writePath = path.join(outputPath, fileName);
+                    let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
 
-                            // path to write account file with name
-                            let fileName = `UTC--date--timestamp--${account.address}`;
-                            let writePath = path.join(outputPath, fileName);
-                            let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
+                    // write encrypted account data to file
+                    fs.writeFileSync(writePath, stringEncryptedAccount);
 
-                            // write encrypted account data to file
-                            fs.writeFileSync(writePath, stringEncryptedAccount);
+                    // output data
+                    success(JSONBig.stringify(encryptedAccount));
 
-                            // output data
-                            success(JSONBig.stringify(encryptedAccount));
+                };
 
-                        };
+                let i = args.options.interactive || interactive;
 
-                        let i = args.options.interactive || interactive;
+                // inquirer questions
+                let questions = [
+                    {
+                        name: 'outputPath',
+                        message: 'Enter keystore output path: ',
+                        default: config.data.storage.keystore,
+                        type: 'input'
+                    },
+                    {
+                        name: 'passwordPath',
+                        message: 'Enter password file path: ',
+                        default: config.data.storage.password,
+                        type: 'input'
+                    }
+                ];
 
-                        // inquirer questions
-                        let questions = [
-                            {
-                                name: 'outputPath',
-                                message: 'Enter keystore output path: ',
-                                default: config.storage.keystore,
-                                type: 'input'
-                            },
-                            {
-                                name: 'passwordPath',
-                                message: 'Enter password file path: ',
-                                default: config.storage.password,
-                                type: 'input'
-                            }
-                        ];
+                if (i) {
 
-                        if (i) {
-
-                            // prompt questions and wait for response
-                            inquirer.prompt(questions)
-                                .then((answers) => {
-                                    args.options.output = answers.outputPath;
-                                    args.options.password = answers.passwordPath;
-                                })
-                                .then(() => {
-                                    handleCreateAccount();
-                                    resolve();
-                                });
-
-                        } else {
-
-                            // if not interactive mode
+                    // prompt questions and wait for response
+                    inquirer.prompt(questions)
+                        .then((answers) => {
+                            args.options.output = answers.outputPath;
+                            args.options.password = answers.passwordPath;
+                        })
+                        .then(() => {
                             handleCreateAccount();
                             resolve();
+                        });
 
-                        }
+                } else {
 
-                    })
-                    .catch(err => error(err));
+                    // if not interactive mode
+                    handleCreateAccount();
+                    resolve();
 
-            });
+                }
+
+            })
 
         });
 

@@ -5,7 +5,7 @@ function commandConfig(evmlc, config) {
         .description('Show config JSON.')
         .action(() => {
         return new Promise(resolve => {
-            console.log(config);
+            console.log(config.data);
             resolve();
         });
     });
