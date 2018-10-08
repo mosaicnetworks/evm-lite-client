@@ -9,7 +9,10 @@ EVM-Lite.
 * [Table of Contents](#table-of-contents)
 * [Installation](#installation)
     * [Makefile](#makefile)
-* [Config](#config-file)
+    * [Dependencies](#dependencies)
+        * [Client Library](#client-library)
+        * [Command Line Interface](#command-line-interface)
+* [Configuration Settings](#configuration-settings)
 * [Commands](#commands)
     * [help](#help)
     * accounts
@@ -78,7 +81,53 @@ $ evmlc
 
 ```
 
-## Config
+### Dependencies
+
+#### Client Library
+
+* [json-bigint](https://www.npmjs.com/package/json-bigint): Used to parse big integers.
+* [solc](https://www.npmjs.com/package/solc): Solidity compiler used to compile Solidity code.
+* [web3](https://www.npmjs.com/package/web3): The Ethereum web3.js library.
+* [web3-eth-accounts](https://www.npmjs.com/package/web3-eth-accounts): The standalone web3 library for managing accounts.
+
+
+```json
+"dependencies": {
+    "json-bigint": "^0.3.0",
+    "solc": "^0.4.24",
+    "web3": "github:ethereum/web3.js",
+    "web3-eth-accounts": "^1.0.0-beta.26"
+}
+```
+
+#### Command Line Interface
+
+* [ascii-table](https://www.npmjs.com/package/ascii-table): Used to create ASCII tables.
+* [chalk](https://www.npmjs.com/package/chalk): Command line formatting.
+* [commander](https://www.npmjs.com/package/commander): API to build the command line interface.
+* [inquirer](https://www.npmjs.com/package/inquirer): Used create interactive commands.
+* [json-bigint](https://www.npmjs.com/package/json-bigint): Used to parse big integers.
+* [mkdirp](https://www.npmjs.com/package/mkdirp): Used to recursively create directories.
+* [toml](https://www.npmjs.com/package/toml): Used to parse TOML to JSON.
+* [tomlify-j0.4](https://www.npmjs.com/package/tomlify-j0.4): Used to parse JSON to TOML.
+* [vorpal](https://www.npmjs.com/package/vorpal): Provides API to build interactive command line interfaces.
+
+
+```json
+"dependencies": {
+    "ascii-table": "0.0.9",
+    "chalk": "^2.4.1",
+    "commander": "^2.18.0",
+    "inquirer": "latest",
+    "json-bigint": "^0.3.0",
+    "mkdirp": "^0.5.1",
+    "toml": "^2.3.3",
+    "tomlify-j0.4": "^3.0.0",
+    "vorpal": "^1.12.0"
+}
+```
+
+## Configuration Settings
 
 The default config directory is `~/.evmlc/config` with configuration:
 
