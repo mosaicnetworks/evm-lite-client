@@ -67,3 +67,35 @@ export const decryptLocalAccounts = (node: Controller, keystorePath: string, pas
         })
 
 };
+
+export const isEquivalentObjects = (objectA: any, objectB: any) => {
+
+    // console.log(objectA);
+    // console.log(objectB);
+
+    let aProps = Object.getOwnPropertyNames(objectA);
+    let bProps = Object.getOwnPropertyNames(objectB);
+
+    // console.log(aProps);
+    // console.log(bProps);
+
+    if (aProps.length != bProps.length) {
+        // console.log(`Length: ${aProps.length} !== ${bProps.length}`);
+        return false;
+    }
+
+    for (let i = 0; i < aProps.length; i++) {
+        let propName = aProps[i];
+        // console.log(`${objectA[propName]}, ${objectB[propName]}`);
+        if (typeof objectA[propName] === 'object' && typeof objectB[propName] === 'object') {
+            if (!isEquivalentObjects(objectA[propName], objectB[propName])) {
+                return false;
+            }
+        } else if (objectA[propName] !== objectB[propName]) {
+            // console.log(`${objectA[propName]} !== ${objectB[propName]}`);
+            return false;
+        }
+    }
+
+    return true;
+};

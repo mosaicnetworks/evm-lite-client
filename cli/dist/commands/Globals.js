@@ -30,23 +30,28 @@ function commandGlobals(evmlc, config) {
             let handleGlobals = () => {
                 for (let prop in args.options) {
                     if (prop.toLowerCase() === 'host') {
-                        functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        if (config.connection.host !== args.options[prop])
+                            functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
                         config.connection.host = args.options[prop];
                     }
                     if (prop.toLowerCase() === 'port') {
-                        functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        if (config.connection.port !== args.options[prop])
+                            functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
                         config.connection.port = args.options[prop];
                     }
                     if (prop.toLowerCase() === 'from') {
-                        functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        if (config.defaults.from !== args.options[prop])
+                            functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
                         config.defaults.from = args.options[prop];
                     }
                     if (prop.toLowerCase() === 'gas') {
-                        functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        if (config.defaults.gas !== args.options[prop])
+                            functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
                         config.defaults.gas = args.options[prop];
                     }
                     if (prop.toLowerCase() === 'gasprice') {
-                        functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        if (config.defaults.gasPrice !== args.options[prop])
+                            functions_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
                         config.defaults.gasPrice = args.options[prop];
                     }
                 }

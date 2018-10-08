@@ -1,12 +1,41 @@
 import * as Vorpal from "vorpal";
 
 import {Account} from '../../../lib/index';
+import {isEquivalentObjects} from "../utils/functions";
 
 
-export default function template(evmlc: Vorpal, config) {
+export default function commandTest(evmlc: Vorpal, config) {
     return evmlc.command('test').alias('test')
         .action((args: Vorpal.Args): Promise<void> => {
-            return new Promise<void>(resolve => resolve());
+            return new Promise<void>(resolve => {
+                let A = {
+                    hello: 'hello',
+                    danu: {
+                        asd: 1,
+                        asd1: 2,
+                        danu1: {
+                            cc: 1,
+                            ss: 22
+                        }
+
+                    }
+                };
+
+                let B = {
+                    hello: 'hello',
+                    danu: {
+                        asd: 1,
+                        asd1: 2,
+                        danu1: {
+                            cc: 1,
+                            ss: 2
+                        }
+                    }
+                };
+
+                console.log(isEquivalentObjects(A, B));
+                resolve();
+            });
         })
         .description('Testing purposes.');
 };

@@ -7,7 +7,7 @@ import * as path from "path";
 import * as Vorpal from "vorpal";
 import * as mkdir from 'mkdirp';
 
-import {error, warning} from "./utils/functions";
+import {error, isEquivalentObjects, warning} from "./utils/functions";
 
 import {Controller} from '../../lib';
 
@@ -18,6 +18,7 @@ import commandGlobals from "./commands/Globals";
 import commandTransfer from "./commands/Transfer";
 import commandConfig from "./commands/Config";
 import commandInteractive from "./commands/Interactive";
+import commandTest from "./commands/Test";
 
 
 // global interactive mode
@@ -34,20 +35,22 @@ let configFilePath: string = path.join(configDir, 'evmlc.toml');
 let node: Controller = null;
 
 // default config layout
-let defaultConfig: any = {
-    title: 'EVM-Lite CLI Config',
-    connection: {
-        host: '127.0.0.1',
-        port: '8080'
-    },
-    defaults: {
-        from: '',
-        gas: 0,
-        gasPrice: 0
-    },
-    storage: {
-        keystore: path.join(evmlcDir, 'keystore'),
-        password: path.join(evmlcDir, 'pwd.txt')
+let defaultConfig = (): any => {
+    return {
+        title: 'EVM-Lite CLI Config',
+        connection: {
+            host: '127.0.0.1',
+            port: '8080'
+        },
+        defaults: {
+            from: '',
+            gas: 0,
+            gasPrice: 0
+        },
+        storage: {
+            keystore: path.join(evmlcDir, 'keystore'),
+            password: path.join(evmlcDir, 'pwd.txt')
+        }
     }
 };
 
@@ -61,7 +64,9 @@ let defaultConfig: any = {
 export function updateToConfigFile<T>(config: T): void {
     writeToConfigFile(config)
         .then((writtenConfig: T) => {
-            defaultConfig = writtenConfig;
+            defaultConfig = () => {
+                return writtenConfig;
+            };
         });
 }
 
@@ -103,6 +108,12 @@ export const connect = (config: any): Promise<Controller> => {
  */
 function writeToConfigFile<T>(content: T): Promise<T> {
 
+    let oldConfig = defaultConfig();
+
+    if (fs.existsSync(configFilePath)) {
+        oldConfig = toml.parse(fs.readFileSync(configFilePath, 'utf8'));
+    }
+
     // currently only supports {} to TOML
     let tomlified = tomlify.toToml(content, {spaces: 2});
 
@@ -115,18 +126,23 @@ function writeToConfigFile<T>(content: T): Promise<T> {
             mkdir.mkdirp(configDir);
         }
 
-        if (!fs.existsSync(defaultConfig.storage.keystore)) {
-            mkdir.mkdirp(defaultConfig.storage.keystore);
+        if (!fs.existsSync(defaultConfig().storage.keystore)) {
+            mkdir.mkdirp(defaultConfig().storage.keystore);
         }
 
-        if (!fs.existsSync(defaultConfig.storage.password)) {
-            fs.writeFileSync(defaultConfig.storage.password, 'supersecurepassword');
+        if (!fs.existsSync(defaultConfig().storage.password)) {
+            fs.writeFileSync(defaultConfig().storage.password, 'supersecurepassword');
         }
 
-        fs.writeFileSync(configFilePath, tomlified);
+        if (!isEquivalentObjects(content, oldConfig)) {
+            fs.writeFileSync(configFilePath, tomlified);
+        } else {
+            warning('No changes in configuration detected.')
+        }
 
         resolve(content);
     })
+
 }
 
 
@@ -140,7 +156,7 @@ const readConfigFile = (): Promise<{}> => {
     return new Promise<{}>((resolve) => {
         let tomlstring = fs.readFileSync(configFilePath, 'utf8');
         resolve(toml.parse(tomlstring));
-    })
+    });
 };
 
 
@@ -153,17 +169,14 @@ const readConfigFile = (): Promise<{}> => {
 const createOrReadConfigFile = (): Promise<{}> => {
     return new Promise<{}>(resolve => {
         if (fs.existsSync(configFilePath)) {
+            console.log('reading config file');
             readConfigFile()
                 .then((config) => {
                     resolve(config);
                 })
                 .catch(err => error(err));
         } else {
-            writeToConfigFile(defaultConfig)
-                .then((config) => {
-                    resolve(config)
-                })
-                .catch(err => error(err));
+            resolve(defaultConfig());
         }
     });
 };
@@ -196,6 +209,7 @@ createOrReadConfigFile()
         commandGlobals(evmlc, config);
         commandTransfer(evmlc, config);
         commandConfig(evmlc, config);
+        commandTest(evmlc, config);
 
         // manual processing of interactive mode
         if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {

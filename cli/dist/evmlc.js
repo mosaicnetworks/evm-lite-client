@@ -16,6 +16,7 @@ const Globals_1 = require("./commands/Globals");
 const Transfer_1 = require("./commands/Transfer");
 const Config_1 = require("./commands/Config");
 const Interactive_1 = require("./commands/Interactive");
+const Test_1 = require("./commands/Test");
 // global interactive mode
 exports.interactive = false;
 // paths
@@ -27,21 +28,23 @@ let configFilePath = path.join(configDir, 'evmlc.toml');
 // of connecting multiple times to improve console speed
 let node = null;
 // default config layout
-let defaultConfig = {
-    title: 'EVM-Lite CLI Config',
-    connection: {
-        host: '127.0.0.1',
-        port: '8080'
-    },
-    defaults: {
-        from: '',
-        gas: 0,
-        gasPrice: 0
-    },
-    storage: {
-        keystore: path.join(evmlcDir, 'keystore'),
-        password: path.join(evmlcDir, 'pwd.txt')
-    }
+let defaultConfig = () => {
+    return {
+        title: 'EVM-Lite CLI Config',
+        connection: {
+            host: '127.0.0.1',
+            port: '8080'
+        },
+        defaults: {
+            from: '',
+            gas: 0,
+            gasPrice: 0
+        },
+        storage: {
+            keystore: path.join(evmlcDir, 'keystore'),
+            password: path.join(evmlcDir, 'pwd.txt')
+        }
+    };
 };
 /**
  * Should update config file and set default config variable.
@@ -52,7 +55,9 @@ let defaultConfig = {
 function updateToConfigFile(config) {
     writeToConfigFile(config)
         .then((writtenConfig) => {
-        defaultConfig = writtenConfig;
+        defaultConfig = () => {
+            return writtenConfig;
+        };
     });
 }
 exports.updateToConfigFile = updateToConfigFile;
@@ -90,6 +95,10 @@ exports.connect = (config) => {
  * @returns Promise<{}>
  */
 function writeToConfigFile(content) {
+    let oldConfig = defaultConfig();
+    if (fs.existsSync(configFilePath)) {
+        oldConfig = toml.parse(fs.readFileSync(configFilePath, 'utf8'));
+    }
     // currently only supports {} to TOML
     let tomlified = tomlify.toToml(content, { spaces: 2 });
     return new Promise((resolve) => {
@@ -99,13 +108,18 @@ function writeToConfigFile(content) {
         if (!fs.existsSync(configDir)) {
             mkdir.mkdirp(configDir);
         }
-        if (!fs.existsSync(defaultConfig.storage.keystore)) {
-            mkdir.mkdirp(defaultConfig.storage.keystore);
+        if (!fs.existsSync(defaultConfig().storage.keystore)) {
+            mkdir.mkdirp(defaultConfig().storage.keystore);
         }
-        if (!fs.existsSync(defaultConfig.storage.password)) {
-            fs.writeFileSync(defaultConfig.storage.password, 'supersecurepassword');
+        if (!fs.existsSync(defaultConfig().storage.password)) {
+            fs.writeFileSync(defaultConfig().storage.password, 'supersecurepassword');
         }
-        fs.writeFileSync(configFilePath, tomlified);
+        if (!functions_1.isEquivalentObjects(content, oldConfig)) {
+            fs.writeFileSync(configFilePath, tomlified);
+        }
+        else {
+            functions_1.warning('No changes in configuration detected.');
+        }
         resolve(content);
     });
 }
@@ -130,6 +144,7 @@ const readConfigFile = () => {
 const createOrReadConfigFile = () => {
     return new Promise(resolve => {
         if (fs.existsSync(configFilePath)) {
+            console.log('reading config file');
             readConfigFile()
                 .then((config) => {
                 resolve(config);
@@ -137,11 +152,7 @@ const createOrReadConfigFile = () => {
                 .catch(err => functions_1.error(err));
         }
         else {
-            writeToConfigFile(defaultConfig)
-                .then((config) => {
-                resolve(config);
-            })
-                .catch(err => functions_1.error(err));
+            resolve(defaultConfig());
         }
     });
 };
@@ -167,6 +178,7 @@ createOrReadConfigFile()
     Globals_1.default(evmlc, config);
     Transfer_1.default(evmlc, config);
     Config_1.default(evmlc, config);
+    Test_1.default(evmlc, config);
     // manual processing of interactive mode
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
         // set global interactive variable so all commands inherit interactive mode
