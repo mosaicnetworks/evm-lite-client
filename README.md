@@ -11,7 +11,6 @@ EVM-Lite.
     * [Makefile](#makefile)
 * [Commands](#commands)
     * [help](#help)
-    * [exit](#exit)
     * accounts
         * [create](#accounts-create)
         * [list](#accounts-list)
@@ -20,6 +19,7 @@ EVM-Lite.
     * [globals](#globals)
     * [transfer](#transfer)
     * [config](#config)
+    * [exit](#exit)
 <!--te-->
 
 ## Installation
@@ -91,7 +91,7 @@ help [command...]                 Provides help for a given command.
 
 #### Usage
 
-```
+```console
 $ evmlc help transfer
 
   Usage: transfer [options]
@@ -111,16 +111,18 @@ $ evmlc help transfer
     -f, --from <address>     address to send from
 ```
 
-### exit
-
-Exits interactive console.
-
 ### accounts create
 ***(Connection established to node)***
 
 Creates an account encrypted with the specified password file in the specified keystore directory.
 
 ```
+accounts create [options]         Create an account.
+```
+
+#### Usage
+
+```console
 $ evmlc help accounts create
 
   Usage: accounts create [options]
@@ -136,15 +138,30 @@ $ evmlc help accounts create
     -p, --password <path>  provide password file path
     -i, --interactive      use interactive mode
 ```
-
 If no `-p, --password` or `-o, --output` are specified, the defaults from the config will be used.
+
+
+#### Example
+
+```console
+$ evmlc accounts create
+
+{"version":3,"id":"a43633f8-ff09-40fd-a1b1-0df40f49f191","address":"e5569229f939e3c8952dcbb964458a91a2370386","crypto":{"ciphertext":"4be03becfcafe020bf2f376d630e0e5f1c163754cdf03f998f1c331a3fa44d9c","cipherparams":{"iv":"7dc4dcb5e9337607b16b65604350e056"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"57ace5f8038269dee49b2474123be13bcda68c29652754b5e04602d34459687a","n":8192,"r":8,"p":1},"mac":"671be8a335d705c32953d970f647126a80e56e37d5453457b171a65aa853f886"}}
+```
+Here the default keystore was `~/.evmlc/keystore` and default password file was `~/.evmlc/pwd.txt`.
 
 ### accounts list
 ***(Connection established to node)***
 
-Lists all accounts in the local keystore directory specified in the config file.
+Lists all accounts in the local keystore directory specified in the config file. This command will also
+get balance and nonce from the node.
 
-```
+
+#### Usage
+
+The `-f, --formatted` flag will output the accounts in an ASCII table.
+
+```console
 $ evmlc help accounts list
 
   Usage: accounts list [options]
@@ -159,12 +176,23 @@ $ evmlc help accounts list
     -f, --formatted  format output
 ```
 
+#### Example
+
+```console
+$ evmlc accounts list
+[{"address":"0xAcd21941401273bD112250081F0743dEB884EBA3","balance":0,"nonce":0},{"address":"0xe5569229F939e3c8952DCBb964458a91A2370386","balance":0,"nonce":0}]
+```
+
 ### accounts get
 ***(Connection established to node)***
 
 Gets an account information from the blockchain.
 
-```
+#### Usage
+
+The `-f, --formatted` flag will output the accounts in an ASCII table.
+
+```console
 $ evmlc help accounts get
 
   Usage: accounts get [options] [address]
@@ -180,11 +208,18 @@ $ evmlc help accounts get
     -i, --interactive  use interactive mode
 ```
 
+#### Example
+
+```console
+$ evmlc accounts get 0xf6a277339cd2172d90535f40cf206613bbce05c7
+{"address":"0xF6A277339cd2172D90535F40cf206613bBCe05c7","balance":1337000000000000000000,"nonce":0}
+```
+
 ### interactive
 
 Enters into an interactive environment.
 
-```
+```console
 $ evmlc help interactive
 
   Usage: interactive [options]
@@ -202,7 +237,7 @@ $ evmlc help interactive
 
 Can set config variables using this command.
 
-```
+```console
 $ evmlc help globals
 
   Usage: globals [options]
@@ -229,7 +264,7 @@ $ evmlc help globals
 
 Transfer tokens to address.
 
-```
+```console
 $ evmlc help transfer
 
   Usage: transfer [options]
@@ -253,4 +288,9 @@ $ evmlc help transfer
 ### config
 
 Outputs current configuration as JSON.
+
+### exit
+
+Exits interactive console.
+
 
