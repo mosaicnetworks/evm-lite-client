@@ -6,7 +6,7 @@ import {warning} from "./functions";
 
 import {Controller} from "../../../lib";
 
-import UserConfig from "./UserConfig";
+import UserConfig from "../classes/UserConfig";
 
 
 // global root evmlc directory

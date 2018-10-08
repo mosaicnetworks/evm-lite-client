@@ -7,7 +7,7 @@ import {connect} from "../utils/globals";
 
 import {Controller} from "../../../lib";
 
-import UserConfig from "../utils/UserConfig";
+import UserConfig from "../classes/UserConfig";
 
 
 /**

@@ -7,7 +7,7 @@ import {interactive} from "../evmlc";
 import {error, info} from "../utils/functions";
 import {connect} from "../utils/globals";
 
-import UserConfig from "../utils/UserConfig";
+import UserConfig from "../classes/UserConfig";
 
 
 /**

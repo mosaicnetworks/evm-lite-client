@@ -4,7 +4,7 @@ import * as inquirer from 'inquirer';
 import {interactive} from "../evmlc";
 import {success} from "../utils/functions";
 
-import UserConfig from "../utils/UserConfig";
+import UserConfig from "../classes/UserConfig";
 
 
 /**

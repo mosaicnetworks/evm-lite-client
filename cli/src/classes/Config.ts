@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as toml from "toml";
 import * as tomlify from 'tomlify-j0.4'
 
-import {isEquivalentObjects, success, warning} from "./functions";
+import {isEquivalentObjects, success, warning} from "../utils/functions";
 
 
 export default class Config {

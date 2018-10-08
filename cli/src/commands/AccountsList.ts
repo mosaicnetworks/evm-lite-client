@@ -7,7 +7,7 @@ import {BaseAccount, decryptLocalAccounts, error, info, success} from "../utils/
 import {Account} from '../../../lib';
 import {connect} from "../utils/globals";
 
-import UserConfig from "../utils/UserConfig";
+import UserConfig from "../classes/UserConfig";
 
 
 /**

@@ -3,7 +3,7 @@ import * as Vorpal from "vorpal";
 import {Account} from '../../../lib/index';
 import {isEquivalentObjects} from "../utils/functions";
 
-import UserConfig from "../utils/UserConfig";
+import UserConfig from "../classes/UserConfig";
 
 
 export default function commandTest(evmlc: Vorpal, config: UserConfig) {

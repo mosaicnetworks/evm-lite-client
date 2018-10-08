@@ -1,28 +1,22 @@
-import Config from "./Config";
-import * as path from "path";
-import * as fs from "fs";
-import * as mkdir from 'mkdirp';
-
-import {evmlcDir} from "./globals";
-
-
-export default class UserConfig extends Config {
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Config_1 = require("./Config");
+const path = require("path");
+const fs = require("fs");
+const mkdir = require("mkdirp");
+const globals_1 = require("../utils/globals");
+class UserConfig extends Config_1.default {
     constructor(configFilePath) {
         super(configFilePath, UserConfig.default());
-
         let storage = this.data.storage;
         let propNames = Object.getOwnPropertyNames(storage);
-
         if (!fs.existsSync(this.data.storage.keystore)) {
-            mkdir.mkdirp(this.data.storage.keystore)
+            mkdir.mkdirp(this.data.storage.keystore);
         }
-
         if (!fs.existsSync(this.data.storage.password)) {
-            fs.writeFileSync(this.data.storage.password, 'supersecurepassword')
+            fs.writeFileSync(this.data.storage.password, 'supersecurepassword');
         }
     }
-
     static default() {
         return {
             title: 'EVM-Lite CLI Config',
@@ -36,10 +30,10 @@ export default class UserConfig extends Config {
                 gasPrice: 0
             },
             storage: {
-                keystore: path.join(evmlcDir, 'keystore'),
-                password: path.join(evmlcDir, 'pwd.txt')
+                keystore: path.join(globals_1.evmlcDir, 'keystore'),
+                password: path.join(globals_1.evmlcDir, 'pwd.txt')
             }
-        }
+        };
     }
-
 }
+exports.default = UserConfig;

@@ -15,8 +15,8 @@ import commandConfig from "./commands/Config";
 import commandInteractive from "./commands/Interactive";
 import commandTest from "./commands/Test";
 
-import RootConfig from "./utils/RootConfig";
-import UserConfig from "./utils/UserConfig";
+import RootConfig from "./classes/RootConfig";
+import UserConfig from "./classes/UserConfig";
 
 
 // global interactive mode

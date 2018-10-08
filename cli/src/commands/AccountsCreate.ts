@@ -9,7 +9,7 @@ import {getPassword, success} from "../utils/functions";
 
 import {Account} from '../../../lib';
 
-import UserConfig from "../utils/UserConfig";
+import UserConfig from "../classes/UserConfig";
 
 
 /**

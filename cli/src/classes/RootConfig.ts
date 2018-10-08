@@ -1,6 +1,6 @@
 import Config from "./Config";
 import * as path from "path";
-import {evmlcDir} from "./globals";
+import {evmlcDir} from "../utils/globals";
 
 export default class RootConfig extends Config {
 

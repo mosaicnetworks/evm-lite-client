@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const toml = require("toml");
 const tomlify = require("tomlify-j0.4");
-const functions_1 = require("./functions");
+const functions_1 = require("../utils/functions");
 class Config {
     constructor(configFilePath, defaultConfig = undefined) {
         this.configFilePath = configFilePath;

@@ -1,6 +1,6 @@
 import * as Vorpal from "vorpal";
 
-import UserConfig from "../utils/UserConfig";
+import UserConfig from "../classes/UserConfig";
 
 
 export default function commandInteractive(evmlc: Vorpal, config: UserConfig) {

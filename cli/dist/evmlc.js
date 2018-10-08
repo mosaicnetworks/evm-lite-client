@@ -13,8 +13,8 @@ const Transfer_1 = require("./commands/Transfer");
 const Config_1 = require("./commands/Config");
 const Interactive_1 = require("./commands/Interactive");
 const Test_1 = require("./commands/Test");
-const RootConfig_1 = require("./utils/RootConfig");
-const UserConfig_1 = require("./utils/UserConfig");
+const RootConfig_1 = require("./classes/RootConfig");
+const UserConfig_1 = require("./classes/UserConfig");
 // global interactive mode
 exports.interactive = false;
 /**
