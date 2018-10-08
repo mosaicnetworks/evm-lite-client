@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-cd lib && npm install && cd ..
-cd cli && npm install && npm link
-evmlc
