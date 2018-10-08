@@ -9,6 +9,7 @@ EVM-Lite.
 * [Table of Contents](#table-of-contents)
 * [Installation](#installation)
     * [Makefile](#makefile)
+* [Config](#config-file)
 * [Commands](#commands)
     * [help](#help)
     * accounts
@@ -75,6 +76,27 @@ $ evmlc
     transfer [options]                Transfer token(s) to address.
     config                            Show config JSON.
 
+```
+
+## Config
+
+The default config directory is `~/.evmlc/config` with configuration:
+
+```toml
+title = "EVM-Lite CLI Config"
+
+[connection]
+host = "127.0.0.1"
+port = "8080"
+
+[defaults]
+from = ""
+gas = 0.0
+gasPrice = 0.0
+
+[storage]
+keystore = "~/.evmlc/keystore"
+password = "~/.evmlc/pwd.txt"
 ```
 
 ## Commands
@@ -156,6 +178,9 @@ Here the default keystore was `~/.evmlc/keystore` and default password file was 
 Lists all accounts in the local keystore directory specified in the config file. This command will also
 get balance and nonce from the node.
 
+```console
+accounts list [options]           List all accounts.
+```
 
 #### Usage
 
@@ -187,6 +212,10 @@ $ evmlc accounts list
 ***(Connection established to node)***
 
 Gets an account information from the blockchain.
+
+```console
+accounts get [options] [address]  Get an account.
+```
 
 #### Usage
 
