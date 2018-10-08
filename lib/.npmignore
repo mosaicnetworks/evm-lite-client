@@ -1,9 +1,7 @@
 node_modules
-.gitignore
-lib/tsconfig.json
 tests
 CHANGELOG.md
 src
-run
-cli
-evml_cli_config.toml
+docs
+tsconfig.json
+.npmignore
