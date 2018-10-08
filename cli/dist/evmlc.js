@@ -24,13 +24,8 @@ globals_1.createDefaultDirectories()
     .then(() => {
     // default root config
     let rootConfig = new RootConfig_1.default(globals_1.rootConfigFilePath);
-    let userConfigPath = path.join(rootConfig.data.storage.configDirectory, 'config.toml');
-    let userConfig = new UserConfig_1.default(userConfigPath);
-    // if no commands are given output help by default
-    if (!process.argv[2]) {
-        process.argv[2] = 'help';
-    }
-    return userConfig;
+    // default user config
+    return new UserConfig_1.default(path.join(rootConfig.data.storage.configDirectory, 'config.toml'));
 })
     .then((userConfig) => {
     // create new Vorpal instance
@@ -44,7 +39,10 @@ globals_1.createDefaultDirectories()
     Transfer_1.default(evmlc, userConfig);
     Config_1.default(evmlc, userConfig);
     Test_1.default(evmlc, userConfig);
-    // manual processing of interactive mode
+    if (!process.argv[2]) {
+        // if no commands are given output help by default
+        process.argv[2] = 'help';
+    }
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
         // set global interactive variable so all commands inherit interactive mode
         exports.interactive = true;
