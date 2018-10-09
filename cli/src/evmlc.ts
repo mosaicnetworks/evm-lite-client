@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import * as Vorpal from "vorpal";
+import * as figlet from 'figlet';
 
 import {defaultConfigFilePath, error, initDirectories} from "./utils/globals";
 
@@ -63,8 +64,15 @@ initDirectories()
             interactive = true;
             interactiveConfig = new Config(configFilePath);
 
-            // show interactive console
-            evmlc.delimiter('evmlc$').show();
+            figlet('EVM-Lite CLI', (err, data) => {
+
+                console.log(data);
+                console.log('Entered interactive mode with configuration file: ' + configFilePath);
+
+                // show interactive console
+                evmlc.delimiter('evmlc$').show();
+
+            });
 
         } else {
 

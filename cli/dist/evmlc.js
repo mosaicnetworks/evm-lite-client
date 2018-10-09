@@ -2,6 +2,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Vorpal = require("vorpal");
+const figlet = require("figlet");
 const globals_1 = require("./utils/globals");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
@@ -44,8 +45,12 @@ globals_1.initDirectories()
         // set global interactive variable so all commands inherit interactive mode
         exports.interactive = true;
         exports.interactiveConfig = new Config_1.default(configFilePath);
-        // show interactive console
-        evmlc.delimiter('evmlc$').show();
+        figlet('EVM-Lite CLI', (err, data) => {
+            console.log(data);
+            console.log('Entered interactive mode with configuration file: ' + configFilePath);
+            // show interactive console
+            evmlc.delimiter('evmlc$').show();
+        });
     }
     else {
         // parse non-interactive command
