@@ -39,10 +39,13 @@ function commandAccountsGet(evmlc) {
                         let accountsTable = new ASCIITable();
                         let formatted = args.options.formatted || false;
                         let account = JSONBig.parse(a);
+                        let balance = account.balance;
+                        if (typeof balance === 'object')
+                            balance = account.balance.toFormat(0);
                         // add account details to ASCII table
                         accountsTable
                             .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                            .addRow(counter, account.address, account.balance, account.nonce);
+                            .addRow(counter, account.address, balance, account.nonce);
                         formatted ? globals_1.info(accountsTable.toString()) : globals_1.info(a);
                         resolve();
                     });

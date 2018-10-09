@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Vorpal = require("vorpal");
 const figlet = require("figlet");
+const fs = require("fs");
 const globals_1 = require("./utils/globals");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
@@ -42,7 +43,14 @@ globals_1.initDirectories()
     }
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
         // set config path for interactive mode
-        let configFilePath = process.argv[4] || globals_1.defaultConfigFilePath;
+        let configFilePath;
+        if ((process.argv[3] === '--config' || process.argv[3] === '-c') && fs.existsSync(process.argv[4])) {
+            configFilePath = process.argv[4];
+        }
+        else {
+            configFilePath = globals_1.defaultConfigFilePath;
+            globals_1.warning('Config file path provided does not exists. Loading default config...');
+        }
         // set global interactive variable so all commands inherit interactive mode
         exports.interactive = true;
         exports.interactiveConfig = new Config_1.default(configFilePath);

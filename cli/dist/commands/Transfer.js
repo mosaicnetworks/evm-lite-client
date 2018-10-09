@@ -84,13 +84,13 @@ function commandTransfer(evmlc) {
                         {
                             name: 'gas',
                             type: 'input',
-                            default: '1000000',
+                            default: config.data.defaults.gas || 10000,
                             message: 'Gas: '
                         },
                         {
                             name: 'gasPrice',
                             type: 'input',
-                            default: '0',
+                            default: config.data.defaults.gasPrice || 0,
                             message: 'Gas Price: '
                         }
                     ];

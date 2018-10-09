@@ -19,6 +19,7 @@ function commandAccountsList(evmlc) {
     return evmlc.command('accounts list').alias('a l')
         .description(description)
         .option('-f, --formatted', 'format output')
+        .option('-r, --remote', 'list remote accounts')
         .option('-c, --config <path>', 'set config file path')
         .action((args) => {
         return new Promise(resolve => {
@@ -27,35 +28,61 @@ function commandAccountsList(evmlc) {
             globals_1.connect(config)
                 .then((node) => {
                 let formatted = args.options.formatted || false;
-                // get all local accounts
-                globals_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
-                    .then((accounts) => {
-                    let counter = 0;
-                    let table = new ASCIITable()
-                        .setHeading('#', 'Account Address', 'Balance', 'Nonce');
-                    if (formatted) {
-                        //formatted accounts list
-                        accounts.forEach((account) => {
-                            counter++;
-                            table.addRow(counter, account.address, account.balance, account.nonce);
-                        });
-                        globals_1.info(table.toString());
-                    }
-                    else {
-                        let parsedAccounts = [];
-                        // parse each account into BaseAccount
-                        accounts.forEach(account => {
-                            parsedAccounts.push({
-                                address: account.address,
-                                balance: account.balance,
-                                nonce: account.nonce
+                let remote = args.options.remote || false;
+                if (!remote) {
+                    // get all local accounts
+                    globals_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
+                        .then((accounts) => {
+                        let counter = 0;
+                        let table = new ASCIITable()
+                            .setHeading('#', 'Account Address', 'Balance', 'Nonce');
+                        if (formatted) {
+                            //formatted accounts list
+                            accounts.forEach((account) => {
+                                counter++;
+                                table.addRow(counter, account.address, account.balance, account.nonce);
                             });
-                        });
-                        globals_1.success(JSONBig.stringify(parsedAccounts));
-                    }
-                    resolve();
-                })
-                    .catch((err) => globals_1.error(err));
+                            globals_1.info(table.toString());
+                        }
+                        else {
+                            let parsedAccounts = [];
+                            // parse each account into BaseAccount
+                            accounts.forEach(account => {
+                                parsedAccounts.push({
+                                    address: account.address,
+                                    balance: account.balance,
+                                    nonce: account.nonce
+                                });
+                            });
+                            globals_1.success(JSONBig.stringify(parsedAccounts));
+                        }
+                        resolve();
+                    })
+                        .catch((err) => globals_1.error(err));
+                }
+                else {
+                    node.api.getAccounts()
+                        .then((a) => {
+                        let accounts = JSONBig.parse(a).accounts;
+                        let counter = 0;
+                        let table = new ASCIITable()
+                            .setHeading('#', 'Account Address', 'Balance', 'Nonce');
+                        if (formatted) {
+                            accounts.forEach((account) => {
+                                let balance = account.balance;
+                                if (typeof balance === 'object')
+                                    balance = account.balance.toFormat(0);
+                                counter++;
+                                table.addRow(counter, account.address, balance, account.nonce);
+                            });
+                            globals_1.info(table.toString());
+                        }
+                        else {
+                            globals_1.success(a);
+                        }
+                    })
+                        .catch(err => globals_1.error(err));
+                }
             })
                 .catch(err => globals_1.error(err));
         });

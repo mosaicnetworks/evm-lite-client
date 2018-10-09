@@ -33,7 +33,7 @@ export let node: Controller = undefined;
 export interface BaseAccount {
     address: string,
     nonce: number,
-    balance: number
+    balance: any
 }
 
 export const getPassword = (passwordPath: string): string => {
@@ -78,6 +78,10 @@ export const decryptLocalAccounts = (node: Controller, keystorePath: string, pas
                     let account: BaseAccount = JSONBig.parse(a);
 
                     decryptedAccount.balance = account.balance;
+
+                    if (typeof account.balance === 'object')
+                        decryptedAccount.balance = account.balance.toFormat(0);
+
                     decryptedAccount.nonce = account.nonce;
 
                     accounts.push(decryptedAccount);

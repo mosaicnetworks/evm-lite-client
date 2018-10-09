@@ -53,6 +53,8 @@ exports.decryptLocalAccounts = (node, keystorePath, passwordPath) => {
             promises.push(node.api.getAccount(decryptedAccount.address).then((a) => {
                 let account = JSONBig.parse(a);
                 decryptedAccount.balance = account.balance;
+                if (typeof account.balance === 'object')
+                    decryptedAccount.balance = account.balance.toFormat(0);
                 decryptedAccount.nonce = account.nonce;
                 accounts.push(decryptedAccount);
             }));
@@ -60,15 +62,15 @@ exports.decryptLocalAccounts = (node, keystorePath, passwordPath) => {
     });
     return Promise.all(promises)
         .then(() => {
-            return new Promise(resolve => {
-                resolve(accounts);
-            });
-        })
-        .catch(() => {
-            return new Promise(resolve => {
-                resolve([]);
-            });
+        return new Promise(resolve => {
+            resolve(accounts);
         });
+    })
+        .catch(() => {
+        return new Promise(resolve => {
+            resolve([]);
+        });
+    });
 };
 exports.isEquivalentObjects = (objectA, objectB) => {
     // console.log(objectA);
@@ -113,7 +115,7 @@ exports.connect = (config) => {
             })
                 .catch((err) => {
                 exports.node = null;
-                    exports.warning(err);
+                exports.warning(err);
                 reject();
             });
         }

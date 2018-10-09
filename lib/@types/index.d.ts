@@ -415,7 +415,7 @@ declare namespace EVMLClient {
     export class Account {
 
         address: string;
-        balance: number;
+        balance: any;
         nonce: number;
         privateKey: string;
         sign: (data: string) => any;
