@@ -6,6 +6,7 @@ import {Account} from '../../../lib/index';
 export default function commandTest(evmlc: Vorpal) {
     return evmlc.command('test').alias('test')
         .option('-c, --config <path>', 'set config file path')
+        .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(resolve => {
                 let string = '/Users/danu/.evmlc/config/config.toml';

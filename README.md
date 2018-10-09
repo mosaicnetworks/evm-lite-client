@@ -72,13 +72,16 @@ $ evmlc
 
     help [command...]                 Provides help for a given command.
     exit                              Exits application.
-    accounts create [options]         Create an account.
-    accounts list [options]           List all accounts.
-    accounts get [options] [address]  Get an account.
-    interactive                       Enter interactive mode.
-    globals [options]                 Set default global values.
-    transfer [options]                Transfer token(s) to address.
-    config                            Show config JSON.
+    config view [options]             Output current configuration file as JSON.
+    config set [options]              Set values of the default config file or the one provided with -c, --config flag.
+    accounts create [options]         Allows you to create and encrypt accounts locally. Created accounts will either be placed in the keystore
+                                      provided by -o, --output flag or if no flag is provided, in the keystore specified in the configuration file.
+    accounts list [options]           List all accounts in the local keystore directory provided by the configuration file. This command will also
+                                      get a balance and nonce for all the accounts from the node if a valid connection is established.
+    accounts get [options] [address]  Gets account balance and nonce from a node with a valid connection.
+    interactive [options]             Enter into interactive mode with default configuration or the one provided with -c, --config.
+    transfer [options]                Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the
+                                      configuration file.
 
 ```
 
@@ -167,24 +170,15 @@ help [command...]                 Provides help for a given command.
 #### Usage
 
 ```console
-$ evmlc help transfer
+$ evmlc help help
 
-  Usage: transfer [options]
+  Usage: help [options] [command...]
 
-  Alias: t
-
-  Transfer token(s) to address.
+  Provides help for a given command.
 
   Options:
 
-    --help                   output usage information
-    -i, --interactive        value to send
-    -v, --value <value>      value to send
-    -g, --gas <value>        gas to send at
-    -c, --config <path>      set config file path
-    -gp, --gasprice <value>  gas price to send at
-    -t, --to <address>       address to send to
-    -f, --from <address>     address to send from
+    --help  output usage information
 ```
 
 ### accounts create
@@ -192,7 +186,8 @@ $ evmlc help transfer
 Creates an account encrypted with the specified password file in the specified keystore directory.
 
 ```
-accounts create [options]         Create an account.
+accounts create [options]         Allows you to create and encrypt accounts locally. Created accounts will either be placed in the keystore
+                                  provided by -o, --output flag or if no flag is provided, in the keystore specified in the configuration file.
 ```
 
 #### Usage
@@ -233,7 +228,8 @@ Lists all accounts in the local keystore directory specified in the config file.
 get balance and nonce from the node.
 
 ```console
-accounts list [options]           List all accounts.
+accounts list [options]           List all accounts in the local keystore directory provided by the configuration file. This command will also
+                                  get a balance and nonce for all the accounts from the node if a valid connection is established.
 ```
 
 #### Usage
@@ -270,7 +266,7 @@ $ evmlc accounts list
 Gets an account information from the blockchain.
 
 ```console
-accounts get [options] [address]  Get an account.
+accounts get [options] [address]  Gets account balance and nonce from a node with a valid connection.
 ```
 
 #### Usage
@@ -307,6 +303,12 @@ $ evmlc accounts get 0xf6a277339cd2172d90535f40cf206613bbce05c7
 Enters into an interactive environment. If `-c, --config` is provided you will taken into an interactive environment with the path as default for the configuration file.
 
 ```console
+interactive [options]             Enter into interactive mode with default configuration or the one provided with -c, --config.
+```
+
+#### Usage
+
+```console
 $ evmlc help interactive
 
   Usage: interactive [options]
@@ -325,6 +327,9 @@ $ evmlc help interactive
 
 View configuration file as JSON.
 
+```console
+config view [options]             Output current configuration file as JSON.
+```
 
 #### Usage
 ```console
@@ -345,6 +350,10 @@ $ evmlc help config view
 ### config set
 
 Set config file values.
+
+```console
+config set [options]              Set values of the default config file or the one provided with -c, --config flag.
+```
 
 #### Usage
 
@@ -375,6 +384,13 @@ $ evmlc help config set
 ***(Connection established to node)***
 
 Transfer tokens to address.
+
+```console
+transfer [options]                Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the
+                                  configuration file.
+```
+
+#### Usage
 
 ```console
 $ evmlc help transfer
