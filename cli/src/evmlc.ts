@@ -50,6 +50,8 @@ initDirectories()
 
         if (!process.argv[2]) {
 
+            console.log(`\n  A Command Line Interface to interact with EVM-Lite.`);
+
             // if no commands are given output help by default
             process.argv[2] = 'help';
 
