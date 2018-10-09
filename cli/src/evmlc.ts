@@ -4,7 +4,7 @@ import * as Vorpal from "vorpal";
 import * as figlet from 'figlet';
 import * as fs from "fs";
 
-import {defaultConfigFilePath, error, getConfig, initDirectories, warning} from "./utils/globals";
+import {defaultConfigFilePath, error, initDirectories, warning} from "./utils/globals";
 
 import commandAccountsCreate from './commands/AccountsCreate';
 import commandAccountsList from './commands/AccountsList';
@@ -61,15 +61,15 @@ initDirectories()
         if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
 
             // set config path for interactive mode
-            let configFilePath: string;
+            let configFilePath: string = defaultConfigFilePath;
 
-            if ((process.argv[3] === '--config' || process.argv[3] === '-c') && fs.existsSync(process.argv[4])) {
-                configFilePath = process.argv[4];
-            } else {
-                configFilePath = defaultConfigFilePath;
-                warning('Config file path provided does not exists. Loading default config...');
+            if ((process.argv[3] === '--config' || process.argv[3] === '-c')) {
+                if (fs.existsSync(process.argv[4])) {
+                    configFilePath = process.argv[4];
+                } else {
+                    warning('Config file path provided does not exists. Loading default config...');
+                }
             }
-
             // set global interactive variable so all commands inherit interactive mode
             interactive = true;
             interactiveConfig = new Config(configFilePath);

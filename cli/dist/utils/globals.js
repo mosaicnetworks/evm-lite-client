@@ -10,6 +10,7 @@ const lib_1 = require("../../../lib");
 const Config_1 = require("../classes/Config");
 const l = console.log;
 const chalk = Chalk.default;
+// logging functions
 exports.success = (message) => l(chalk.green(message));
 exports.warning = (message) => l(chalk.yellow(message));
 exports.error = (message) => l(chalk.red(message));
@@ -23,6 +24,8 @@ exports.defaultConfigFilePath = path.join(exports.defaultConfigDir, 'config.toml
 // when in interactive mode this is resolved instead
 // of connecting multiple times to improve console speed
 exports.node = undefined;
+// read password file
+// create directory if it does not exists
 exports.getPassword = (passwordPath) => {
     if (passwordPath) {
         let list = passwordPath.split('/');
@@ -40,6 +43,9 @@ exports.getPassword = (passwordPath) => {
     }
     return undefined;
 };
+// decrypts local accounts in keystore with provided password file
+// gets balance and nonce from node
+// connection required
 exports.decryptLocalAccounts = (node, keystorePath, passwordPath) => {
     let accounts = [];
     let promises = [];
@@ -72,6 +78,8 @@ exports.decryptLocalAccounts = (node, keystorePath, passwordPath) => {
         });
     });
 };
+// checks if two objects are equivalent
+// recursion for objects within objects
 exports.isEquivalentObjects = (objectA, objectB) => {
     // console.log(objectA);
     // console.log(objectB);
@@ -124,6 +132,7 @@ exports.connect = (config) => {
         }
     });
 };
+// initialise root cli directory
 exports.initDirectories = () => {
     return new Promise(resolve => {
         // .evmlc
@@ -133,9 +142,12 @@ exports.initDirectories = () => {
         resolve();
     });
 };
+// get config
+// returns an instance or interactive instance
 exports.getConfig = (optionalPath) => {
     return evmlc_1.interactiveConfig || new Config_1.default(optionalPath || exports.defaultConfigFilePath);
 };
+// return if interactive or not
 exports.getInteractive = (optionalInteractive) => {
     return optionalInteractive || evmlc_1.interactive;
 };

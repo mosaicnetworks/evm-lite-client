@@ -14,6 +14,7 @@ import Config from "../classes/Config";
 const l = console.log;
 const chalk = Chalk.default;
 
+// logging functions
 export const success = (message: any): void => l(chalk.green(message));
 export const warning = (message: any): void => l(chalk.yellow(message));
 export const error = (message: any): void => l(chalk.red(message));
@@ -36,6 +37,8 @@ export interface BaseAccount {
     balance: any
 }
 
+// read password file
+// create directory if it does not exists
 export const getPassword = (passwordPath: string): string => {
     if (passwordPath) {
         let list = passwordPath.split('/');
@@ -61,6 +64,9 @@ export const getPassword = (passwordPath: string): string => {
     return undefined;
 };
 
+// decrypts local accounts in keystore with provided password file
+// gets balance and nonce from node
+// connection required
 export const decryptLocalAccounts = (node: Controller, keystorePath: string, passwordPath: string): Promise<Account[]> => {
     let accounts: Account[] = [];
     let promises = [];
@@ -104,6 +110,8 @@ export const decryptLocalAccounts = (node: Controller, keystorePath: string, pas
 
 };
 
+// checks if two objects are equivalent
+// recursion for objects within objects
 export const isEquivalentObjects = (objectA: any, objectB: any) => {
 
     // console.log(objectA);
@@ -162,6 +170,7 @@ export const connect = (config: Config): Promise<Controller> => {
     });
 };
 
+// initialise root cli directory
 export const initDirectories = (): Promise<void> => {
     return new Promise<void>(resolve => {
         // .evmlc
@@ -172,10 +181,13 @@ export const initDirectories = (): Promise<void> => {
     });
 };
 
+// get config
+// returns an instance or interactive instance
 export const getConfig = (optionalPath: string): Config => {
     return interactiveConfig || new Config(optionalPath || defaultConfigFilePath)
 };
 
+// return if interactive or not
 export const getInteractive = (optionalInteractive: boolean): boolean => {
     return optionalInteractive || interactive;
 };

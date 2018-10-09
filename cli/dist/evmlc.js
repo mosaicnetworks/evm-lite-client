@@ -43,13 +43,14 @@ globals_1.initDirectories()
     }
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
         // set config path for interactive mode
-        let configFilePath;
-        if ((process.argv[3] === '--config' || process.argv[3] === '-c') && fs.existsSync(process.argv[4])) {
-            configFilePath = process.argv[4];
-        }
-        else {
-            configFilePath = globals_1.defaultConfigFilePath;
-            globals_1.warning('Config file path provided does not exists. Loading default config...');
+        let configFilePath = globals_1.defaultConfigFilePath;
+        if ((process.argv[3] === '--config' || process.argv[3] === '-c')) {
+            if (fs.existsSync(process.argv[4])) {
+                configFilePath = process.argv[4];
+            }
+            else {
+                globals_1.warning('Config file path provided does not exists. Loading default config...');
+            }
         }
         // set global interactive variable so all commands inherit interactive mode
         exports.interactive = true;
