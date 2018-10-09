@@ -153,7 +153,6 @@ password = "~/.evmlc/pwd.txt"
 ```
 
 ## Commands
-
 By default all commands will output raw JSON unless `-f, --formatted` flag is provided. A connection to the node is not required unless stated in each command.
 
 All commands by default accept a `-c, --config` flag which allow you to provide a config file path.
@@ -180,7 +179,7 @@ $ evmlc help help
 
     --help  output usage information
 ```
-
+---
 ### accounts create
 
 Creates an account encrypted with the specified password file in the specified keystore directory.
@@ -221,13 +220,15 @@ $ evmlc accounts create
 ```
 Here the default keystore was `~/.evmlc/keystore` and default password file was `~/.evmlc/pwd.txt`.
 
+---
+
 ### accounts list
 ***(Connection established to node)***
 
 Lists all accounts in the local keystore directory specified in the config file. This command will also
 get balance and nonce from the node.
 
-```console
+```
 accounts list [options]           List all accounts in the local keystore directory provided by the configuration file. This command will also
                                   get a balance and nonce for all the accounts from the node if a valid connection is established.
 ```
@@ -260,12 +261,14 @@ $ evmlc accounts list
 [{"address":"0xAcd21941401273bD112250081F0743dEB884EBA3","balance":0,"nonce":0},{"address":"0xe5569229F939e3c8952DCBb964458a91A2370386","balance":0,"nonce":0}]
 ```
 
+---
+
 ### accounts get
 ***(Connection established to node)***
 
 Gets an account information from the blockchain.
 
-```console
+```
 accounts get [options] [address]  Gets account balance and nonce from a node with a valid connection.
 ```
 
@@ -298,11 +301,13 @@ $ evmlc accounts get 0xf6a277339cd2172d90535f40cf206613bbce05c7
 {"address":"0xF6A277339cd2172D90535F40cf206613bBCe05c7","balance":1337000000000000000000,"nonce":0}
 ```
 
+---
+
 ### interactive
 
 Enters into an interactive environment. If `-c, --config` is provided you will taken into an interactive environment with the path as default for the configuration file.
 
-```console
+```
 interactive [options]             Enter into interactive mode with default configuration or the one provided with -c, --config.
 ```
 
@@ -323,11 +328,13 @@ $ evmlc help interactive
     -c, --config <path>  set config file path
 ```
 
+---
+
 ### config view
 
 View configuration file as JSON.
 
-```console
+```
 config view [options]             Output current configuration file as JSON.
 ```
 
@@ -347,11 +354,13 @@ $ evmlc help config view
     -c, --config <path>  set config file path
 ```
 
+---
+
 ### config set
 
 Set config file values.
 
-```console
+```
 config set [options]              Set values of the default config file or the one provided with -c, --config flag.
 ```
 
@@ -380,12 +389,14 @@ $ evmlc help config set
     --pwd <path>           password path
 ```
 
+---
+
 ### transfer
 ***(Connection established to node)***
 
 Transfer tokens to address.
 
-```console
+```
 transfer [options]                Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the
                                   configuration file.
 ```
@@ -412,6 +423,8 @@ $ evmlc help transfer
     -c, --config <path>      set config file path
     -f, --from <address>     address to send from
 ```
+
+---
 
 ### exit
 
