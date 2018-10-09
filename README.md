@@ -130,7 +130,7 @@ $ evmlc
 
 ## Configuration Settings
 
-The default config directory is `~/.evmlc/config` with configuration:
+The default config file path is `~/.evmlc/config/config.toml` with configuration:
 
 ```toml
 title = "EVM-Lite CLI Config"
@@ -188,7 +188,6 @@ $ evmlc help transfer
 ```
 
 ### accounts create
-***(Connection established to node)***
 
 Creates an account encrypted with the specified password file in the specified keystore directory.
 
