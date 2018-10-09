@@ -21,19 +21,19 @@ globals_1.initDirectories()
     .then(() => {
     // create new Vorpal instance
     const evmlc = new Vorpal().version("0.1.0");
-        /**
-         *commands: (Vorpal, UserConfig, RootConfig = undefined) => Vorpal.Command
-         */
-        // Config commands
-        ConfigView_1.default(evmlc);
-        ConfigSet_1.default(evmlc);
-        // Account commands
-        AccountsCreate_1.default(evmlc);
-        AccountsList_1.default(evmlc);
-        AccountsGet_1.default(evmlc);
-        Interactive_1.default(evmlc);
-        Transfer_1.default(evmlc);
-        Test_1.default(evmlc);
+    /**
+     *commands: (Vorpal) => Vorpal.Command
+     */
+    // Config commands
+    ConfigView_1.default(evmlc);
+    ConfigSet_1.default(evmlc);
+    // Account commands
+    AccountsCreate_1.default(evmlc);
+    AccountsList_1.default(evmlc);
+    AccountsGet_1.default(evmlc);
+    Interactive_1.default(evmlc);
+    Transfer_1.default(evmlc);
+    Test_1.default(evmlc);
     if (!process.argv[2]) {
         // if no commands are given output help by default
         process.argv[2] = 'help';

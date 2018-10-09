@@ -4,7 +4,7 @@ import * as tomlify from 'tomlify-j0.4';
 import * as mkdir from 'mkdirp';
 import * as path from "path";
 
-import {evmlcDir, isEquivalentObjects, success, warning} from "../utils/globals";
+import {evmlcDir, info, isEquivalentObjects, success, warning} from "../utils/globals";
 
 
 export default class Config {
@@ -54,6 +54,7 @@ export default class Config {
     }
 
     save(): boolean {
+        info(`Config is being read from and updated at ${this.configFilePath}`);
         if (isEquivalentObjects(this.data, this._initialData)) {
             warning('No changes in configuration detected.');
             return false;

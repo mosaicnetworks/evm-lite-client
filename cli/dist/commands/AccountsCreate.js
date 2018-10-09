@@ -19,18 +19,20 @@ const lib_1 = require("../../../lib");
  * @returns Vorpal Command instance
  */
 function commandAccountsCreate(evmlc) {
+    let description = `Allows you to create and encrypt accounts locally. Created accounts will either be placed in the keystore 
+        provided by -o, --output flag or if no flag is provided, in the keystore specified in the configuration file.`;
     return evmlc.command('accounts create').alias('a c')
-        .description('Create an account.')
+        .description(description)
         .option('-o, --output <path>', 'provide output path')
         .option('-p, --password <path>', 'provide password file path')
         .option('-i, --interactive', 'use interactive mode')
         .option('-c, --config <path>', 'set config file path')
         .types({
-            string: ['p', 'password', 'o', 'output', 'config']
+        string: ['p', 'password', 'o', 'output', 'config']
     })
         .action((args) => {
-            let i = globals_1.getInteractive(args.options.interactive);
-            let config = globals_1.getConfig(args.options.config);
+        let i = globals_1.getInteractive(args.options.interactive);
+        let config = globals_1.getConfig(args.options.config);
         return new Promise(resolve => {
             let createAccount = (directory, name, data) => {
                 if (!fs.existsSync(directory)) {

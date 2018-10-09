@@ -17,7 +17,12 @@ import {Controller} from "../../../lib";
  */
 export default function commandTransfer(evmlc: Vorpal) {
 
+    let description =
+        `Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the 
+        configuration file.`;
+
     return evmlc.command('transfer').alias('t')
+        .description(description)
         .option('-i, --interactive', 'value to send')
         .option('-v, --value <value>', 'value to send')
         .option('-g, --gas <value>', 'gas to send at')
@@ -140,6 +145,5 @@ export default function commandTransfer(evmlc: Vorpal) {
             });
 
         })
-        .description('Transfer token(s) to address.');
 
 };

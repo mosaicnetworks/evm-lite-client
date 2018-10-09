@@ -19,10 +19,14 @@ import {Account} from '../../../lib';
  */
 export default function commandAccountsList(evmlc: Vorpal) {
 
+    let description =
+        `List all accounts in the local keystore directory provided by the configuration file. This command will also
+        get a balance and nonce for all the accounts from the node if a valid connection is established.`;
+
     return evmlc.command('accounts list').alias('a l')
+        .description(description)
         .option('-f, --formatted', 'format output')
         .option('-c, --config <path>', 'set config file path')
-        .description('List all accounts.')
         .action((args: Vorpal.Args): Promise<void> => {
 
             return new Promise<void>(resolve => {

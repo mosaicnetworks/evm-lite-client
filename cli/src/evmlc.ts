@@ -31,7 +31,7 @@ initDirectories()
         const evmlc = new Vorpal().version("0.1.0");
 
         /**
-         *commands: (Vorpal, UserConfig, RootConfig = undefined) => Vorpal.Command
+         *commands: (Vorpal) => Vorpal.Command
          */
 
         // Config commands

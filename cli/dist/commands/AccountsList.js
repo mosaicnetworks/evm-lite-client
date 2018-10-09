@@ -14,10 +14,12 @@ const globals_1 = require("../utils/globals");
  * @returns Vorpal Command instance
  */
 function commandAccountsList(evmlc) {
+    let description = `List all accounts in the local keystore directory provided by the configuration file. This command will also
+        get a balance and nonce for all the accounts from the node if a valid connection is established.`;
     return evmlc.command('accounts list').alias('a l')
+        .description(description)
         .option('-f, --formatted', 'format output')
         .option('-c, --config <path>', 'set config file path')
-        .description('List all accounts.')
         .action((args) => {
         return new Promise(resolve => {
             let config = globals_1.getConfig(args.options.config);
@@ -26,7 +28,7 @@ function commandAccountsList(evmlc) {
                 .then((node) => {
                 let formatted = args.options.formatted || false;
                 // get all local accounts
-                    globals_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
+                globals_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                     .then((accounts) => {
                     let counter = 0;
                     let table = new ASCIITable()
@@ -53,7 +55,7 @@ function commandAccountsList(evmlc) {
                     }
                     resolve();
                 })
-                        .catch((err) => globals_1.error(err));
+                    .catch((err) => globals_1.error(err));
             })
                 .catch(err => globals_1.error(err));
         });

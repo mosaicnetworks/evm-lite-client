@@ -15,7 +15,9 @@ const globals_1 = require("../utils/globals");
  * @returns Vorpal Command instance
  */
 function commandAccountsGet(evmlc) {
+    let description = `Gets account balance and nonce from a node with a valid connection.`;
     return evmlc.command('accounts get [address]').alias('a g')
+        .description(description)
         .option('-f, --formatted', 'format output')
         .option('-c, --config <path>', 'set config file path')
         .option('-i, --interactive', 'use interactive mode')
@@ -77,8 +79,7 @@ function commandAccountsGet(evmlc) {
             })
                 .catch(err => globals_1.error(err));
         });
-    })
-        .description('Get an account.');
+    });
 }
 exports.default = commandAccountsGet;
 ;

@@ -8,9 +8,10 @@ const globals_1 = require("../utils/globals");
  * @param {Vorpal} evmlc - The command line object.
  * @returns Vorpal Command instance
  */
-function commandConfigUser(evmlc) {
+function commandConfigSet(evmlc) {
+    let description = `Set values of the default config file or the one provided with -c, --config flag.`;
     return evmlc.command('config set').alias('c s')
-        .description('Set config values.')
+        .description(description)
         .option('-i, --interactive', 'enter into interactive command')
         .option('-h, --host <host>', 'default host')
         .option('-p, --port <port>', 'default port')
@@ -21,7 +22,7 @@ function commandConfigUser(evmlc) {
         .option('--keystore <path>', 'keystore path')
         .option('--pwd <path>', 'password path')
         .types({
-            string: ['h', 'host', 'from', 'keystore', 'pwd', 'config']
+        string: ['h', 'host', 'from', 'keystore', 'pwd', 'config']
     })
         .action((args) => {
         return new Promise(resolve => {
@@ -117,6 +118,5 @@ function commandConfigUser(evmlc) {
         });
     });
 }
-
-exports.default = commandConfigUser;
+exports.default = commandConfigSet;
 ;
