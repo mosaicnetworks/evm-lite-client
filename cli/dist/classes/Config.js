@@ -16,14 +16,14 @@ class Config {
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
         }
+        else {
+        }
     }
-
     static readFile(path) {
         if (fs.existsSync(path)) {
             return fs.readFileSync(path, 'utf8');
         }
     }
-
     static default() {
         return {
             title: 'EVM-Lite CLI Config',
@@ -46,6 +46,7 @@ class Config {
         return tomlify.toToml(this.data, { spaces: 2 });
     }
     save() {
+        globals_1.info(`Config is being read from and updated at ${this.configFilePath}`);
         if (globals_1.isEquivalentObjects(this.data, this._initialData)) {
             globals_1.warning('No changes in configuration detected.');
             return false;

@@ -12,7 +12,10 @@ const globals_1 = require("../utils/globals");
  * @returns Vorpal Command instance
  */
 function commandTransfer(evmlc) {
+    let description = `Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the 
+        configuration file.`;
     return evmlc.command('transfer').alias('t')
+        .description(description)
         .option('-i, --interactive', 'value to send')
         .option('-v, --value <value>', 'value to send')
         .option('-g, --gas <value>', 'gas to send at')
@@ -30,7 +33,7 @@ function commandTransfer(evmlc) {
             // connect to API endpoints
             globals_1.connect(config)
                 .then((node) => {
-                    globals_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
+                globals_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                     .then((accounts) => {
                     // handles signing and sending transaction
                     let handleTransfer = (tx) => {
@@ -44,7 +47,7 @@ function commandTransfer(evmlc) {
                                 .then((signed) => {
                                 node.api.sendRawTx(signed.rawTransaction)
                                     .then(resp => {
-                                        globals_1.success(`Transferred.`);
+                                    globals_1.success(`Transferred.`);
                                     resolve();
                                 })
                                     .catch(err => {
@@ -81,13 +84,13 @@ function commandTransfer(evmlc) {
                         {
                             name: 'gas',
                             type: 'input',
-                            default: '1000000',
+                            default: config.data.defaults.gas || 10000,
                             message: 'Gas: '
                         },
                         {
                             name: 'gasPrice',
                             type: 'input',
-                            default: '0',
+                            default: config.data.defaults.gasPrice || 0,
                             message: 'Gas Price: '
                         }
                     ];
@@ -113,12 +116,11 @@ function commandTransfer(evmlc) {
                         }
                     }
                 })
-                        .catch(err => globals_1.error(err));
+                    .catch(err => globals_1.error(err));
             })
                 .catch(err => globals_1.error(err));
         });
-    })
-        .description('Transfer token(s) to address.');
+    });
 }
 exports.default = commandTransfer;
 ;

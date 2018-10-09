@@ -15,7 +15,9 @@ const globals_1 = require("../utils/globals");
  * @returns Vorpal Command instance
  */
 function commandAccountsGet(evmlc) {
+    let description = `Gets account balance and nonce from a node with a valid connection.`;
     return evmlc.command('accounts get [address]').alias('a g')
+        .description(description)
         .option('-f, --formatted', 'format output')
         .option('-c, --config <path>', 'set config file path')
         .option('-i, --interactive', 'use interactive mode')
@@ -37,10 +39,13 @@ function commandAccountsGet(evmlc) {
                         let accountsTable = new ASCIITable();
                         let formatted = args.options.formatted || false;
                         let account = JSONBig.parse(a);
+                        let balance = account.balance;
+                        if (typeof balance === 'object')
+                            balance = account.balance.toFormat(0);
                         // add account details to ASCII table
                         accountsTable
                             .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                            .addRow(counter, account.address, account.balance, account.nonce);
+                            .addRow(counter, account.address, balance, account.nonce);
                         formatted ? globals_1.info(accountsTable.toString()) : globals_1.info(a);
                         resolve();
                     });
@@ -77,8 +82,7 @@ function commandAccountsGet(evmlc) {
             })
                 .catch(err => globals_1.error(err));
         });
-    })
-        .description('Get an account.');
+    });
 }
 exports.default = commandAccountsGet;
 ;

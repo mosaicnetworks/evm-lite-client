@@ -14,8 +14,11 @@ import Config from "../classes/Config";
 
 export default function commandConfigUser(evmlc: Vorpal) {
 
+    let description =
+        `Output current configuration file as JSON.`;
+
     return evmlc.command('config view').alias('c v')
-        .description('View config file.')
+        .description(description)
         .option('-c, --config <path>', 'set config file path')
         .types({
             string: ['config']

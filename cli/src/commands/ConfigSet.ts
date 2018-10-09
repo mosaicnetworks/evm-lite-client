@@ -11,10 +11,13 @@ import {getConfig, getInteractive, success, warning} from "../utils/globals";
  * @returns Vorpal Command instance
  */
 
-export default function commandConfigUser(evmlc: Vorpal) {
+export default function commandConfigSet(evmlc: Vorpal) {
+
+    let description =
+        `Set values of the default config file or the one provided with -c, --config flag.`;
 
     return evmlc.command('config set').alias('c s')
-        .description('Set config values.')
+        .description(description)
         .option('-i, --interactive', 'enter into interactive command')
         .option('-h, --host <host>', 'default host')
         .option('-p, --port <port>', 'default port')

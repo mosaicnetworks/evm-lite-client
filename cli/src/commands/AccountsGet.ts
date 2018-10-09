@@ -18,7 +18,11 @@ import {connect, error, getConfig, getInteractive, info} from "../utils/globals"
  */
 export default function commandAccountsGet(evmlc: Vorpal) {
 
+    let description =
+        `Gets account balance and nonce from a node with a valid connection.`;
+
     return evmlc.command('accounts get [address]').alias('a g')
+        .description(description)
         .option('-f, --formatted', 'format output')
         .option('-c, --config <path>', 'set config file path')
         .option('-i, --interactive', 'use interactive mode')
@@ -50,14 +54,20 @@ export default function commandAccountsGet(evmlc: Vorpal) {
 
                                 let account: {
                                     address: string,
-                                    balance: number,
+                                    balance: any,
                                     nonce: number
                                 } = JSONBig.parse(a);
+
+                                let balance = account.balance;
+
+                                if (typeof balance === 'object')
+                                    balance = account.balance.toFormat(0);
+
 
                                 // add account details to ASCII table
                                 accountsTable
                                     .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                                    .addRow(counter, account.address, account.balance, account.nonce);
+                                    .addRow(counter, account.address, balance, account.nonce);
 
                                 formatted ? info(accountsTable.toString()) : info(a);
 
@@ -107,7 +117,6 @@ export default function commandAccountsGet(evmlc: Vorpal) {
                     .catch(err => error(err));
 
             });
-        })
-        .description('Get an account.');
+        });
 
 };
