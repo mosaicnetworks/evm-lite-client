@@ -4,6 +4,7 @@ const JSONBig = require("json-bigint");
 function commandTest(evmlc) {
     return evmlc.command('test').alias('test')
         .option('-c, --config <path>', 'set config file path')
+        .hidden()
         .action((args) => {
         return new Promise(resolve => {
             // connect(getConfig(undefined))

@@ -4,7 +4,7 @@ import * as Vorpal from "vorpal";
 import * as figlet from 'figlet';
 import * as fs from "fs";
 
-import {defaultConfigFilePath, error, initDirectories, warning} from "./utils/globals";
+import {defaultConfigFilePath, error, getConfig, initDirectories, warning} from "./utils/globals";
 
 import commandAccountsCreate from './commands/AccountsCreate';
 import commandAccountsList from './commands/AccountsList';

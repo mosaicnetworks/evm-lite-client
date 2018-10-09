@@ -21,6 +21,8 @@ export default class Config {
 
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
+        } else {
+
         }
     }
 

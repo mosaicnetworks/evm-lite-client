@@ -1,11 +1,11 @@
 import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
-import {connect, getConfig} from "../utils/globals";
 
 
 export default function commandTest(evmlc: Vorpal) {
     return evmlc.command('test').alias('test')
         .option('-c, --config <path>', 'set config file path')
+        .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(resolve => {
                 // connect(getConfig(undefined))

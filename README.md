@@ -12,6 +12,7 @@ EVM-Lite.
     * [Dependencies](#dependencies)
         * [Client Library](#client-library)
         * [Command Line Interface](#command-line-interface)
+* [Demo](#demo)
 * [Configuration Settings](#configuration-settings)
 * [Commands](#commands)
     * [help](#help)
@@ -130,6 +131,74 @@ $ evmlc
     "vorpal": "^1.12.0"
 }
 ```
+
+## Demo
+
+Once installed run `evmlc`. An example of the expected out is displayed below:
+
+```console
+$ evmlc
+
+  A Command Line Interface to interact with EVM-Lite.
+
+  Commands:
+
+    help [command...]                 Provides help for a given command.
+    exit                              Exits application.
+    config view [options]             Output current configuration file as JSON.
+    config set [options]              Set values of the default config file or the one provided with -c, --config flag.
+    accounts create [options]         Allows you to create and encrypt accounts locally. Created accounts will either be placed in the keystore
+                                      provided by -o, --output flag or if no flag is provided, in the keystore specified in the configuration file.
+    accounts list [options]           List all accounts in the local keystore directory provided by the configuration file. This command will also
+                                      get a balance and nonce for all the accounts from the node if a valid connection is established.
+    accounts get [options] [address]  Gets account balance and nonce from a node with a valid connection.
+    interactive [options]             Enter into interactive mode with default configuration or the one provided with -c, --config.
+    transfer [options]                Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the
+                                      configuration file.
+```
+
+The easiest way to change configuration file through the CLI is enter interactive mode. Which can be done with the
+`interactive` or `i` command:
+
+```console
+$ evmlc interactive
+  _______     ____  __       _     _ _          ____ _     ___
+ | ____\ \   / /  \/  |     | |   (_) |_ ___   / ___| |   |_ _|
+ |  _|  \ \ / /| |\/| |_____| |   | | __/ _ \ | |   | |    | |
+ | |___  \ V / | |  | |_____| |___| | ||  __/ | |___| |___ | |
+ |_____|  \_/  |_|  |_|     |_____|_|\__\___|  \____|_____|___|
+
+Entered interactive mode with configuration file: [...]/.evmlc/config/config.toml
+evmlc$
+
+```
+
+Now running `config view` or `c v`, will show you the default configuration as JSON.
+
+```console
+evmlc$ config view
+
+{ title: 'EVM-Lite CLI Config',
+  connection: { host: '127.0.0.1', port: '8080' },
+  defaults: { from: '', gas: 0, gasPrice: 0 },
+  storage:
+   { keystore: '[...]/.evmlc/keystore',
+     password: '[...]/.evmlc/pwd.txt' } }
+```
+
+To change default config values run `config set` or `c s`. You will be taken to an interactive prompt to change connection and default values.
+
+```console
+evmlc$ config set
+
+? Host:  127.0.0.1
+? Port:  8080
+? Default From Address:
+? Default Gas:  0
+? Default Gas Price:  0
+```
+
+
 
 ## Configuration Settings
 

@@ -16,6 +16,8 @@ class Config {
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
         }
+        else {
+        }
     }
     static readFile(path) {
         if (fs.existsSync(path)) {
