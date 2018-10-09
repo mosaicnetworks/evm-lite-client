@@ -1,3 +1,9 @@
+/**
+ * @file Client.js
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as http from 'http'
 
 let request = (options, callback) => {

@@ -1,3 +1,9 @@
+/**
+ * @file Transaction.js
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as JSONBig from 'json-bigint'
 
 import {TX, TXReceipt} from "./utils/Interfaces";

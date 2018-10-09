@@ -2,8 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const ASCIITable = require("ascii-table");
-const evmlc_1 = require("../evmlc");
-const functions_1 = require("../utils/functions");
+const globals_1 = require("../utils/globals");
 /**
  * Should return a Vorpal command instance used for listing all account.
  *
@@ -12,21 +11,22 @@ const functions_1 = require("../utils/functions");
  * --formatted flag else outputs raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-function commandAccountsList(evmlc, config) {
+function commandAccountsList(evmlc) {
     return evmlc.command('accounts list').alias('a l')
         .option('-f, --formatted', 'format output')
+        .option('-c, --config <path>', 'set config file path')
         .description('List all accounts.')
         .action((args) => {
         return new Promise(resolve => {
+            let config = globals_1.getConfig(args.options.config);
             // connect to node
-            evmlc_1.connect(config)
+            globals_1.connect(config)
                 .then((node) => {
                 let formatted = args.options.formatted || false;
                 // get all local accounts
-                functions_1.decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                    globals_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                     .then((accounts) => {
                     let counter = 0;
                     let table = new ASCIITable()
@@ -37,7 +37,7 @@ function commandAccountsList(evmlc, config) {
                             counter++;
                             table.addRow(counter, account.address, account.balance, account.nonce);
                         });
-                        functions_1.info(table.toString());
+                        globals_1.info(table.toString());
                     }
                     else {
                         let parsedAccounts = [];
@@ -49,13 +49,13 @@ function commandAccountsList(evmlc, config) {
                                 nonce: account.nonce
                             });
                         });
-                        functions_1.success(JSONBig.stringify(parsedAccounts));
+                        globals_1.success(JSONBig.stringify(parsedAccounts));
                     }
                     resolve();
                 })
-                    .catch((err) => functions_1.error(err));
+                        .catch((err) => globals_1.error(err));
             })
-                .catch(err => functions_1.error(err));
+                .catch(err => globals_1.error(err));
         });
     });
 }

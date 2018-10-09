@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
-const evmlc_1 = require("../evmlc");
-const functions_1 = require("../utils/functions");
+const globals_1 = require("../utils/globals");
 /**
  * Should return a Vorpal command instance used for transferring tokens.
  *
@@ -10,26 +9,28 @@ const functions_1 = require("../utils/functions");
  * specified value to the desired to address.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-function commandTransfer(evmlc, config) {
+function commandTransfer(evmlc) {
     return evmlc.command('transfer').alias('t')
         .option('-i, --interactive', 'value to send')
         .option('-v, --value <value>', 'value to send')
         .option('-g, --gas <value>', 'gas to send at')
         .option('-gp, --gasprice <value>', 'gas price to send at')
         .option('-t, --to <address>', 'address to send to')
+        .option('-c, --config <path>', 'set config file path')
         .option('-f, --from <address>', 'address to send from')
         .types({
         string: ['t', 'to', 'f', 'from'],
     })
         .action((args) => {
         return new Promise((resolve) => {
+            let i = globals_1.getInteractive(args.options.interactive);
+            let config = globals_1.getConfig(args.options.config);
             // connect to API endpoints
-            evmlc_1.connect(config)
+            globals_1.connect(config)
                 .then((node) => {
-                functions_1.decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                    globals_1.decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                     .then((accounts) => {
                     // handles signing and sending transaction
                     let handleTransfer = (tx) => {
@@ -43,7 +44,7 @@ function commandTransfer(evmlc, config) {
                                 .then((signed) => {
                                 node.api.sendRawTx(signed.rawTransaction)
                                     .then(resp => {
-                                    functions_1.success(`Transferred.`);
+                                        globals_1.success(`Transferred.`);
                                     resolve();
                                 })
                                     .catch(err => {
@@ -53,10 +54,9 @@ function commandTransfer(evmlc, config) {
                             });
                         }
                         else {
-                            functions_1.error('Cannot find associated local account.');
+                            globals_1.error('Cannot find associated local account.');
                         }
                     };
-                    let i = args.options.interactive || evmlc_1.interactive;
                     let choices = accounts.map((account) => {
                         return account.address;
                     });
@@ -102,20 +102,20 @@ function commandTransfer(evmlc, config) {
                         tx.from = args.options.from || undefined;
                         tx.to = args.options.to || undefined;
                         tx.value = args.options.value || undefined;
-                        tx.gas = args.options.gas || config.defaults.gas || 100000;
-                        tx.gasPrice = args.options.gasprice || config.defaults.gasPrice || 0;
+                        tx.gas = args.options.gas || config.data.defaults.gas || 100000;
+                        tx.gasPrice = args.options.gasprice || config.data.defaults.gasPrice || 0;
                         if (tx.from && tx.to && tx.value) {
                             handleTransfer(tx);
                         }
                         else {
-                            functions_1.error('Provide from, to and a value.');
+                            globals_1.error('Provide from, to and a value.');
                             resolve();
                         }
                     }
                 })
-                    .catch(err => functions_1.error(err));
+                        .catch(err => globals_1.error(err));
             })
-                .then(err => functions_1.error(err));
+                .catch(err => globals_1.error(err));
         });
     })
         .description('Transfer token(s) to address.');

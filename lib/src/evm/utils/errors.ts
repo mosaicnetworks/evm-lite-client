@@ -1,3 +1,9 @@
+/**
+ * @file errors.js
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 export function InvalidNumberOfSolidityArgs(expected: number, received: number) {
     return new Error(`Expected ${expected} but got ${received} arguments.`);
 }

@@ -1,3 +1,9 @@
+/**
+ * @file Controller.js
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as JSONBig from 'json-bigint'
 import * as fs from "fs";
 import * as solidityCompiler from 'solc'
@@ -13,6 +19,10 @@ interface DefaultTXOptions extends BaseTX {
     from?: string,
 }
 
+
+/**
+ * The root class to interactive with EVM-Lite.
+ */
 export default class Controller {
 
     public accounts: Account[];

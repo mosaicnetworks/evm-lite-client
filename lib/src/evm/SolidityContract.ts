@@ -1,3 +1,9 @@
+/**
+ * @file SolidityContract.js
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as Web3 from 'web3'
 import * as coder from 'web3/lib/solidity/coder.js'
 

@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "clean:cli": "rm -rf cli/node_modules && rm -rf cli/package-lock.json",
+    "clean:lib": "rm -rf lib/node_modules && rm -rf libpackage-lock.json",
+    "build:lib": "cd lib && npm install && cd ..",
+    "build:cli": "cd cli && npm install && npm link && cd .."
+  }
+}

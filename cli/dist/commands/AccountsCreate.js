@@ -4,8 +4,8 @@ const fs = require("fs");
 const path = require("path");
 const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
-const evmlc_1 = require("../evmlc");
-const functions_1 = require("../utils/functions");
+const mkdir = require("mkdirp");
+const globals_1 = require("../utils/globals");
 const lib_1 = require("../../../lib");
 /**
  * Should return a Vorpal command instance used for creating an account.
@@ -16,75 +16,76 @@ const lib_1 = require("../../../lib");
  * password file is provided it will used the default password file specified in the config object.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-function commandAccountsCreate(evmlc, config) {
+function commandAccountsCreate(evmlc) {
     return evmlc.command('accounts create').alias('a c')
         .description('Create an account.')
         .option('-o, --output <path>', 'provide output path')
         .option('-p, --password <path>', 'provide password file path')
         .option('-i, --interactive', 'use interactive mode')
+        .option('-c, --config <path>', 'set config file path')
         .types({
-        string: ['p', 'password', 'o', 'output']
+            string: ['p', 'password', 'o', 'output', 'config']
     })
         .action((args) => {
+            let i = globals_1.getInteractive(args.options.interactive);
+            let config = globals_1.getConfig(args.options.config);
         return new Promise(resolve => {
-            // connect to API endpoint
-            evmlc_1.connect(config)
-                .then((node) => {
-                // handles create account logic
-                let handleCreateAccount = () => {
-                    // create an account object without saving
-                    let account = lib_1.Account.create();
-                    let outputPath = args.options.output || config.storage.keystore;
-                    let password = functions_1.getPassword(args.options.password) || functions_1.getPassword(config.storage.password);
-                    // encrypt account with password
-                    let encryptedAccount = account.encrypt(password);
-                    // path to write account file with name
-                    let fileName = `UTC--date--timestamp--${account.address}`;
-                    let writePath = path.join(outputPath, fileName);
-                    let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-                    // write encrypted account data to file
-                    fs.writeFileSync(writePath, stringEncryptedAccount);
-                    // output data
-                    functions_1.success(JSONBig.stringify(encryptedAccount));
-                };
-                let i = args.options.interactive || evmlc_1.interactive;
-                // inquirer questions
-                let questions = [
-                    {
-                        name: 'outputPath',
-                        message: 'Enter keystore output path: ',
-                        default: config.storage.keystore,
-                        type: 'input'
-                    },
-                    {
-                        name: 'passwordPath',
-                        message: 'Enter password file path: ',
-                        default: config.storage.password,
-                        type: 'input'
-                    }
-                ];
-                if (i) {
-                    // prompt questions and wait for response
-                    inquirer.prompt(questions)
-                        .then((answers) => {
-                        args.options.output = answers.outputPath;
-                        args.options.password = answers.passwordPath;
-                    })
-                        .then(() => {
-                        handleCreateAccount();
-                        resolve();
-                    });
+            let createAccount = (directory, name, data) => {
+                if (!fs.existsSync(directory)) {
+                    mkdir.sync(directory);
                 }
-                else {
-                    // if not interactive mode
+                fs.writeFileSync(path.join(directory, name), data);
+            };
+            // handles create account logic
+            let handleCreateAccount = () => {
+                // create an account object without saving
+                let account = lib_1.Account.create();
+                let outputPath = args.options.output || config.data.storage.keystore;
+                let password = globals_1.getPassword(args.options.password || config.data.storage.password);
+                // encrypt account with password
+                let encryptedAccount = account.encrypt(password);
+                // path to write account file with name
+                let fileName = `UTC--date--timestamp--${account.address}`;
+                let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
+                // write encrypted account data to file
+                createAccount(outputPath, fileName, stringEncryptedAccount);
+                // output data
+                globals_1.success(JSONBig.stringify(encryptedAccount));
+            };
+            // inquirer questions
+            let questions = [
+                {
+                    name: 'outputPath',
+                    message: 'Enter keystore output path: ',
+                    default: config.data.storage.keystore,
+                    type: 'input'
+                },
+                {
+                    name: 'passwordPath',
+                    message: 'Enter password file path: ',
+                    default: config.data.storage.password,
+                    type: 'input'
+                }
+            ];
+            if (i) {
+                // prompt questions and wait for response
+                inquirer.prompt(questions)
+                    .then((answers) => {
+                    args.options.output = answers.outputPath;
+                    args.options.password = answers.passwordPath;
+                })
+                    .then(() => {
                     handleCreateAccount();
                     resolve();
-                }
-            })
-                .catch(err => functions_1.error(err));
+                });
+            }
+            else {
+                // if not interactive mode
+                handleCreateAccount();
+                resolve();
+            }
         });
     });
 }

@@ -1,8 +1,8 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {connect, interactive} from "../evmlc";
-import {decryptLocalAccounts, error, success} from "../utils/functions";
+import {connect, decryptLocalAccounts, error, getConfig, getInteractive, success} from "../utils/globals";
+
 import {Controller} from "../../../lib";
 
 
@@ -13,10 +13,9 @@ import {Controller} from "../../../lib";
  * specified value to the desired to address.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandTransfer(evmlc: Vorpal, config) {
+export default function commandTransfer(evmlc: Vorpal) {
 
     return evmlc.command('transfer').alias('t')
         .option('-i, --interactive', 'value to send')
@@ -24,6 +23,7 @@ export default function commandTransfer(evmlc: Vorpal, config) {
         .option('-g, --gas <value>', 'gas to send at')
         .option('-gp, --gasprice <value>', 'gas price to send at')
         .option('-t, --to <address>', 'address to send to')
+        .option('-c, --config <path>', 'set config file path')
         .option('-f, --from <address>', 'address to send from')
         .types({
             string: ['t', 'to', 'f', 'from'],
@@ -32,11 +32,14 @@ export default function commandTransfer(evmlc: Vorpal, config) {
 
             return new Promise<void>((resolve) => {
 
+                let i = getInteractive(args.options.interactive);
+                let config = getConfig(args.options.config);
+
                 // connect to API endpoints
                 connect(config)
                     .then((node: Controller) => {
 
-                        decryptLocalAccounts(node, config.storage.keystore, config.storage.password)
+                        decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
                             .then((accounts) => {
 
                                 // handles signing and sending transaction
@@ -67,7 +70,6 @@ export default function commandTransfer(evmlc: Vorpal, config) {
 
                                 };
 
-                                let i = args.options.interactive || interactive;
 
                                 let choices: string[] = accounts.map((account) => {
                                     return account.address;
@@ -117,8 +119,8 @@ export default function commandTransfer(evmlc: Vorpal, config) {
                                     tx.from = args.options.from || undefined;
                                     tx.to = args.options.to || undefined;
                                     tx.value = args.options.value || undefined;
-                                    tx.gas = args.options.gas || config.defaults.gas || 100000;
-                                    tx.gasPrice = args.options.gasprice || config.defaults.gasPrice || 0;
+                                    tx.gas = args.options.gas || config.data.defaults.gas || 100000;
+                                    tx.gasPrice = args.options.gasprice || config.data.defaults.gasPrice || 0;
 
                                     if (tx.from && tx.to && tx.value) {
                                         handleTransfer(tx);
@@ -133,7 +135,7 @@ export default function commandTransfer(evmlc: Vorpal, config) {
                             .catch(err => error(err));
 
                     })
-                    .then(err => error(err))
+                    .catch(err => error(err))
 
             });
 
