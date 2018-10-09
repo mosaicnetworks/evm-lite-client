@@ -15,14 +15,15 @@ EVM-Lite.
 * [Configuration Settings](#configuration-settings)
 * [Commands](#commands)
     * [help](#help)
-    * accounts
+    * [accounts](#accounts-create)
         * [create](#accounts-create)
         * [list](#accounts-list)
         * [get](#accounts-get)
     * [interactive](#interactive)
-    * [globals](#globals)
+    * [config](#config-view)
+        * [config view](#config-view)
+        * [config set](#config-set)
     * [transfer](#transfer)
-    * [config](#config)
     * [exit](#exit)
 <!--te-->
 
@@ -152,6 +153,9 @@ password = "~/.evmlc/pwd.txt"
 
 By default all commands will output raw JSON unless `-f, --formatted` flag is provided. A connection to the node is not required unless stated in each command.
 
+All commands by default accept a `-c, --config` flag which allow you to provide a config file path.
+Note that if this flag is not provided for any commands run, it will take the default config file path: `~/.evmlc/config/config.toml`
+
 ### help
 
 Lists help for the specified command:
@@ -177,6 +181,7 @@ $ evmlc help transfer
     -i, --interactive        value to send
     -v, --value <value>      value to send
     -g, --gas <value>        gas to send at
+    -c, --config <path>      set config file path
     -gp, --gasprice <value>  gas price to send at
     -t, --to <address>       address to send to
     -f, --from <address>     address to send from
@@ -208,6 +213,7 @@ $ evmlc help accounts create
     -o, --output <path>    provide output path
     -p, --password <path>  provide password file path
     -i, --interactive      use interactive mode
+    -c, --config <path>    set config file path
 ```
 If no `-p, --password` or `-o, --output` are specified, the defaults from the config will be used.
 
@@ -246,14 +252,16 @@ $ evmlc help accounts list
 
   Options:
 
-    --help           output usage information
-    -f, --formatted  format output
+    --help               output usage information
+    -f, --formatted      format output
+    -c, --config <path>  set config file path
 ```
 
 #### Example
 
 ```console
 $ evmlc accounts list
+
 [{"address":"0xAcd21941401273bD112250081F0743dEB884EBA3","balance":0,"nonce":0},{"address":"0xe5569229F939e3c8952DCBb964458a91A2370386","balance":0,"nonce":0}]
 ```
 
@@ -281,21 +289,23 @@ $ evmlc help accounts get
 
   Options:
 
-    --help             output usage information
-    -f, --formatted    format output
-    -i, --interactive  use interactive mode
+    --help               output usage information
+    -f, --formatted      format output
+    -c, --config <path>  set config file path
+    -i, --interactive    use interactive mode
 ```
 
 #### Example
 
 ```console
 $ evmlc accounts get 0xf6a277339cd2172d90535f40cf206613bbce05c7
+
 {"address":"0xF6A277339cd2172D90535F40cf206613bBCe05c7","balance":1337000000000000000000,"nonce":0}
 ```
 
 ### interactive
 
-Enters into an interactive environment.
+Enters into an interactive environment. If `-c, --config` is provided you will taken into an interactive environment with the path as default for the configuration file.
 
 ```console
 $ evmlc help interactive
@@ -308,21 +318,45 @@ $ evmlc help interactive
 
   Options:
 
-    --help  output usage information
+    --help               output usage information
+    -c, --config <path>  set config file path
 ```
 
-### globals
+### config view
 
-Can set config variables using this command.
+View configuration file as JSON.
+
+
+#### Usage
+```console
+$ evmlc help config view
+
+  Usage: config view [options]
+
+  Alias: c v
+
+  View config file.
+
+  Options:
+
+    --help               output usage information
+    -c, --config <path>  set config file path
+```
+
+### config set
+
+Set config file values.
+
+#### Usage
 
 ```console
-$ evmlc help globals
+$ evmlc help config set
 
-  Usage: globals [options]
+  Usage: config set [options]
 
-  Alias: g
+  Alias: c s
 
-  Set default global values.
+  Set config values.
 
   Options:
 
@@ -333,6 +367,7 @@ $ evmlc help globals
     --from <from>          default from
     --gas <gas>            default gas
     --gasprice <gasprice>  gas price
+    -c, --config <path>    set config file path
     --keystore <path>      keystore path
     --pwd <path>           password path
 ```
@@ -359,13 +394,9 @@ $ evmlc help transfer
     -g, --gas <value>        gas to send at
     -gp, --gasprice <value>  gas price to send at
     -t, --to <address>       address to send to
+    -c, --config <path>      set config file path
     -f, --from <address>     address to send from
 ```
-
-
-### config
-
-Outputs current configuration as JSON.
 
 ### exit
 

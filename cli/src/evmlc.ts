@@ -1,55 +1,51 @@
 #!/usr/bin/env node
 
-import * as path from "path";
 import * as Vorpal from "vorpal";
 
-import {error} from "./utils/functions";
-import {createDefaultDirectories, rootConfigFilePath} from "./utils/globals";
+import {defaultConfigFilePath, error, initDirectories} from "./utils/globals";
 
 import commandAccountsCreate from './commands/AccountsCreate';
 import commandAccountsList from './commands/AccountsList';
 import commandAccountsGet from './commands/AccountsGet';
-import commandGlobals from "./commands/Globals";
-import commandTransfer from "./commands/Transfer";
-import commandConfig from "./commands/Config";
 import commandInteractive from "./commands/Interactive";
+import commandConfigView from "./commands/ConfigView";
+import commandConfigSet from "./commands/ConfigSet";
+import commandTransfer from "./commands/Transfer";
 import commandTest from "./commands/Test";
 
-import RootConfig from "./classes/RootConfig";
-import UserConfig from "./classes/UserConfig";
+import Config from "./classes/Config";
 
 
-// global interactive mode
+// global interactive mode and config file
 export let interactive: boolean = false;
+export let interactiveConfig: Config;
 
 
 /**
- * Main Program
+ * EVM-Lite Command Line Interface
  */
-createDefaultDirectories()
+initDirectories()
     .then(() => {
-
-        // default root config
-        let rootConfig: RootConfig = new RootConfig(rootConfigFilePath);
-
-        // default user config
-        return new UserConfig(path.join(rootConfig.data.storage.configDirectory, 'config.toml'));
-
-    })
-    .then((userConfig: UserConfig) => {
 
         // create new Vorpal instance
         const evmlc = new Vorpal().version("0.1.0");
 
-        // commands: (Vorpal, {}) => Vorpal.Command
-        commandAccountsCreate(evmlc, userConfig);
-        commandAccountsList(evmlc, userConfig);
-        commandAccountsGet(evmlc, userConfig);
-        commandInteractive(evmlc, userConfig);
-        commandGlobals(evmlc, userConfig);
-        commandTransfer(evmlc, userConfig);
-        commandConfig(evmlc, userConfig);
-        commandTest(evmlc, userConfig);
+        /**
+         *commands: (Vorpal, UserConfig, RootConfig = undefined) => Vorpal.Command
+         */
+
+        // Config commands
+        commandConfigView(evmlc);
+        commandConfigSet(evmlc);
+
+        // Account commands
+        commandAccountsCreate(evmlc);
+        commandAccountsList(evmlc);
+        commandAccountsGet(evmlc);
+
+        commandInteractive(evmlc);
+        commandTransfer(evmlc);
+        commandTest(evmlc);
 
         if (!process.argv[2]) {
 
@@ -60,8 +56,12 @@ createDefaultDirectories()
 
         if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
 
+            // set config path for interactive mode
+            let configFilePath: string = process.argv[4] || defaultConfigFilePath;
+
             // set global interactive variable so all commands inherit interactive mode
             interactive = true;
+            interactiveConfig = new Config(configFilePath);
 
             // show interactive console
             evmlc.delimiter('evmlc$').show();

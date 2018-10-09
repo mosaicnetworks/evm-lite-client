@@ -3,13 +3,11 @@ import * as fs from "fs";
 import * as path from "path";
 import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
+import * as mkdir from 'mkdirp';
 
-import {interactive} from "../evmlc";
-import {getPassword, success} from "../utils/functions";
+import {getConfig, getInteractive, getPassword, success} from "../utils/globals";
 
 import {Account} from '../../../lib';
-
-import UserConfig from "../classes/UserConfig";
 
 
 /**
@@ -21,22 +19,32 @@ import UserConfig from "../classes/UserConfig";
  * password file is provided it will used the default password file specified in the config object.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandAccountsCreate(evmlc: Vorpal, config: UserConfig) {
+export default function commandAccountsCreate(evmlc: Vorpal) {
 
     return evmlc.command('accounts create').alias('a c')
         .description('Create an account.')
         .option('-o, --output <path>', 'provide output path')
         .option('-p, --password <path>', 'provide password file path')
         .option('-i, --interactive', 'use interactive mode')
+        .option('-c, --config <path>', 'set config file path')
         .types({
-            string: ['p', 'password', 'o', 'output']
+            string: ['p', 'password', 'o', 'output', 'config']
         })
         .action((args: Vorpal.Args): Promise<void> => {
+            let i = getInteractive(args.options.interactive);
+            let config = getConfig(args.options.config);
 
             return new Promise<void>(resolve => {
+
+                let createAccount = (directory: string, name: string, data: any) => {
+                    if (!fs.existsSync(directory)) {
+                        mkdir.sync(directory);
+                    }
+
+                    fs.writeFileSync(path.join(directory, name), data);
+                };
 
                 // handles create account logic
                 let handleCreateAccount = (): void => {
@@ -45,25 +53,22 @@ export default function commandAccountsCreate(evmlc: Vorpal, config: UserConfig)
                     let account: Account = Account.create();
 
                     let outputPath: string = args.options.output || config.data.storage.keystore;
-                    let password: string = getPassword(args.options.password) || getPassword(config.data.storage.password);
+                    let password: string = getPassword(args.options.password || config.data.storage.password);
 
                     // encrypt account with password
                     let encryptedAccount = account.encrypt(password);
 
                     // path to write account file with name
                     let fileName = `UTC--date--timestamp--${account.address}`;
-                    let writePath = path.join(outputPath, fileName);
                     let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
 
                     // write encrypted account data to file
-                    fs.writeFileSync(writePath, stringEncryptedAccount);
+                    createAccount(outputPath, fileName, stringEncryptedAccount);
 
                     // output data
                     success(JSONBig.stringify(encryptedAccount));
 
                 };
-
-                let i = args.options.interactive || interactive;
 
                 // inquirer questions
                 let questions = [

@@ -1,38 +1,38 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {interactive} from "../evmlc";
-import {success} from "../utils/functions";
-
-import UserConfig from "../classes/UserConfig";
+import {getConfig, getInteractive, success, warning} from "../utils/globals";
 
 
 /**
  * Should return a Vorpal command instance used for updating the config file.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
 
-export default function commandGlobals(evmlc: Vorpal, config: UserConfig) {
+export default function commandConfigUser(evmlc: Vorpal) {
 
-    return evmlc.command('globals ').alias('g')
-        .description('Set default global values.')
+    return evmlc.command('config set').alias('c s')
+        .description('Set config values.')
         .option('-i, --interactive', 'enter into interactive command')
         .option('-h, --host <host>', 'default host')
         .option('-p, --port <port>', 'default port')
         .option('--from <from>', 'default from')
         .option('--gas <gas>', 'default gas')
         .option('--gasprice <gasprice>', 'gas price')
+        .option('-c, --config <path>', 'set config file path')
         .option('--keystore <path>', 'keystore path')
         .option('--pwd <path>', 'password path')
         .types({
-            string: ['h', 'host', 'from', 'keystore', 'pwd']
+            string: ['h', 'host', 'from', 'keystore', 'pwd', 'config']
         })
         .action((args: Vorpal.Args): Promise<void> => {
 
             return new Promise<void>(resolve => {
+
+                let config = getConfig(args.options.config);
+                let interactive = getInteractive(args.options.interactive);
 
                 // handles updating config file
                 let handleGlobals = (): void => {
@@ -72,7 +72,6 @@ export default function commandGlobals(evmlc: Vorpal, config: UserConfig) {
                     config.save();
                 };
 
-                let i = args.options.interactive || interactive;
                 let questions = [
                     {
                         name: 'host',
@@ -106,7 +105,7 @@ export default function commandGlobals(evmlc: Vorpal, config: UserConfig) {
                     },
                 ];
 
-                if (i) {
+                if (interactive) {
 
                     // interactive mode
                     inquirer.prompt(questions)
@@ -123,11 +122,12 @@ export default function commandGlobals(evmlc: Vorpal, config: UserConfig) {
                         });
 
                 } else {
-
-                    // if not interactive
-                    handleGlobals();
-                    resolve();
-
+                    if (Object.keys(args.options).length) {
+                        handleGlobals();
+                        resolve();
+                    } else {
+                        warning('No options provided. To enter interactive mode use: -i, --interactive.');
+                    }
                 }
 
             });

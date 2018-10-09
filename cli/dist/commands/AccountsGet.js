@@ -3,8 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
-const evmlc_1 = require("../evmlc");
-const functions_1 = require("../utils/functions");
 const globals_1 = require("../utils/globals");
 /**
  * Should return a Vorpal command instance used for getting an account.
@@ -14,18 +12,20 @@ const globals_1 = require("../utils/globals");
  * with --formatted flag or output raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {UserConfig} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-function commandAccountsGet(evmlc, config) {
+function commandAccountsGet(evmlc) {
     return evmlc.command('accounts get [address]').alias('a g')
         .option('-f, --formatted', 'format output')
+        .option('-c, --config <path>', 'set config file path')
         .option('-i, --interactive', 'use interactive mode')
         .types({
         string: ['_']
     })
         .action((args) => {
         return new Promise(resolve => {
+            let i = globals_1.getInteractive(args.options.interactive);
+            let config = globals_1.getConfig(args.options.config);
             // connect to API endpoints
             globals_1.connect(config)
                 .then((node) => {
@@ -41,11 +41,10 @@ function commandAccountsGet(evmlc, config) {
                         accountsTable
                             .setHeading('#', 'Account Address', 'Balance', 'Nonce')
                             .addRow(counter, account.address, account.balance, account.nonce);
-                        formatted ? functions_1.info(accountsTable.toString()) : functions_1.info(a);
+                        formatted ? globals_1.info(accountsTable.toString()) : globals_1.info(a);
                         resolve();
                     });
                 };
-                let i = args.options.interactive || evmlc_1.interactive;
                 if (args.address) {
                     // address provided
                     handleAccountGet();
@@ -71,12 +70,12 @@ function commandAccountsGet(evmlc, config) {
                 else {
                     // if -a or --address are not provided
                     return new Promise(resolve => {
-                        functions_1.error('Provide an address. Usage: accounts get <address>');
+                        globals_1.error('Provide an address. Usage: accounts get <address>');
                         resolve();
                     });
                 }
             })
-                .catch(err => functions_1.error(err));
+                .catch(err => globals_1.error(err));
         });
     })
         .description('Get an account.');

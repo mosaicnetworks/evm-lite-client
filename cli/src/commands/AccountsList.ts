@@ -2,12 +2,9 @@ import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
 import * as ASCIITable from 'ascii-table';
 
-import {BaseAccount, decryptLocalAccounts, error, info, success} from "../utils/functions";
+import {BaseAccount, connect, decryptLocalAccounts, error, getConfig, info, success} from "../utils/globals";
 
 import {Account} from '../../../lib';
-import {connect} from "../utils/globals";
-
-import UserConfig from "../classes/UserConfig";
 
 
 /**
@@ -18,17 +15,19 @@ import UserConfig from "../classes/UserConfig";
  * --formatted flag else outputs raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {UserConfig} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandAccountsList(evmlc: Vorpal, config: UserConfig) {
+export default function commandAccountsList(evmlc: Vorpal) {
 
     return evmlc.command('accounts list').alias('a l')
         .option('-f, --formatted', 'format output')
+        .option('-c, --config <path>', 'set config file path')
         .description('List all accounts.')
         .action((args: Vorpal.Args): Promise<void> => {
 
             return new Promise<void>(resolve => {
+
+                let config = getConfig(args.options.config);
 
                 // connect to node
                 connect(config)

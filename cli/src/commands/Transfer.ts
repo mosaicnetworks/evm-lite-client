@@ -1,13 +1,9 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {interactive} from "../evmlc";
-import {decryptLocalAccounts, error, success} from "../utils/functions";
-import {connect} from "../utils/globals";
+import {connect, decryptLocalAccounts, error, getConfig, getInteractive, success} from "../utils/globals";
 
 import {Controller} from "../../../lib";
-
-import UserConfig from "../classes/UserConfig";
 
 
 /**
@@ -17,10 +13,9 @@ import UserConfig from "../classes/UserConfig";
  * specified value to the desired to address.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {Object} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandTransfer(evmlc: Vorpal, config: UserConfig) {
+export default function commandTransfer(evmlc: Vorpal) {
 
     return evmlc.command('transfer').alias('t')
         .option('-i, --interactive', 'value to send')
@@ -28,6 +23,7 @@ export default function commandTransfer(evmlc: Vorpal, config: UserConfig) {
         .option('-g, --gas <value>', 'gas to send at')
         .option('-gp, --gasprice <value>', 'gas price to send at')
         .option('-t, --to <address>', 'address to send to')
+        .option('-c, --config <path>', 'set config file path')
         .option('-f, --from <address>', 'address to send from')
         .types({
             string: ['t', 'to', 'f', 'from'],
@@ -35,6 +31,9 @@ export default function commandTransfer(evmlc: Vorpal, config: UserConfig) {
         .action((args: Vorpal.Args): Promise<void> => {
 
             return new Promise<void>((resolve) => {
+
+                let i = getInteractive(args.options.interactive);
+                let config = getConfig(args.options.config);
 
                 // connect to API endpoints
                 connect(config)
@@ -71,7 +70,6 @@ export default function commandTransfer(evmlc: Vorpal, config: UserConfig) {
 
                                 };
 
-                                let i = args.options.interactive || interactive;
 
                                 let choices: string[] = accounts.map((account) => {
                                     return account.address;

@@ -1,34 +1,51 @@
 import * as fs from 'fs';
 import * as toml from "toml";
-import * as tomlify from 'tomlify-j0.4'
+import * as tomlify from 'tomlify-j0.4';
+import * as mkdir from 'mkdirp';
+import * as path from "path";
 
-import {isEquivalentObjects, success, warning} from "../utils/functions";
+import {evmlcDir, isEquivalentObjects, success, warning} from "../utils/globals";
 
 
 export default class Config {
 
     public data: any;
-    readonly _data: any;
+    private _initialData: any;
 
-    constructor(public configFilePath: string, defaultConfig: any = undefined) {
-        let fileData: string;
+    constructor(public configFilePath: string) {
+        this.data = Config.default();
+        this._initialData = Config.default();
 
         if (fs.existsSync(configFilePath)) {
-            fileData = fs.readFileSync(configFilePath, 'utf8');
-        } else {
-            fileData = tomlify.toToml(defaultConfig, {spaces: 2});
-            fs.writeFileSync(configFilePath, fileData);
-        }
+            let tomlData: string = Config.readFile(configFilePath);
 
-        this.data = toml.parse(fileData);
-        this._data = toml.parse(fileData);
+            this.data = toml.parse(tomlData);
+            this._initialData = toml.parse(tomlData);
+        }
     }
 
-    static create(filePath: string, data: any) {
-        if (!fs.existsSync(filePath)) {
-            let tomlified = tomlify.toToml(data, {spaces: 2});
+    static readFile(path: string): string {
+        if (fs.existsSync(path)) {
+            return fs.readFileSync(path, 'utf8');
+        }
+    }
 
-            fs.writeFileSync(filePath, tomlified);
+    static default() {
+        return {
+            title: 'EVM-Lite CLI Config',
+            connection: {
+                host: '127.0.0.1',
+                port: '8080'
+            },
+            defaults: {
+                from: '',
+                gas: 0,
+                gasPrice: 0
+            },
+            storage: {
+                keystore: path.join(evmlcDir, 'keystore'),
+                password: path.join(evmlcDir, 'pwd.txt')
+            }
         }
     }
 
@@ -36,12 +53,25 @@ export default class Config {
         return tomlify.toToml(this.data, {spaces: 2})
     }
 
-    save(): void {
-        if (isEquivalentObjects(this.data, this._data)) {
+    save(): boolean {
+        if (isEquivalentObjects(this.data, this._initialData)) {
             warning('No changes in configuration detected.');
+            return false;
         } else {
+            let list = this.configFilePath.split('/');
+            list.pop();
+
+            let configFileDir = list.join('/');
+
+            if (!fs.existsSync(configFileDir)) {
+                mkdir.mkdirp(configFileDir);
+            }
+
             fs.writeFileSync(this.configFilePath, this.toTOML());
-            success('Updated configuration file.')
+            this._initialData = toml.parse(this.toTOML());
+
+            success('Configuration file updated.');
+            return true;
         }
     }
 

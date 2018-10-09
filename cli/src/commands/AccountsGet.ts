@@ -3,11 +3,7 @@ import * as ASCIITable from 'ascii-table';
 import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 
-import {interactive} from "../evmlc";
-import {error, info} from "../utils/functions";
-import {connect} from "../utils/globals";
-
-import UserConfig from "../classes/UserConfig";
+import {connect, error, getConfig, getInteractive, info} from "../utils/globals";
 
 
 /**
@@ -18,13 +14,13 @@ import UserConfig from "../classes/UserConfig";
  * with --formatted flag or output raw JSON.
  *
  * @param {Vorpal} evmlc - The command line object.
- * @param {UserConfig} config - A JSON of the TOML config file.
  * @returns Vorpal Command instance
  */
-export default function commandAccountsGet(evmlc: Vorpal, config: UserConfig) {
+export default function commandAccountsGet(evmlc: Vorpal) {
 
     return evmlc.command('accounts get [address]').alias('a g')
         .option('-f, --formatted', 'format output')
+        .option('-c, --config <path>', 'set config file path')
         .option('-i, --interactive', 'use interactive mode')
         .types({
             string: ['_']
@@ -32,6 +28,9 @@ export default function commandAccountsGet(evmlc: Vorpal, config: UserConfig) {
         .action((args: Vorpal.Args): Promise<void> => {
 
             return new Promise<void>(resolve => {
+
+                let i = getInteractive(args.options.interactive);
+                let config = getConfig(args.options.config);
 
                 // connect to API endpoints
                 connect(config)
@@ -66,8 +65,6 @@ export default function commandAccountsGet(evmlc: Vorpal, config: UserConfig) {
                             });
 
                         };
-
-                        let i = args.options.interactive || interactive;
 
                         if (args.address) {
 

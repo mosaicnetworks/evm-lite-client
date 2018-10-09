@@ -1,33 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const functions_1 = require("../utils/functions");
-function commandTest(evmlc, config) {
+
+function commandTest(evmlc) {
     return evmlc.command('test').alias('test')
+        .option('-c, --config <path>', 'set config file path')
         .action((args) => {
         return new Promise(resolve => {
-            let A = {
-                hello: 'hello',
-                danu: {
-                    asd: 1,
-                    asd1: 2,
-                    danu1: {
-                        cc: 1,
-                        ss: 22
-                    }
-                }
-            };
-            let B = {
-                hello: 'hello',
-                danu: {
-                    asd: 1,
-                    asd1: 2,
-                    danu1: {
-                        cc: 1,
-                        ss: 2
-                    }
-                }
-            };
-            console.log(functions_1.isEquivalentObjects(A, B));
+            let string = '/Users/danu/.evmlc/config/config.toml';
+            let res = string.split('/');
+            res.pop();
+            let strin2 = res.join('/');
+            console.log(strin2);
             resolve();
         });
     })

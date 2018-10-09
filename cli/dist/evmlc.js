@@ -1,51 +1,49 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const path = require("path");
 const Vorpal = require("vorpal");
-const functions_1 = require("./utils/functions");
 const globals_1 = require("./utils/globals");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
 const AccountsGet_1 = require("./commands/AccountsGet");
-const Globals_1 = require("./commands/Globals");
-const Transfer_1 = require("./commands/Transfer");
-const Config_1 = require("./commands/Config");
 const Interactive_1 = require("./commands/Interactive");
+const ConfigView_1 = require("./commands/ConfigView");
+const ConfigSet_1 = require("./commands/ConfigSet");
+const Transfer_1 = require("./commands/Transfer");
 const Test_1 = require("./commands/Test");
-const RootConfig_1 = require("./classes/RootConfig");
-const UserConfig_1 = require("./classes/UserConfig");
-// global interactive mode
+const Config_1 = require("./classes/Config");
+// global interactive mode and config file
 exports.interactive = false;
 /**
- * Main Program
+ * EVM-Lite Command Line Interface
  */
-globals_1.createDefaultDirectories()
+globals_1.initDirectories()
     .then(() => {
-    // default root config
-    let rootConfig = new RootConfig_1.default(globals_1.rootConfigFilePath);
-    // default user config
-    return new UserConfig_1.default(path.join(rootConfig.data.storage.configDirectory, 'config.toml'));
-})
-    .then((userConfig) => {
     // create new Vorpal instance
     const evmlc = new Vorpal().version("0.1.0");
-    // commands: (Vorpal, {}) => Vorpal.Command
-    AccountsCreate_1.default(evmlc, userConfig);
-    AccountsList_1.default(evmlc, userConfig);
-    AccountsGet_1.default(evmlc, userConfig);
-    Interactive_1.default(evmlc, userConfig);
-    Globals_1.default(evmlc, userConfig);
-    Transfer_1.default(evmlc, userConfig);
-    Config_1.default(evmlc, userConfig);
-    Test_1.default(evmlc, userConfig);
+        /**
+         *commands: (Vorpal, UserConfig, RootConfig = undefined) => Vorpal.Command
+         */
+        // Config commands
+        ConfigView_1.default(evmlc);
+        ConfigSet_1.default(evmlc);
+        // Account commands
+        AccountsCreate_1.default(evmlc);
+        AccountsList_1.default(evmlc);
+        AccountsGet_1.default(evmlc);
+        Interactive_1.default(evmlc);
+        Transfer_1.default(evmlc);
+        Test_1.default(evmlc);
     if (!process.argv[2]) {
         // if no commands are given output help by default
         process.argv[2] = 'help';
     }
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
+        // set config path for interactive mode
+        let configFilePath = process.argv[4] || globals_1.defaultConfigFilePath;
         // set global interactive variable so all commands inherit interactive mode
         exports.interactive = true;
+        exports.interactiveConfig = new Config_1.default(configFilePath);
         // show interactive console
         evmlc.delimiter('evmlc$').show();
     }
@@ -54,4 +52,4 @@ globals_1.createDefaultDirectories()
         evmlc.parse(process.argv);
     }
 })
-    .catch(err => functions_1.error(err));
+    .catch(err => globals_1.error(err));
