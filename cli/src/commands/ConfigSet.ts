@@ -1,20 +1,15 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {getConfig, getInteractive, success, warning} from "../utils/globals";
+import {success, warning} from "../utils/globals";
+
+import Session from "../classes/Session";
 
 
-/**
- * Should return a Vorpal command instance used for updating the config file.
- *
- * @param {Vorpal} evmlc - The command line object.
- * @returns Vorpal Command instance
- */
-
-export default function commandConfigSet(evmlc: Vorpal) {
+export default function commandConfigSet(evmlc: Vorpal, session: Session) {
 
     let description =
-        `Set values of the default config file or the one provided with -c, --config flag.`;
+        'Set values of the configuration inside the data directory.';
 
     return evmlc.command('config set').alias('c s')
         .description(description)
@@ -24,7 +19,6 @@ export default function commandConfigSet(evmlc: Vorpal) {
         .option('--from <from>', 'default from')
         .option('--gas <gas>', 'default gas')
         .option('--gasprice <gasprice>', 'gas price')
-        .option('-c, --config <path>', 'set config file path')
         .option('--keystore <path>', 'keystore path')
         .option('--pwd <path>', 'password path')
         .types({
@@ -34,11 +28,11 @@ export default function commandConfigSet(evmlc: Vorpal) {
 
             return new Promise<void>(resolve => {
 
-                let config = getConfig(args.options.config);
-                let interactive = getInteractive(args.options.interactive);
+                let config = session.config;
+                let interactive = args.options.interactive || session.interactive;
 
                 // handles updating config file
-                let handleGlobals = (): void => {
+                let handleConfig = (): void => {
                     for (let prop in args.options) {
                         if (prop.toLowerCase() === 'host') {
                             if (config.data.connection.host !== args.options[prop])
@@ -120,13 +114,13 @@ export default function commandConfigSet(evmlc: Vorpal) {
                             args.options.gasprice = answers.gasPrice;
                         })
                         .then(() => {
-                            handleGlobals();
+                            handleConfig();
                             resolve();
                         });
 
                 } else {
                     if (Object.keys(args.options).length) {
-                        handleGlobals();
+                        handleConfig();
                         resolve();
                     } else {
                         warning('No options provided. To enter interactive mode use: -i, --interactive.');

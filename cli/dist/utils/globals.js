@@ -5,9 +5,7 @@ const fs = require("fs");
 const mkdir = require("mkdirp");
 const Chalk = require("chalk");
 const JSONBig = require("json-bigint");
-const evmlc_1 = require("../evmlc");
 const lib_1 = require("../../../lib");
-const Config_1 = require("../classes/Config");
 const l = console.log;
 const chalk = Chalk.default;
 // logging functions
@@ -109,9 +107,9 @@ exports.isEquivalentObjects = (objectA, objectB) => {
 /**
  * Should attempt to connect to node with the config connection parameters
  * then try and get accounts to make sure the connection is valid then
- * returns a promise which resolves the respective Controller object.
+ * returns a promise which resolves the respective Controller instance.
  *
- * @param {Config} config - The config object
+ * @param {Config} config - The config instance
  * @returns Promise<Controller>
  */
 exports.connect = (config) => {
@@ -141,13 +139,4 @@ exports.initDirectories = () => {
         }
         resolve();
     });
-};
-// get config
-// returns an instance or interactive instance
-exports.getConfig = (optionalPath) => {
-    return evmlc_1.interactiveConfig || new Config_1.default(optionalPath || exports.defaultConfigFilePath);
-};
-// return if interactive or not
-exports.getInteractive = (optionalInteractive) => {
-    return optionalInteractive || evmlc_1.interactive;
 };

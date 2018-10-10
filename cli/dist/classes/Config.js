@@ -7,12 +7,12 @@ const mkdir = require("mkdirp");
 const path = require("path");
 const globals_1 = require("../utils/globals");
 class Config {
-    constructor(configFilePath) {
-        this.configFilePath = configFilePath;
+    constructor(path) {
+        this.path = path;
         this.data = Config.default();
         this._initialData = Config.default();
-        if (fs.existsSync(configFilePath)) {
-            let tomlData = Config.readFile(configFilePath);
+        if (fs.existsSync(path)) {
+            let tomlData = Config.readFile(path);
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
         }
@@ -42,23 +42,26 @@ class Config {
             }
         };
     }
+    static defaultTOML() {
+        return tomlify.toToml(Config.default(), { spaces: 2 });
+    }
     toTOML() {
         return tomlify.toToml(this.data, { spaces: 2 });
     }
     save() {
-        globals_1.info(`Config is being read from and updated at ${this.configFilePath}`);
+        globals_1.info(`Config is being read from and updated at ${this.path}`);
         if (globals_1.isEquivalentObjects(this.data, this._initialData)) {
             globals_1.warning('No changes in configuration detected.');
             return false;
         }
         else {
-            let list = this.configFilePath.split('/');
+            let list = this.path.split('/');
             list.pop();
             let configFileDir = list.join('/');
             if (!fs.existsSync(configFileDir)) {
                 mkdir.mkdirp(configFileDir);
             }
-            fs.writeFileSync(this.configFilePath, this.toTOML());
+            fs.writeFileSync(this.path, this.toTOML());
             this._initialData = toml.parse(this.toTOML());
             globals_1.success('Configuration file updated.');
             return true;

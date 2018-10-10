@@ -46,7 +46,7 @@ export default class Controller {
     /**
      * Return default options
      *
-     * @returns {DefaultTXOptions} A Javascript object with default transaction parameters
+     * @returns {DefaultTXOptions} A Javascript instance with default transaction parameters
      */
     get defaultOptions(): DefaultTXOptions {
         return this._defaultTXOptions;
@@ -107,7 +107,7 @@ export default class Controller {
     }
 
     /**
-     * Generates Javascript object from Solidity Contract File.
+     * Generates Javascript instance from Solidity Contract File.
      *
      * Takes a solidity file and generates corresponding functions associated with the contract
      * name provided. The byte-code of the contract is auto-assigned to the data option field
@@ -115,7 +115,7 @@ export default class Controller {
      *
      * @param {string} contractName - Name of the Contract to get from Solidity file
      * @param {string} filePath - Absolute or relative path of the Solidity file.
-     * @returns {SolidityContract} A Javascript object representation of solidity contract
+     * @returns {SolidityContract} A Javascript instance representation of solidity contract
      */
     ContractFromSolidityFile(contractName: string, filePath: string): SolidityContract {
         this._requireDefaultFromAddress();
@@ -134,14 +134,14 @@ export default class Controller {
     };
 
     /**
-     * Generates Contract Javascript object from Solidity Contract File.
+     * Generates Contract Javascript instance from Solidity Contract File.
      *
      * Takes ABI and generates corresponding functions associated with the contract provided.
      * The byte-code of the contract needs to be assigned before deploying. Mostly used to
      * interact with already deployed contracts.
      *
      * @param {ABI[]} abi - The Application Binary Interface of the Solidity contract
-     * @returns {SolidityContract} A Javascript object representation of solidity contract
+     * @returns {SolidityContract} A Javascript instance representation of solidity contract
      */
     ContractFromABI(abi: ABI[]): SolidityContract {
         this._requireDefaultFromAddress();
@@ -156,13 +156,13 @@ export default class Controller {
     /**
      * Transfer a specified value to the desired address.
      *
-     * Sender address can be set after instantiating the Controller object (recommended) or
-     * after the Transaction object has been created.
+     * Sender address can be set after instantiating the Controller instance (recommended) or
+     * after the Transaction instance has been created.
      *
      * @param {string} to - The address of the sender
      * @param {string} from - The address of the receiver
      * @param {number} value - The value to send the receiver
-     * @returns {Transaction} the required Transaction object for transfer request
+     * @returns {Transaction} the required Transaction instance for transfer request
      */
     transfer(to: string, from: string, value: number): Transaction {
         if (from === '') {

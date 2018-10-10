@@ -16,7 +16,7 @@ export default class Transaction {
     public receipt: TXReceipt;
 
     /**
-     * Transaction object to be sent or called.
+     * Transaction instance to be sent or called.
      *
      * @param {TX} _tx - The transaction options eg. gas, gas price, value...
      * @param {boolean} constant - If the transaction is constant

@@ -68,6 +68,8 @@ declare namespace EVMLClient {
 
         getAccounts(): Promise<string>;
 
+        getInfo(): Promise<string>;
+
         call(tx: string): Promise<{}>;
 
         sendTx(tx: string): Promise<{}>;
@@ -85,7 +87,7 @@ declare namespace EVMLClient {
         readonly constant: boolean;
 
         /**
-         * Transaction object to be sent or called.
+         * Transaction instance to be sent or called.
          *
          * @param {TX} options The transaction options eg. gas, gas price, value...
          * @param {boolean} constant If the transaction is constant
@@ -190,7 +192,7 @@ declare namespace EVMLClient {
         /**
          * Attaches functions to contract.
          *
-         * Parses function data from ABI and creates Javascript object representation then adds
+         * Parses function data from ABI and creates Javascript instance representation then adds
          * these functions to Contract.methods.
          *
          * @private
@@ -210,7 +212,7 @@ declare namespace EVMLClient {
          *
          * Can either be used to deploy a contract or interact with a contract already deployed.
          *
-         * @param {Controller} controller Controller Javascript object
+         * @param {Controller} controller Controller Javascript instance
          * @param {ContractOptions} options The options of the contract. eg. gas price, gas, address
          * @constructor
          */
@@ -220,7 +222,7 @@ declare namespace EVMLClient {
          * Deploy contract to the blockchain.
          *
          * Deploys contract to the blockchain and sets the newly acquired address of the contract.
-         * Also assigns the transaction receipt to this object..
+         * Also assigns the transaction receipt to this instance..
          *
          * @param {Object} options The options for the contract. eg. constructor params, gas, gas price, data
          * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
@@ -252,7 +254,7 @@ declare namespace EVMLClient {
          * Sets the default gas for the contract.
          *
          * Any functions from the this contract will inherit the `gas` value by default.
-         * You still have the option to override the value once the transaction object is instantiated.
+         * You still have the option to override the value once the transaction instance is instantiated.
          *
          * @param {number} gas The gas to assign to the contract
          * @returns {SolidityContract} The contract
@@ -263,7 +265,7 @@ declare namespace EVMLClient {
          * Sets the default gas price for the contract.
          *
          * Any functions from the this contract will inherit the `gasPrice` value by default.
-         * You still have the option to override the value once the transaction object is instantiated.
+         * You still have the option to override the value once the transaction instance is instantiated.
          *
          * @param {number} gasPrice The gas price to assign to the contract
          * @returns {SolidityContract} The contract
@@ -314,7 +316,7 @@ declare namespace EVMLClient {
         constructor(host: string, port?: number);
 
         /**
-         * Generates Javascript object from Solidity Contract File.
+         * Generates Javascript instance from Solidity Contract File.
          *
          * Takes a solidity file and generates corresponding functions associated with the contract
          * name provided. The byte-code of the contract is auto-assigned to the data option field
@@ -322,32 +324,32 @@ declare namespace EVMLClient {
          *
          * @param {string} contractName Name of the Contract to get from Solidity file
          * @param {string} filePath Absolute or relative path of the Solidity file.
-         * @returns {SolidityContract} A Javascript object representation of solidity contract
+         * @returns {SolidityContract} A Javascript instance representation of solidity contract
          */
         ContractFromSolidityFile(contractName: string, filePath: string): SolidityContract;
 
         /**
-         * Generates Contract Javascript object from Solidity Contract File.
+         * Generates Contract Javascript instance from Solidity Contract File.
          *
          * Takes ABI and generates corresponding functions associated with the contract provided.
          * The byte-code of the contract needs to be assigned before deploying. Mostly used to
          * interact with already deployed contracts.
          *
          * @param {ABI[]} abi The Application Binary Interface of the Solidity contract
-         * @returns {SolidityContract} A Javascript object representation of solidity contract
+         * @returns {SolidityContract} A Javascript instance representation of solidity contract
          */
         ContractFromABI(abi: ABI[]): SolidityContract;
 
         /**
          * Transfer a specified value to the desired address.
          *
-         * Sender address can be set after instantiating the Controller object (recommended) or
-         * after the Transaction object has been created.
+         * Sender address can be set after instantiating the Controller instance (recommended) or
+         * after the Transaction instance has been created.
          *
          * @param {string} to - The address of the sender
          * @param {string} from - The address of the receiver
          * @param {number} value - The value to send the receiver
-         * @returns {Transaction} the required Transaction object for transfer request
+         * @returns {Transaction} the required Transaction instance for transfer request
          */
         transfer(to: string, from: string, value: number): Transaction;
 

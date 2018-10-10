@@ -12,27 +12,34 @@ export default class Config {
     public data: any;
     private _initialData: any;
 
-    constructor(public configFilePath: string) {
+    constructor(public path: string) {
+
         this.data = Config.default();
         this._initialData = Config.default();
 
-        if (fs.existsSync(configFilePath)) {
-            let tomlData: string = Config.readFile(configFilePath);
+        if (fs.existsSync(path)) {
+
+            let tomlData: string = Config.readFile(path);
 
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
+
         } else {
 
         }
+
     }
 
     static readFile(path: string): string {
+
         if (fs.existsSync(path)) {
             return fs.readFileSync(path, 'utf8');
         }
+
     }
 
     static default() {
+
         return {
             title: 'EVM-Lite CLI Config',
             connection: {
@@ -49,6 +56,11 @@ export default class Config {
                 password: path.join(evmlcDir, 'pwd.txt')
             }
         }
+
+    }
+
+    static defaultTOML() {
+        return tomlify.toToml(Config.default(), {spaces: 2});
     }
 
     toTOML(): string {
@@ -56,12 +68,18 @@ export default class Config {
     }
 
     save(): boolean {
-        info(`Config is being read from and updated at ${this.configFilePath}`);
+
+        info(`Config is being read from and updated at ${this.path}`);
+
         if (isEquivalentObjects(this.data, this._initialData)) {
+
             warning('No changes in configuration detected.');
+
             return false;
+
         } else {
-            let list = this.configFilePath.split('/');
+
+            let list = this.path.split('/');
             list.pop();
 
             let configFileDir = list.join('/');
@@ -70,12 +88,16 @@ export default class Config {
                 mkdir.mkdirp(configFileDir);
             }
 
-            fs.writeFileSync(this.configFilePath, this.toTOML());
+            fs.writeFileSync(this.path, this.toTOML());
+
             this._initialData = toml.parse(this.toTOML());
 
             success('Configuration file updated.');
+
             return true;
+
         }
+
     }
 
 }

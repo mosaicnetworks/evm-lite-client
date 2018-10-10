@@ -4,8 +4,6 @@ import * as mkdir from 'mkdirp';
 import * as Chalk from "chalk";
 import * as JSONBig from 'json-bigint';
 
-import {interactive, interactiveConfig} from "../evmlc";
-
 import {Account, Controller} from "../../../lib";
 
 import Config from "../classes/Config";
@@ -147,9 +145,9 @@ export const isEquivalentObjects = (objectA: any, objectB: any) => {
 /**
  * Should attempt to connect to node with the config connection parameters
  * then try and get accounts to make sure the connection is valid then
- * returns a promise which resolves the respective Controller object.
+ * returns a promise which resolves the respective Controller instance.
  *
- * @param {Config} config - The config object
+ * @param {Config} config - The config instance
  * @returns Promise<Controller>
  */
 export const connect = (config: Config): Promise<Controller> => {
@@ -181,13 +179,3 @@ export const initDirectories = (): Promise<void> => {
     });
 };
 
-// get config
-// returns an instance or interactive instance
-export const getConfig = (optionalPath: string): Config => {
-    return interactiveConfig || new Config(optionalPath || defaultConfigFilePath)
-};
-
-// return if interactive or not
-export const getInteractive = (optionalInteractive: boolean): boolean => {
-    return optionalInteractive || interactive;
-};

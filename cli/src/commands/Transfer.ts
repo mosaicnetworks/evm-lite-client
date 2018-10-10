@@ -1,25 +1,16 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {connect, decryptLocalAccounts, error, getConfig, getInteractive, success} from "../utils/globals";
+import {error, success} from "../utils/globals";
 
 import {Controller} from "../../../lib";
+import Session from "../classes/Session";
 
-
-/**
- * Should return a Vorpal command instance used for transferring tokens.
- *
- * This function should return a Vorpal command which should transfer
- * specified value to the desired to address.
- *
- * @param {Vorpal} evmlc - The command line object.
- * @returns Vorpal Command instance
- */
-export default function commandTransfer(evmlc: Vorpal) {
+export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
     let description =
-        `Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the 
-        configuration file.`;
+        'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
+        ' configuration file.';
 
     return evmlc.command('transfer').alias('t')
         .description(description)
@@ -28,7 +19,6 @@ export default function commandTransfer(evmlc: Vorpal) {
         .option('-g, --gas <value>', 'gas to send at')
         .option('-gp, --gasprice <value>', 'gas price to send at')
         .option('-t, --to <address>', 'address to send to')
-        .option('-c, --config <path>', 'set config file path')
         .option('-f, --from <address>', 'address to send from')
         .types({
             string: ['t', 'to', 'f', 'from'],
@@ -37,14 +27,13 @@ export default function commandTransfer(evmlc: Vorpal) {
 
             return new Promise<void>((resolve) => {
 
-                let i = getInteractive(args.options.interactive);
-                let config = getConfig(args.options.config);
+                let interactive = args.options.interactive || session.interactive;
 
                 // connect to API endpoints
-                connect(config)
-                    .then((node: Controller) => {
+                session.connect()
+                    .then((connection: Controller) => {
 
-                        decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
+                        session.keystore.decrypt(connection)
                             .then((accounts) => {
 
                                 // handles signing and sending transaction
@@ -59,7 +48,7 @@ export default function commandTransfer(evmlc: Vorpal) {
 
                                         account.signTransaction(tx)
                                             .then((signed: any) => {
-                                                node.api.sendRawTx(signed.rawTransaction)
+                                                connection.api.sendRawTx(signed.rawTransaction)
                                                     .then(resp => {
                                                         success(`Transferred.`);
                                                         resolve();
@@ -101,18 +90,18 @@ export default function commandTransfer(evmlc: Vorpal) {
                                     {
                                         name: 'gas',
                                         type: 'input',
-                                        default: config.data.defaults.gas || 10000,
+                                        default: session.config.data.defaults.gas || 10000,
                                         message: 'Gas: '
                                     },
                                     {
                                         name: 'gasPrice',
                                         type: 'input',
-                                        default: config.data.defaults.gasPrice || 0,
+                                        default: session.config.data.defaults.gasPrice || 0,
                                         message: 'Gas Price: '
                                     }
                                 ];
 
-                                if (i) {
+                                if (interactive) {
                                     inquirer.prompt(questions)
                                         .then(tx => {
                                             handleTransfer(tx);
@@ -124,8 +113,8 @@ export default function commandTransfer(evmlc: Vorpal) {
                                     tx.from = args.options.from || undefined;
                                     tx.to = args.options.to || undefined;
                                     tx.value = args.options.value || undefined;
-                                    tx.gas = args.options.gas || config.data.defaults.gas || 100000;
-                                    tx.gasPrice = args.options.gasprice || config.data.defaults.gasPrice || 0;
+                                    tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
+                                    tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
 
                                     if (tx.from && tx.to && tx.value) {
                                         handleTransfer(tx);

@@ -12,59 +12,72 @@ const Interactive_1 = require("./commands/Interactive");
 const ConfigView_1 = require("./commands/ConfigView");
 const ConfigSet_1 = require("./commands/ConfigSet");
 const Transfer_1 = require("./commands/Transfer");
+const Info_1 = require("./commands/Info");
 const Test_1 = require("./commands/Test");
-const Config_1 = require("./classes/Config");
-// global interactive mode and config file
-exports.interactive = false;
+const Session_1 = require("./classes/Session");
 /**
  * EVM-Lite Command Line Interface
  */
 globals_1.initDirectories()
+    // custom parse data dir
     .then(() => {
-    // create new Vorpal instance
-    const evmlc = new Vorpal().version("0.1.0");
-    /**
-     *commands: (Vorpal) => Vorpal.Command
-     */
-    // Config commands
-    ConfigView_1.default(evmlc);
-    ConfigSet_1.default(evmlc);
-    // Account commands
-    AccountsCreate_1.default(evmlc);
-    AccountsList_1.default(evmlc);
-    AccountsGet_1.default(evmlc);
-    Interactive_1.default(evmlc);
-    Transfer_1.default(evmlc);
-    Test_1.default(evmlc);
+    // set data directory
+    // initially set to default
+    // unless overridden by --datadir or -d
+    let dataDirPath = globals_1.evmlcDir;
+    if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
+        dataDirPath = process.argv[3];
+        if (!fs.existsSync(process.argv[3])) {
+            globals_1.warning('Data directory file path provided does not exist and hence will created...');
+        }
+        // remove the flag and its value
+        process.argv.splice(2, 2);
+    }
+    let session = new Session_1.default(dataDirPath);
+    // show default help if no commands are provided
     if (!process.argv[2]) {
         console.log(`\n  A Command Line Interface to interact with EVM-Lite.`);
+        console.log(`\n  Current Data Directory: ${session.directory.path}`);
         // if no commands are given output help by default
         process.argv[2] = 'help';
     }
+    return session;
+})
+    // add commands
+    .then((session) => {
+    // create new Vorpal instance
+    const evmlc = new Vorpal().version("0.1.0");
+    // Config commands
+    ConfigView_1.default(evmlc, session);
+    ConfigSet_1.default(evmlc, session);
+    // Account commands
+    AccountsCreate_1.default(evmlc, session);
+    AccountsList_1.default(evmlc, session);
+    AccountsGet_1.default(evmlc, session);
+    // Others
+    Interactive_1.default(evmlc, session);
+    Transfer_1.default(evmlc, session);
+    Info_1.default(evmlc, session);
+    Test_1.default(evmlc, session);
+    return {
+        instance: evmlc,
+        session: session
+    };
+})
+    // custom parse interactive mode
+    .then((cli) => {
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-        // set config path for interactive mode
-        let configFilePath = globals_1.defaultConfigFilePath;
-        if ((process.argv[3] === '--config' || process.argv[3] === '-c')) {
-            if (fs.existsSync(process.argv[4])) {
-                configFilePath = process.argv[4];
-            }
-            else {
-                globals_1.warning('Config file path provided does not exists. Loading default config...');
-            }
-        }
         // set global interactive variable so all commands inherit interactive mode
-        exports.interactive = true;
-        exports.interactiveConfig = new Config_1.default(configFilePath);
+        cli.session.interactive = true;
         figlet('EVM-Lite CLI', (err, data) => {
-            console.log(data);
-            console.log('Entered interactive mode with configuration file: ' + configFilePath);
+            globals_1.info(`${data} \n Entered interactive mode with configuration file: ${cli.session.config.path}`);
             // show interactive console
-            evmlc.delimiter('evmlc$').show();
+            cli.instance.delimiter('evmlc$').show();
         });
     }
     else {
         // parse non-interactive command
-        evmlc.parse(process.argv);
+        cli.instance.parse(process.argv);
     }
 })
     .catch(err => globals_1.error(err));

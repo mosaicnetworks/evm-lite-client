@@ -2,14 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
 const globals_1 = require("../utils/globals");
-/**
- * Should return a Vorpal command instance used for updating the config file.
- *
- * @param {Vorpal} evmlc - The command line object.
- * @returns Vorpal Command instance
- */
-function commandConfigSet(evmlc) {
-    let description = `Set values of the default config file or the one provided with -c, --config flag.`;
+function commandConfigSet(evmlc, session) {
+    let description = 'Set values of the configuration inside the data directory.';
     return evmlc.command('config set').alias('c s')
         .description(description)
         .option('-i, --interactive', 'enter into interactive command')
@@ -18,7 +12,6 @@ function commandConfigSet(evmlc) {
         .option('--from <from>', 'default from')
         .option('--gas <gas>', 'default gas')
         .option('--gasprice <gasprice>', 'gas price')
-        .option('-c, --config <path>', 'set config file path')
         .option('--keystore <path>', 'keystore path')
         .option('--pwd <path>', 'password path')
         .types({
@@ -26,10 +19,10 @@ function commandConfigSet(evmlc) {
     })
         .action((args) => {
         return new Promise(resolve => {
-            let config = globals_1.getConfig(args.options.config);
-            let interactive = globals_1.getInteractive(args.options.interactive);
+            let config = session.config;
+            let interactive = args.options.interactive || session.interactive;
             // handles updating config file
-            let handleGlobals = () => {
+            let handleConfig = () => {
                 for (let prop in args.options) {
                     if (prop.toLowerCase() === 'host') {
                         if (config.data.connection.host !== args.options[prop])
@@ -102,13 +95,13 @@ function commandConfigSet(evmlc) {
                     args.options.gasprice = answers.gasPrice;
                 })
                     .then(() => {
-                    handleGlobals();
+                    handleConfig();
                     resolve();
                 });
             }
             else {
                 if (Object.keys(args.options).length) {
-                    handleGlobals();
+                    handleConfig();
                     resolve();
                 }
                 else {

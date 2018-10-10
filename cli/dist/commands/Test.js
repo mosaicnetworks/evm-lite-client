@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
-function commandTest(evmlc) {
+function commandTest(evmlc, session) {
     return evmlc.command('test').alias('test')
-        .option('-c, --config <path>', 'set config file path')
         .hidden()
         .action((args) => {
         return new Promise(resolve => {

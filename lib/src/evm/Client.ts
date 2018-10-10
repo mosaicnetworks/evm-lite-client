@@ -41,6 +41,15 @@ export default class Client {
         });
     }
 
+    public getInfo(): Promise<string> {
+        let options = this._constructOptions('GET', '/info');
+        return new Promise((resolve, reject) => {
+            let req = request(options, resolve);
+            req.on('error', (err) => reject(err));
+            req.end();
+        });
+    }
+
     public call(tx: string): Promise<string> {
         let options = this._constructOptions('POST', '/call');
         return new Promise((resolve, reject) => {

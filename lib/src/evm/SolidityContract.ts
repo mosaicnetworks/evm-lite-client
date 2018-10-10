@@ -28,7 +28,7 @@ export default class SolidityContract {
      *
      * Can either be used to deploy a contract or interact with a contract already deployed.
      *
-     * @param {Controller} controller - Controller Javascript object
+     * @param {Controller} controller - Controller Javascript instance
      * @param {ContractOptions} options - The options of the contract. eg. gas price, gas, address
      * @constructor
      */
@@ -48,7 +48,7 @@ export default class SolidityContract {
      * Deploy contract to the blockchain.
      *
      * Deploys contract to the blockchain and sets the newly acquired address of the contract.
-     * Also assigns the transaction receipt to this object.
+     * Also assigns the transaction receipt to this instance.
      *
      * @param {Object} options - The options for the contract. eg. constructor params, gas, gas price, data
      * @returns {SolidityContract} Returns deployed contract with receipt and address attributes
@@ -117,7 +117,7 @@ export default class SolidityContract {
      * Sets the default gas for the contract.
      *
      * Any functions from the this contract will inherit the `gas` value by default.
-     * You still have the option to override the value once the transaction object is instantiated.
+     * You still have the option to override the value once the transaction instance is instantiated.
      *
      * @param {number} gas - The gas to assign to the contract
      * @returns {SolidityContract} The contract
@@ -131,7 +131,7 @@ export default class SolidityContract {
      * Sets the default gas price for the contract.
      *
      * Any functions from the this contract will inherit the `gasPrice` value by default.
-     * You still have the option to override the value once the transaction object is instantiated.
+     * You still have the option to override the value once the transaction instance is instantiated.
      *
      * @param {number} gasPrice - The gas price to assign to the contract
      * @returns {SolidityContract} The contract
@@ -166,7 +166,7 @@ export default class SolidityContract {
     /**
      * Attaches functions to contract.
      *
-     * Parses function data from ABI and creates Javascript object representation then adds
+     * Parses function data from ABI and creates Javascript instance representation then adds
      * these functions to Contract.methods.
      *
      * @private
