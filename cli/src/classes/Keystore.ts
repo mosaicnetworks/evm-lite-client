@@ -16,7 +16,10 @@ export default class Keystore {
     }
 
     decrypt(connection: Controller): Promise<Account[]> {
+        this.accounts = [];
+
         let promises = [];
+
         fs.readdirSync(this.path).forEach((file) => {
             if (!file.startsWith('.')) {
                 let keystoreFile = path.join(this.path, file);

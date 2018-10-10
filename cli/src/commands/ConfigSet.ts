@@ -124,6 +124,7 @@ export default function commandConfigSet(evmlc: Vorpal, session: Session) {
                         resolve();
                     } else {
                         warning('No options provided. To enter interactive mode use: -i, --interactive.');
+                        resolve();
                     }
                 }
 

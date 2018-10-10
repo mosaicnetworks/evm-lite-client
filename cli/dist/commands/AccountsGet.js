@@ -62,10 +62,8 @@ function commandAccountsGet(evmlc, session) {
                 }
                 else {
                     // if -a or --address are not provided
-                    return new Promise(resolve => {
-                        globals_1.error('Provide an address. Usage: accounts get <address>');
-                        resolve();
-                    });
+                    globals_1.error('Provide an address. Usage: accounts get <address>');
+                    resolve();
                 }
             })
                 .catch(err => globals_1.error(err));

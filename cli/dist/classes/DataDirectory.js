@@ -27,15 +27,16 @@ class DataDirectory {
         DataDirectory.createDirectoryIfNotExists(keystorePath);
         return new Keystore_1.default(keystorePath, password);
     }
-    createAndGetConfigFile() {
+    createAndGetConfig() {
         let configFilePath = path.join(this.path, 'config.toml');
         DataDirectory.createOrReadFile(configFilePath, Config_1.default.defaultTOML());
         return new Config_1.default(configFilePath);
     }
-    createAndGetPasswordFile() {
+    createAndGetPasswordFilePath() {
         let password = 'supersecurepassword';
         let passwordFilePath = path.join(this.path, 'pwd.txt');
-        return DataDirectory.createOrReadFile(passwordFilePath, password);
+        DataDirectory.createOrReadFile(passwordFilePath, password);
+        return passwordFilePath;
     }
 }
 exports.default = DataDirectory;

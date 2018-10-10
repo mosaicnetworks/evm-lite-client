@@ -61,6 +61,7 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
                                     let counter = 0;
                                     let table = new ASCIITable()
                                         .setHeading('#', 'Account Address', 'Balance', 'Nonce');
+
                                     if (formatted) {
                                         accounts.forEach((account) => {
                                             let balance = account.balance;
@@ -76,6 +77,8 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
                                     } else {
                                         success(a);
                                     }
+
+                                    resolve();
                                 })
                                 .catch(err => error(err))
                         }

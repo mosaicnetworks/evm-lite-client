@@ -12,6 +12,7 @@ class Keystore {
         this.accounts = [];
     }
     decrypt(connection) {
+        this.accounts = [];
         let promises = [];
         fs.readdirSync(this.path).forEach((file) => {
             if (!file.startsWith('.')) {

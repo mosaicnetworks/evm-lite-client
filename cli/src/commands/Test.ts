@@ -1,5 +1,4 @@
 import * as Vorpal from "vorpal";
-import * as JSONBig from 'json-bigint';
 import Session from "../classes/Session";
 
 
@@ -8,18 +7,24 @@ export default function commandTest(evmlc: Vorpal, session: Session) {
         .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(resolve => {
-                // connect(getConfig(undefined))
-                //     .then((node) => {
-                //         node.api.getAccount('0x6005153de588828f1ae4f3bac5129bf8ba7a82e4')
-                //             .then((a) => {
-                //                 console.log(JSONBig.parse(a));
-                //             });
-                //     })
-                //     .catch();
-                let string = '{"address":"0x6005153de588828f1Ae4F3BaC5129BF8BA7A82E4","balance":1337000000000000000000,"nonce":0}';
-                let json = JSONBig.parse(string);
-                console.log(typeof json.balance);
-                console.log(json.balance.toFormat(0))
+                var sqlite3 = require('sqlite3').verbose();
+                var db = new sqlite3.Database('danu.sqlite3');
+
+                db.serialize(function () {
+                    db.run("CREATE TABLE lorem (info TEXT)");
+
+                    var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
+                    for (var i = 0; i < 10; i++) {
+                        stmt.run("Ipsum " + i);
+                    }
+                    stmt.finalize();
+
+                    db.each("SELECT rowid AS id, info FROM lorem", function (err, row) {
+                        console.log(row.id + ": " + row.info);
+                    });
+                });
+
+                db.close();
             });
         })
         .description('Testing purposes.');

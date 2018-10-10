@@ -93,12 +93,8 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                         } else {
 
                             // if -a or --address are not provided
-                            return new Promise<void>(resolve => {
-
-                                error('Provide an address. Usage: accounts get <address>');
-                                resolve();
-
-                            });
+                            error('Provide an address. Usage: accounts get <address>');
+                            resolve();
 
                         }
 

@@ -27,13 +27,13 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
                     {
                         name: 'outputPath',
                         message: 'Enter keystore output path: ',
-                        default: session.config.data.storage.keystore,
+                        default: session.keystore.path,
                         type: 'input'
                     },
                     {
                         name: 'passwordPath',
                         message: 'Enter password file path: ',
-                        default: session.config.data.storage.password,
+                        default: session.passwordPath,
                         type: 'input'
                     }
                 ];

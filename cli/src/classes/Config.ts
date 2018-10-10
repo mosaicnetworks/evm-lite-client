@@ -2,9 +2,8 @@ import * as fs from 'fs';
 import * as toml from "toml";
 import * as tomlify from 'tomlify-j0.4';
 import * as mkdir from 'mkdirp';
-import * as path from "path";
 
-import {evmlcDir, info, isEquivalentObjects, success, warning} from "../utils/globals";
+import {info, isEquivalentObjects, success, warning} from "../utils/globals";
 
 
 export default class Config {
@@ -41,7 +40,6 @@ export default class Config {
     static default() {
 
         return {
-            title: 'EVM-Lite CLI Config',
             connection: {
                 host: '127.0.0.1',
                 port: '8080'
@@ -50,10 +48,6 @@ export default class Config {
                 from: '',
                 gas: 0,
                 gasPrice: 0
-            },
-            storage: {
-                keystore: path.join(evmlcDir, 'keystore'),
-                password: path.join(evmlcDir, 'pwd.txt')
             }
         }
 

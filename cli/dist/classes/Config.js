@@ -4,7 +4,6 @@ const fs = require("fs");
 const toml = require("toml");
 const tomlify = require("tomlify-j0.4");
 const mkdir = require("mkdirp");
-const path = require("path");
 const globals_1 = require("../utils/globals");
 class Config {
     constructor(path) {
@@ -26,7 +25,6 @@ class Config {
     }
     static default() {
         return {
-            title: 'EVM-Lite CLI Config',
             connection: {
                 host: '127.0.0.1',
                 port: '8080'
@@ -35,10 +33,6 @@ class Config {
                 from: '',
                 gas: 0,
                 gasPrice: 0
-            },
-            storage: {
-                keystore: path.join(globals_1.evmlcDir, 'keystore'),
-                password: path.join(globals_1.evmlcDir, 'pwd.txt')
             }
         };
     }

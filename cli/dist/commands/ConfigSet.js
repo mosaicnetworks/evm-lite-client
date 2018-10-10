@@ -106,6 +106,7 @@ function commandConfigSet(evmlc, session) {
                 }
                 else {
                     globals_1.warning('No options provided. To enter interactive mode use: -i, --interactive.');
+                    resolve();
                 }
             }
         });

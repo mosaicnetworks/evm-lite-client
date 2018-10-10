@@ -16,6 +16,7 @@
     "inquirer": "latest",
     "json-bigint": "^0.3.0",
     "mkdirp": "^0.5.1",
+    "sqlite3": "^4.0.2",
     "toml": "^2.3.3",
     "tomlify-j0.4": "^3.0.0",
     "vorpal": "^1.12.0"

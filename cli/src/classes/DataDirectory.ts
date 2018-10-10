@@ -35,18 +35,19 @@ export default class DataDirectory {
         return new Keystore(keystorePath, password);
     }
 
-    createAndGetConfigFile(): Config {
+    createAndGetConfig(): Config {
         let configFilePath = path.join(this.path, 'config.toml');
 
         DataDirectory.createOrReadFile(configFilePath, Config.defaultTOML());
         return new Config(configFilePath);
     }
 
-    createAndGetPasswordFile() {
+    createAndGetPasswordFilePath() {
         let password: string = 'supersecurepassword';
         let passwordFilePath = path.join(this.path, 'pwd.txt');
+        DataDirectory.createOrReadFile(passwordFilePath, password);
 
-        return DataDirectory.createOrReadFile(passwordFilePath, password);
+        return passwordFilePath;
     }
 
 }

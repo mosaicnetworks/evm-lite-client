@@ -5,12 +5,13 @@ import {Controller} from "../../../lib";
 import Config from "./Config";
 import DataDirectory from "./DataDirectory";
 import Keystore from "./Keystore";
+import * as fs from "fs";
 
 
 export default class Session {
 
     public interactive: boolean;
-    public password: string;
+    public passwordPath: string;
 
     public directory: DataDirectory;
     public connection: Controller;
@@ -24,9 +25,13 @@ export default class Session {
 
         this.directory = new DataDirectory(dataDirPath);
 
-        this.password = this.directory.createAndGetPasswordFile();
+        this.passwordPath = this.directory.createAndGetPasswordFilePath();
         this.keystore = this.directory.createAndGetKeystore(this.password);
-        this.config = this.directory.createAndGetConfigFile();
+        this.config = this.directory.createAndGetConfig();
+    }
+
+    get password(): string {
+        return fs.readFileSync(this.passwordPath, 'utf8');
     }
 
     connect(): Promise<Controller> {

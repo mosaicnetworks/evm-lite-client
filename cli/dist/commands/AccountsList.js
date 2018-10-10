@@ -64,6 +64,7 @@ function commandAccountsList(evmlc, session) {
                         else {
                             globals_1.success(a);
                         }
+                        resolve();
                     })
                         .catch(err => globals_1.error(err));
                 }

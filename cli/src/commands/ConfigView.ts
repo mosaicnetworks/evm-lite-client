@@ -1,5 +1,7 @@
 import * as Vorpal from "vorpal";
 
+import {success} from "../utils/globals";
+
 import Session from "../classes/Session";
 
 
@@ -12,7 +14,7 @@ export default function commandConfigUser(evmlc: Vorpal, session: Session) {
         .description(description)
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(resolve => {
-                console.log(session.config.data);
+                success(session.config.toTOML());
                 resolve();
             });
         });
