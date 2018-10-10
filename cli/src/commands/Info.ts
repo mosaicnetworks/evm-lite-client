@@ -28,8 +28,10 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
                                     });
 
                                     info(table.toString());
+                                    resolve();
                                 } else {
                                     success(res);
+                                    resolve();
                                 }
                             })
                             .catch(err => error(err));

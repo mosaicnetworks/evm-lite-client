@@ -21,9 +21,11 @@ function commandInfo(evmlc, session) {
                             table.addRow(key, information[key]);
                         });
                         globals_1.info(table.toString());
+                        resolve();
                     }
                     else {
                         globals_1.success(res);
+                        resolve();
                     }
                 })
                     .catch(err => globals_1.error(err));
