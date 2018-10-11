@@ -1,14 +1,15 @@
 import * as path from "path";
+import * as sqlite3 from 'sqlite3';
 
-import DataDirectory from "./DataDirectory";
 
 export default class Transactions {
 
-    public database: string;
+    public database: sqlite3.Database;
+    public databasePath: string;
 
     constructor(dataDir: string) {
-        this.database = path.join(dataDir, 'db.sqlite3');
-        DataDirectory.createOrReadFile(this.database, '');
+        this.databasePath = path.join(dataDir, 'db.sqlite3');
+        this.database = new sqlite3.Database('danu.sqlite3')
     }
 
     createTables() {

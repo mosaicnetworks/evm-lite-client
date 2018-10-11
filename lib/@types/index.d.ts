@@ -321,6 +321,7 @@ declare namespace EVMLClient {
          */
         constructor(host: string, port?: number);
 
+        testConnection(): Promise<boolean>;
         getRemoteAccounts(): Promise<BaseAccount[]>;
         getRemoteAccount(address: string): Promise<BaseAccount>;
 

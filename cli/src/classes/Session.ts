@@ -40,16 +40,17 @@ export default class Session {
                 let host: string = this.config.data.connection.host || '127.0.0.1';
                 let port: number = this.config.data.connection.port || 8080;
                 let node = new Controller(host, port);
-                node.api.getAccounts().then(() => {
-                    this.connection = node;
-                    resolve(this.connection);
-                })
+                node.testConnection()
+                    .then((success) => {
+                        if (success) {
+                            this.connection = node;
+                            resolve(this.connection);
+                        }
+                    })
                     .catch((err) => {
                         this.connection = null;
-                        warning(err);
-                        reject();
+                        reject(err);
                     });
-
             } else {
                 resolve(this.connection);
             }

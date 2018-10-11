@@ -25,41 +25,57 @@ export default function commandConfigSet(evmlc: Vorpal, session: Session) {
             string: ['h', 'host', 'from', 'keystore', 'pwd']
         })
         .action((args: Vorpal.Args): Promise<void> => {
-            return new Promise<void>(resolve => {
-                let interactive = args.options.interactive || session.interactive;
-                let questions = [
-                    {
-                        name: 'host',
-                        default: session.config.data.connection.host,
-                        type: 'input',
-                        message: 'Host: '
-                    },
-                    {
-                        name: 'port',
-                        default: session.config.data.connection.port,
-                        type: 'input',
-                        message: 'Port: '
-                    },
-                    {
-                        name: 'from',
-                        default: session.config.data.defaults.from,
-                        type: 'input',
-                        message: 'Default From Address: '
-                    },
-                    {
-                        name: 'gas',
-                        default: session.config.data.defaults.gas,
-                        type: 'input',
-                        message: 'Default Gas: '
-                    },
-                    {
-                        name: 'gasPrice',
-                        default: session.config.data.defaults.gasPrice,
-                        type: 'input',
-                        message: 'Default Gas Price: '
-                    },
-                ];
-                let handleConfig = (): void => {
+            return new Promise<void>(async (resolve) => {
+                try {
+                    let interactive = args.options.interactive || session.interactive;
+                    let questions = [
+                        {
+                            name: 'host',
+                            default: session.config.data.connection.host,
+                            type: 'input',
+                            message: 'Host: '
+                        },
+                        {
+                            name: 'port',
+                            default: session.config.data.connection.port,
+                            type: 'input',
+                            message: 'Port: '
+                        },
+                        {
+                            name: 'from',
+                            default: session.config.data.defaults.from,
+                            type: 'input',
+                            message: 'Default From Address: '
+                        },
+                        {
+                            name: 'gas',
+                            default: session.config.data.defaults.gas,
+                            type: 'input',
+                            message: 'Default Gas: '
+                        },
+                        {
+                            name: 'gasPrice',
+                            default: session.config.data.defaults.gasPrice,
+                            type: 'input',
+                            message: 'Default Gas Price: '
+                        },
+                    ];
+
+                    if (interactive) {
+                        let answers = await inquirer.prompt(questions);
+
+                        args.options.host = answers.host;
+                        args.options.port = answers.port;
+                        args.options.from = answers.from;
+                        args.options.gas = answers.gas;
+                        args.options.gasprice = answers.gasPrice;
+                    }
+
+                    if (!Object.keys(args.options).length) {
+                        error('No options provided. To enter interactive mode use: -i, --interactive.');
+                        resolve();
+                    }
+
                     for (let prop in args.options) {
                         if (prop.toLowerCase() === 'host') {
                             if (session.config.data.connection.host !== args.options[prop])
@@ -92,31 +108,12 @@ export default function commandConfigSet(evmlc: Vorpal, session: Session) {
                             session.config.data.defaults.gasPrice = args.options[prop];
                         }
                     }
-                    session.config.save();
-                };
 
-                if (interactive) {
-                    inquirer.prompt(questions)
-                        .then((answers) => {
-                            args.options.host = answers.host;
-                            args.options.port = answers.port;
-                            args.options.from = answers.from;
-                            args.options.gas = answers.gas;
-                            args.options.gasprice = answers.gasPrice;
-                        })
-                        .then(() => {
-                            handleConfig();
-                            resolve();
-                        });
-                } else {
-                    if (Object.keys(args.options).length) {
-                        handleConfig();
-                        resolve();
-                    } else {
-                        error('No options provided. To enter interactive mode use: -i, --interactive.');
-                        resolve();
-                    }
+                    session.config.save();
+                } catch (err) {
+                    (typeof err === 'object') ? console.log(err) : error(err);
                 }
+                resolve();
             });
         });
 

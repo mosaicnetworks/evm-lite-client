@@ -1,7 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {success} from "../utils/globals";
+import {error, success} from "../utils/globals";
 
 import Session from "../classes/Session";
 
@@ -22,36 +22,35 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
             string: ['p', 'password', 'o', 'output']
         })
         .action((args: Vorpal.Args): Promise<void> => {
-            let interactive = args.options.interactive || session.interactive;
-            return new Promise<void>(resolve => {
-                let questions = [
-                    {
-                        name: 'outputPath',
-                        message: 'Enter keystore output path: ',
-                        default: session.keystore.path,
-                        type: 'input'
-                    },
-                    {
-                        name: 'passwordPath',
-                        message: 'Enter password file path: ',
-                        default: session.passwordPath,
-                        type: 'input'
+            return new Promise<void>(async (resolve) => {
+                try {
+                    let interactive = args.options.interactive || session.interactive;
+                    let questions = [
+                        {
+                            name: 'outputPath',
+                            message: 'Enter keystore output path: ',
+                            default: session.keystore.path,
+                            type: 'input'
+                        },
+                        {
+                            name: 'passwordPath',
+                            message: 'Enter password file path: ',
+                            default: session.passwordPath,
+                            type: 'input'
+                        }
+                    ];
+                    if (interactive) {
+                        let answers = await inquirer.prompt(questions);
+
+                        args.options.output = answers.outputPath;
+                        args.options.password = answers.passwordPath;
                     }
-                ];
-                if (interactive) {
-                    inquirer.prompt(questions)
-                        .then((answers) => {
-                            args.options.output = answers.outputPath;
-                            args.options.password = answers.passwordPath;
-                        })
-                        .then(() => {
-                            success(session.keystore.create(args.options.output, args.options.password));
-                            resolve();
-                        });
-                } else {
                     success(session.keystore.create(args.options.output, args.options.password));
-                    resolve();
+                } catch (err) {
+                    (typeof err === 'object') ? console.log(err) : error(err);
                 }
+
+                resolve();
             })
         });
 };

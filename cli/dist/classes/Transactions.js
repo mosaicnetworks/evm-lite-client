@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
-const DataDirectory_1 = require("./DataDirectory");
+const sqlite3 = require("sqlite3");
 class Transactions {
     constructor(dataDir) {
-        this.database = path.join(dataDir, 'db.sqlite3');
-        DataDirectory_1.default.createOrReadFile(this.database, '');
+        this.databasePath = path.join(dataDir, 'db.sqlite3');
+        this.database = new sqlite3.Database('danu.sqlite3');
     }
     createTables() {
     }

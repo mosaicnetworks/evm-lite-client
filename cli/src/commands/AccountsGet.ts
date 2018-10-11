@@ -21,56 +21,39 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
             string: ['_']
         })
         .action((args: Vorpal.Args): Promise<void> => {
+            return new Promise<void>(async (resolve) => {
+                try {
+                    let interactive = args.options.interactive || session.interactive;
+                    let connection = await session.connect();
+                    if (interactive) {
+                        let questions = [
+                            {
+                                name: 'address',
+                                type: 'input',
+                                required: true,
+                                message: 'Address: '
+                            }
+                        ];
+                        let answers = await inquirer.prompt(questions);
 
-            return new Promise<void>(resolve => {
-
-                let interactive = args.options.interactive || session.interactive;
-
-                // connect to API endpoints
-                session.connect()
-                    .then((connection) => {
-                        let handleAccountGet = (): void => {
-                            connection.getRemoteAccount(args.address)
-                                .then((account: BaseAccount) => {
-                                    let counter: number = 0;
-                                    let accountsTable: ASCIITable = new ASCIITable();
-                                    let formatted = args.options.formatted || false;
-
-                                    accountsTable
-                                        .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                                        .addRow(counter, account.address, account.balance, account.nonce);
-
-                                    formatted ? info(accountsTable.toString()) : info(JSONBig.stringify(account));
-                                    resolve();
-                                })
-                                .catch(err => error(err));
-                        };
-
-                        if (args.address) {
-                            handleAccountGet();
-                        } else if (interactive) {
-                            let questions = [
-                                {
-                                    name: 'address',
-                                    type: 'input',
-                                    required: true,
-                                    message: 'Address: '
-                                }
-                            ];
-                            inquirer.prompt(questions)
-                                .then(answers => {
-                                    args.address = answers.address;
-                                })
-                                .then(() => {
-                                    handleAccountGet();
-                                });
-                        } else {
-                            error('Provide an address. Usage: accounts get <address>');
-                            resolve();
-                        }
-                    })
-                    .catch(err => error(err));
-
+                        args.address = answers.address;
+                    }
+                    if (!args.address && !interactive) {
+                        error('Provide an address. Usage: accounts get <address>');
+                        resolve();
+                    }
+                    let account: BaseAccount = await connection.getRemoteAccount(args.address);
+                    let counter: number = 0;
+                    let accountsTable: ASCIITable = new ASCIITable();
+                    let formatted = args.options.formatted || false;
+                    accountsTable
+                        .setHeading('#', 'Account Address', 'Balance', 'Nonce')
+                        .addRow(counter, account.address, account.balance, account.nonce);
+                    formatted ? info(accountsTable.toString()) : info(JSONBig.stringify(account));
+                } catch (err) {
+                    (typeof err === 'object') ? console.log(err) : error(err);
+                }
+                resolve();
             });
         });
 

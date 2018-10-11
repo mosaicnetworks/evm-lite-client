@@ -140,3 +140,4 @@ exports.initDirectories = () => {
         resolve();
     });
 };
+exports.catchErrors = (fn) => (...params) => fn(...params).catch(console.error);

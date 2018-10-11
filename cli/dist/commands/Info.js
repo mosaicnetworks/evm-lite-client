@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const ASCIITable = require("ascii-table");
@@ -8,30 +16,28 @@ function commandInfo(evmlc, session) {
         .description('Prints information about node as JSON or --formatted.')
         .option('-f, --formatted', 'format output')
         .action((args) => {
-        return new Promise(resolve => {
-            let formatted = args.options.formatted || false;
-            session.connect()
-                .then((connection) => {
-                connection.api.getInfo()
-                    .then((res) => {
-                    if (formatted) {
-                        let information = JSONBig.parse(res);
-                        let table = new ASCIITable('Info');
-                        Object.keys(information).forEach(function (key) {
-                            table.addRow(key, information[key]);
-                        });
-                        globals_1.success(table.toString());
-                        resolve();
-                    }
-                    else {
-                        globals_1.success(res);
-                        resolve();
-                    }
-                })
-                    .catch(err => globals_1.error(err));
-            })
-                .catch(err => globals_1.error(err));
-        });
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let formatted = args.options.formatted || false;
+                let connection = yield session.connect();
+                let response = yield connection.api.getInfo();
+                let information = JSONBig.parse(response);
+                if (formatted) {
+                    let table = new ASCIITable('Info');
+                    Object.keys(information).forEach(function (key) {
+                        table.addRow(key, information[key]);
+                    });
+                    globals_1.success(table.toString());
+                }
+                else {
+                    globals_1.success(response);
+                }
+            }
+            catch (err) {
+                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+            }
+            resolve();
+        }));
     })
         .description('Testing purposes.');
 }

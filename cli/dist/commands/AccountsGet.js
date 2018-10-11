@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
@@ -14,29 +22,11 @@ function commandAccountsGet(evmlc, session) {
         string: ['_']
     })
         .action((args) => {
-        return new Promise(resolve => {
-            let interactive = args.options.interactive || session.interactive;
-            // connect to API endpoints
-            session.connect()
-                .then((connection) => {
-                let handleAccountGet = () => {
-                    connection.getRemoteAccount(args.address)
-                        .then((account) => {
-                        let counter = 0;
-                        let accountsTable = new ASCIITable();
-                        let formatted = args.options.formatted || false;
-                        accountsTable
-                            .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                            .addRow(counter, account.address, account.balance, account.nonce);
-                        formatted ? globals_1.info(accountsTable.toString()) : globals_1.info(JSONBig.stringify(account));
-                        resolve();
-                    })
-                        .catch(err => globals_1.error(err));
-                };
-                if (args.address) {
-                    handleAccountGet();
-                }
-                else if (interactive) {
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let interactive = args.options.interactive || session.interactive;
+                let connection = yield session.connect();
+                if (interactive) {
                     let questions = [
                         {
                             name: 'address',
@@ -45,21 +35,27 @@ function commandAccountsGet(evmlc, session) {
                             message: 'Address: '
                         }
                     ];
-                    inquirer.prompt(questions)
-                        .then(answers => {
-                        args.address = answers.address;
-                    })
-                        .then(() => {
-                        handleAccountGet();
-                    });
+                    let answers = yield inquirer.prompt(questions);
+                    args.address = answers.address;
                 }
-                else {
+                if (!args.address && !interactive) {
                     globals_1.error('Provide an address. Usage: accounts get <address>');
                     resolve();
                 }
-            })
-                .catch(err => globals_1.error(err));
-        });
+                let account = yield connection.getRemoteAccount(args.address);
+                let counter = 0;
+                let accountsTable = new ASCIITable();
+                let formatted = args.options.formatted || false;
+                accountsTable
+                    .setHeading('#', 'Account Address', 'Balance', 'Nonce')
+                    .addRow(counter, account.address, account.balance, account.nonce);
+                formatted ? globals_1.info(accountsTable.toString()) : globals_1.info(JSONBig.stringify(account));
+            }
+            catch (err) {
+                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+            }
+            resolve();
+        }));
     });
 }
 exports.default = commandAccountsGet;

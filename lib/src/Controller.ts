@@ -105,6 +105,14 @@ export default class Controller {
         this._defaultTXOptions.gasPrice = gasPrice;
     }
 
+    testConnection(): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this.getRemoteAccounts()
+                .then(() => resolve(true))
+                .catch(() => reject('Could not connect to node.'))
+        });
+    }
+
     getRemoteAccounts(): Promise<BaseAccount[]> {
         return new Promise<BaseAccount[]>((resolve, reject) => {
             this.api.getAccounts()

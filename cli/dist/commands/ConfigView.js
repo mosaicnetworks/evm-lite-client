@@ -7,7 +7,12 @@ function commandConfigUser(evmlc, session) {
         .description(description)
         .action(() => {
         return new Promise(resolve => {
-            globals_1.success(session.config.toTOML());
+            try {
+                globals_1.success(session.config.toTOML());
+            }
+            catch (err) {
+                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+            }
             resolve();
         });
     });

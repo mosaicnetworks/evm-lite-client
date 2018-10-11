@@ -179,3 +179,5 @@ export const initDirectories = (): Promise<void> => {
     });
 };
 
+export const catchErrors = (fn) => (...params) => fn(...params).catch(console.error);
+

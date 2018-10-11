@@ -20,62 +20,48 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
         .option('-f, --formatted', 'format output')
         .option('-r, --remote', 'list remote accounts')
         .action((args: Vorpal.Args): Promise<void> => {
-            return new Promise<void>(resolve => {
-                session.connect()
-                    .then((connection) => {
+            return new Promise<void>(async (resolve) => {
+                try {
+                    let connection = await session.connect();
+                    let formatted: boolean = args.options.formatted || false;
+                    let remote = args.options.remote || false;
 
-                        let formatted: boolean = args.options.formatted || false;
-                        let remote = args.options.remote || false;
+                    if (!remote) {
+                        let accounts = await session.keystore.decrypt((connection));
+                        let counter = 0;
+                        let table = new ASCIITable().setHeading('#', 'Account Address', 'Balance', 'Nonce');
 
-                        if (!remote) {
-                            session.keystore.decrypt(connection)
-                                .then((accounts: Account[]) => {
-                                    let counter = 0;
-                                    let table = new ASCIITable()
-                                        .setHeading('#', 'Account Address', 'Balance', 'Nonce');
-
-                                    if (formatted) {
-                                        accounts.forEach((account: Account) => {
-                                            counter++;
-                                            table.addRow(counter, account.address, account.balance, account.nonce)
-                                        });
-                                        success(table.toString());
-                                    } else {
-                                        let parsedAccounts: BaseAccount[] = [];
-                                        accounts.forEach(account => {
-                                            parsedAccounts.push(account.toBaseAccount())
-                                        });
-                                        success(JSONBig.stringify(parsedAccounts));
-                                    }
-
-                                    resolve();
-                                })
-                                .catch((err) => error(err));
+                        if (formatted) {
+                            accounts.forEach((account: Account) => {
+                                counter++;
+                                table.addRow(counter, account.address, account.balance, account.nonce)
+                            });
+                            success(table.toString());
                         } else {
-                            connection.getRemoteAccounts()
-                                .then((accounts: BaseAccount[]) => {
-                                    let counter = 0;
-                                    let table = new ASCIITable()
-                                        .setHeading('#', 'Account Address', 'Balance', 'Nonce');
-
-                                    if (formatted) {
-                                        accounts.forEach((account) => {
-                                            counter++;
-                                            table.addRow(counter, account.address, account.balance, account.nonce)
-                                        });
-                                        success(table.toString());
-                                    } else {
-                                        success(JSONBig.stringify(accounts));
-                                    }
-
-                                    resolve();
-                                })
-                                .catch(err => error(err));
-
+                            let parsedAccounts: BaseAccount[] = accounts.map(account => {
+                                return account.toBaseAccount();
+                            });
+                            success(JSONBig.stringify(parsedAccounts));
                         }
-                    })
-                    .catch(err => error(err));
+                    } else {
+                        let accounts: BaseAccount[] = await connection.getRemoteAccounts();
+                        let counter = 0;
+                        let table = new ASCIITable().setHeading('#', 'Account Address', 'Balance', 'Nonce');
 
+                        if (formatted) {
+                            accounts.forEach((account) => {
+                                counter++;
+                                table.addRow(counter, account.address, account.balance, account.nonce)
+                            });
+                            success(table.toString());
+                        } else {
+                            success(JSONBig.stringify(accounts));
+                        }
+                    }
+                } catch (err) {
+                    (typeof err === 'object') ? console.log(err) : error(err);
+                }
+                resolve();
             });
         });
 
