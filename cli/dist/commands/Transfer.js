@@ -30,15 +30,12 @@ function commandTransfer(evmlc, session) {
                 let interactive = args.options.interactive || session.interactive;
                 let connection = yield session.connect();
                 let accounts = yield session.keystore.decrypt(connection);
-                let choices = accounts.map((account) => {
-                    return account.address;
-                });
                 let questions = [
                     {
                         name: 'from',
                         type: 'list',
                         message: 'From: ',
-                        choices: choices
+                        choices: accounts.map((account) => account.address)
                     },
                     {
                         name: 'to',
@@ -65,24 +62,23 @@ function commandTransfer(evmlc, session) {
                     }
                 ];
                 let tx = {};
-                tx.from = args.options.from || undefined;
-                tx.to = args.options.to || undefined;
-                tx.value = args.options.value || undefined;
-                tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
-                tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
                 if (interactive) {
                     tx = yield inquirer.prompt(questions);
+                }
+                else {
+                    tx.from = args.options.from || undefined;
+                    tx.to = args.options.to || undefined;
+                    tx.value = args.options.value || undefined;
+                    tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
+                    tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
                 }
                 if (!tx.from && !tx.to && !tx.value) {
                     globals_1.error('Provide from, to and a value.');
                     resolve();
                 }
-                let account = accounts.find((acc) => {
-                    return acc.address === tx.from;
-                });
-                if (!account) {
+                let account = accounts.find((acc) => acc.address === tx.from);
+                if (!account)
                     globals_1.error('Cannot find associated local account.');
-                }
                 tx.chainId = 1;
                 tx.nonce = account.nonce;
                 let signed = yield account.signTransaction(tx);

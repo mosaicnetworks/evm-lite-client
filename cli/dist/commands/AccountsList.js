@@ -23,12 +23,9 @@ function commandAccountsList(evmlc, session) {
                 let connection = yield session.connect();
                 let formatted = args.options.formatted || false;
                 let remote = args.options.remote || false;
-                let accounts;
+                let accounts = [];
                 if (!remote) {
-                    let accs = yield session.keystore.decrypt((connection));
-                    accounts = accs.map((account) => {
-                        return account.toBaseAccount();
-                    });
+                    accounts = (yield session.keystore.decrypt(connection)).map(account => account.toBaseAccount());
                 }
                 else {
                     accounts = yield connection.getRemoteAccounts();

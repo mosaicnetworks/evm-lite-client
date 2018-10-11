@@ -23,10 +23,9 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
             return new Promise<void>(async (resolve) => {
                 try {
                     let interactive = args.options.interactive || session.interactive;
+                    let formatted = args.options.formatted || false;
                     let connection = await session.connect();
-
-                    if (interactive) {
-                        let questions = [
+                    let questions = [
                             {
                                 name: 'address',
                                 type: 'input',
@@ -34,9 +33,11 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                                 message: 'Address: '
                             }
                         ];
-                        let answers = await inquirer.prompt(questions);
 
-                        args.address = answers.address;
+                    if (interactive) {
+                        let {address} = await inquirer.prompt(questions);
+
+                        args.address = address;
                     }
 
                     if (!args.address && !interactive) {
@@ -45,7 +46,6 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                     }
 
                     let account: BaseAccount = await connection.getRemoteAccount(args.address);
-                    let formatted = args.options.formatted || false;
 
                     formatted ? console.table(account) : info(JSONBig.stringify(account));
                 } catch (err) {

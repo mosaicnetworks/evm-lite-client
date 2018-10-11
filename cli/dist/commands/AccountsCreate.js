@@ -28,22 +28,22 @@ function commandAccountsCreate(evmlc, session) {
                 let interactive = args.options.interactive || session.interactive;
                 let questions = [
                     {
-                        name: 'outputPath',
+                        name: 'output',
                         message: 'Enter keystore output path: ',
                         default: session.keystore.path,
                         type: 'input'
                     },
                     {
-                        name: 'passwordPath',
+                        name: 'password',
                         message: 'Enter password file path: ',
                         default: session.passwordPath,
                         type: 'input'
                     }
                 ];
                 if (interactive) {
-                    let answers = yield inquirer.prompt(questions);
-                    args.options.output = answers.outputPath;
-                    args.options.password = answers.passwordPath;
+                    let { output, password } = yield inquirer.prompt(questions);
+                    args.options.output = output;
+                    args.options.password = password;
                 }
                 globals_1.success(session.keystore.create(args.options.output, args.options.password));
             }

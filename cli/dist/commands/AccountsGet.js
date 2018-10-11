@@ -24,25 +24,25 @@ function commandAccountsGet(evmlc, session) {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let interactive = args.options.interactive || session.interactive;
+                let formatted = args.options.formatted || false;
                 let connection = yield session.connect();
+                let questions = [
+                    {
+                        name: 'address',
+                        type: 'input',
+                        required: true,
+                        message: 'Address: '
+                    }
+                ];
                 if (interactive) {
-                    let questions = [
-                        {
-                            name: 'address',
-                            type: 'input',
-                            required: true,
-                            message: 'Address: '
-                        }
-                    ];
-                    let answers = yield inquirer.prompt(questions);
-                    args.address = answers.address;
+                    let { address } = yield inquirer.prompt(questions);
+                    args.address = address;
                 }
                 if (!args.address && !interactive) {
                     globals_1.error('Provide an address. Usage: accounts get <address>');
                     resolve();
                 }
                 let account = yield connection.getRemoteAccount(args.address);
-                let formatted = args.options.formatted || false;
                 formatted ? console.table(account) : globals_1.info(JSONBig.stringify(account));
             }
             catch (err) {

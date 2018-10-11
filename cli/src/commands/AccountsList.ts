@@ -22,14 +22,10 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
                     let connection = await session.connect();
                     let formatted: boolean = args.options.formatted || false;
                     let remote = args.options.remote || false;
-                    let accounts: BaseAccount[];
+                    let accounts: BaseAccount[] = [];
 
                     if (!remote) {
-                        let accs = await session.keystore.decrypt((connection));
-
-                        accounts = accs.map((account) => {
-                            return account.toBaseAccount()
-                        });
+                        accounts = (await session.keystore.decrypt(connection)).map(account => account.toBaseAccount());
                     } else {
                         accounts = await connection.getRemoteAccounts();
                     }
