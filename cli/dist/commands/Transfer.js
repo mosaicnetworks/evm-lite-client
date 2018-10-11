@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
-const globals_1 = require("../utils/globals");
+const Globals_1 = require("../utils/Globals");
 function commandTransfer(evmlc, session) {
     let description = 'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
         ' configuration file.';
@@ -73,21 +73,21 @@ function commandTransfer(evmlc, session) {
                     tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
                 }
                 if (!tx.from && !tx.to && !tx.value) {
-                    globals_1.error('Provide from, to and a value.');
+                    Globals_1.default.error('Provide from, to and a value.');
                     resolve();
                 }
                 let account = accounts.find((acc) => acc.address === tx.from);
                 if (!account)
-                    globals_1.error('Cannot find associated local account.');
+                    Globals_1.default.error('Cannot find associated local account.');
                 tx.chainId = 1;
                 tx.nonce = account.nonce;
                 let signed = yield account.signTransaction(tx);
                 let txHash = yield connection.api.sendRawTx(signed.rawTransaction);
                 console.log(txHash);
-                globals_1.success(`Transaction submitted.`);
+                Globals_1.default.success(`Transaction submitted.`);
             }
             catch (err) {
-                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
             }
             resolve();
         }));

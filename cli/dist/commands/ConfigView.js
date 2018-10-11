@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const globals_1 = require("../utils/globals");
+const Globals_1 = require("../utils/Globals");
 function commandConfigUser(evmlc, session) {
     let description = 'Output current configuration file as JSON.';
     return evmlc.command('config view').alias('c v')
@@ -8,10 +8,10 @@ function commandConfigUser(evmlc, session) {
         .action(() => {
         return new Promise(resolve => {
             try {
-                globals_1.success(session.config.toTOML());
+                Globals_1.default.success(session.config.toTOML());
             }
             catch (err) {
-                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
             }
             resolve();
         });

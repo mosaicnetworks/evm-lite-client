@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
-const globals_1 = require("../utils/globals");
+const Globals_1 = require("../utils/Globals");
 function commandAccountsList(evmlc, session) {
     let description = 'List all accounts in the local keystore directory provided by the configuration file. This command will ' +
         'also get a balance and nonce for all the accounts from the node if a valid connection is established.';
@@ -30,10 +30,10 @@ function commandAccountsList(evmlc, session) {
                 else {
                     accounts = yield connection.getRemoteAccounts();
                 }
-                (formatted) ? console.table(accounts) : globals_1.success(JSONBig.stringify(accounts));
+                (formatted) ? console.table(accounts) : Globals_1.default.success(JSONBig.stringify(accounts));
             }
             catch (err) {
-                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
             }
             resolve();
         }));

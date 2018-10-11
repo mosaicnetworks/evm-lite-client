@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
-const globals_1 = require("../utils/globals");
+const Globals_1 = require("../utils/Globals");
 function commandAccountsGet(evmlc, session) {
     let description = 'Gets account balance and nonce from a node with a valid connection.';
     return evmlc.command('accounts get [address]').alias('a g')
@@ -39,14 +39,14 @@ function commandAccountsGet(evmlc, session) {
                     args.address = address;
                 }
                 if (!args.address && !interactive) {
-                    globals_1.error('Provide an address. Usage: accounts get <address>');
+                    Globals_1.default.error('Provide an address. Usage: accounts get <address>');
                     resolve();
                 }
                 let account = yield connection.getRemoteAccount(args.address);
-                formatted ? console.table(account) : globals_1.info(JSONBig.stringify(account));
+                formatted ? console.table(account) : Globals_1.default.info(JSONBig.stringify(account));
             }
             catch (err) {
-                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
             }
             resolve();
         }));

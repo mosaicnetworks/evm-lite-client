@@ -1,8 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
 
-import {BaseAccount, error, success} from "../utils/globals";
-
+import Globals, {BaseAccount} from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -30,9 +29,9 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
                         accounts = await connection.getRemoteAccounts();
                     }
 
-                    (formatted) ? console.table(accounts) : success(JSONBig.stringify(accounts));
+                    (formatted) ? console.table(accounts) : Globals.success(JSONBig.stringify(accounts));
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
                 resolve();
             });

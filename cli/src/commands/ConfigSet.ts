@@ -1,8 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {error, success} from "../utils/globals";
-
+import Globals from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -72,38 +71,38 @@ export default function commandConfigSet(evmlc: Vorpal, session: Session) {
                     }
 
                     if (!Object.keys(args.options).length) {
-                        error('No options provided. To enter interactive mode use: -i, --interactive.');
+                        Globals.error('No options provided. To enter interactive mode use: -i, --interactive.');
                         resolve();
                     }
 
                     for (let prop in args.options) {
                         if (prop.toLowerCase() === 'host') {
                             if (session.config.data.connection.host !== args.options[prop])
-                                success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                                Globals.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
                             session.config.data.connection.host = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'port') {
                             if (session.config.data.connection.port !== args.options[prop])
-                                success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                                Globals.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
                             session.config.data.connection.port = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'from') {
                             if (session.config.data.defaults.from !== args.options[prop])
-                                success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                                Globals.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
                             session.config.data.defaults.from = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'gas') {
                             if (session.config.data.defaults.gas !== args.options[prop])
-                                success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                                Globals.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
                             session.config.data.defaults.gas = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'gasprice') {
                             if (session.config.data.defaults.gasPrice !== args.options[prop])
-                                success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                                Globals.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
                             session.config.data.defaults.gasPrice = args.options[prop];
                         }
@@ -111,7 +110,7 @@ export default function commandConfigSet(evmlc: Vorpal, session: Session) {
 
                     session.config.save();
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
                 resolve();
             });

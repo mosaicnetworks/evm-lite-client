@@ -1,8 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {error, success} from "../utils/globals";
-
+import Globals from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -73,13 +72,13 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                     }
 
                     if (!tx.from && !tx.to && !tx.value) {
-                        error('Provide from, to and a value.');
+                        Globals.error('Provide from, to and a value.');
                         resolve();
                     }
 
                     let account = accounts.find((acc) => acc.address === tx.from);
 
-                    if (!account) error('Cannot find associated local account.');
+                    if (!account) Globals.error('Cannot find associated local account.');
 
                     tx.chainId = 1;
                     tx.nonce = account.nonce;
@@ -88,9 +87,9 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                     let txHash = await connection.api.sendRawTx(signed.rawTransaction);
 
                     console.log(txHash);
-                    success(`Transaction submitted.`);
+                    Globals.success(`Transaction submitted.`);
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
                 resolve();
             });

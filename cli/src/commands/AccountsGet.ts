@@ -2,8 +2,7 @@ import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 
-import {BaseAccount, error, info} from "../utils/globals";
-
+import Globals, {BaseAccount} from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -41,15 +40,15 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                     }
 
                     if (!args.address && !interactive) {
-                        error('Provide an address. Usage: accounts get <address>');
+                        Globals.error('Provide an address. Usage: accounts get <address>');
                         resolve();
                     }
 
                     let account: BaseAccount = await connection.getRemoteAccount(args.address);
 
-                    formatted ? console.table(account) : info(JSONBig.stringify(account));
+                    formatted ? console.table(account) : Globals.info(JSONBig.stringify(account));
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
                 resolve();
             });

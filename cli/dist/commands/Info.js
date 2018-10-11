@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
-const globals_1 = require("../utils/globals");
+const Globals_1 = require("../utils/Globals");
 function commandInfo(evmlc, session) {
     return evmlc.command('info')
         .description('Prints information about node as JSON or --formatted.')
@@ -21,10 +21,10 @@ function commandInfo(evmlc, session) {
                 let connection = yield session.connect();
                 let response = yield connection.api.getInfo();
                 let information = JSONBig.parse(response);
-                (formatted) ? console.table(information) : globals_1.success(response);
+                (formatted) ? console.table(information) : Globals_1.default.success(response);
             }
             catch (err) {
-                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
             }
             resolve();
         }));

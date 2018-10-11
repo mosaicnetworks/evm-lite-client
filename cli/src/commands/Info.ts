@@ -1,8 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
 
-import {error, info, success} from "../utils/globals";
-
+import Globals from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -18,9 +17,9 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
                     let response = await connection.api.getInfo();
                     let information = JSONBig.parse(response);
 
-                    (formatted) ? console.table(information) : success(response);
+                    (formatted) ? console.table(information) : Globals.success(response);
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
                 resolve();
             });

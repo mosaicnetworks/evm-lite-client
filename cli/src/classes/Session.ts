@@ -1,11 +1,10 @@
-import {warning} from "../utils/globals";
+import * as fs from "fs";
 
 import {Controller} from "../../../lib";
 
 import Config from "./Config";
 import DataDirectory from "./DataDirectory";
 import Keystore from "./Keystore";
-import * as fs from "fs";
 
 
 export default class Session {

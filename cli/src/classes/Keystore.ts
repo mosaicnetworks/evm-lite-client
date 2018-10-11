@@ -2,22 +2,18 @@ import * as fs from "fs";
 import * as path from "path";
 import * as JSONBig from 'json-bigint';
 
-import {Account} from "../../../lib";
-import {BaseAccount, warning} from "../utils/globals";
-import {Controller} from "../../../lib/@types";
+import Globals, {BaseAccount} from "../utils/Globals";
+
+import {Account, Controller} from "../../../lib";
 
 
 export default class Keystore {
 
-    public accounts: Account[];
-
     constructor(readonly path: string, readonly password: string) {
-        this.accounts = [];
     }
 
     decrypt(connection: Controller): Promise<Account[]> {
-        this.accounts = [];
-
+        let accounts = [];
         let promises = [];
 
         fs.readdirSync(this.path).forEach((file) => {
@@ -27,7 +23,8 @@ export default class Keystore {
                 let decryptedAccount: Account = Account.decrypt(v3JSONKeyStore, this.password);
 
                 promises.push(
-                    connection.api.getAccount(decryptedAccount.address).then((a) => {
+                    connection.api.getAccount(decryptedAccount.address)
+                        .then((a) => {
                         let account: BaseAccount = JSONBig.parse(a);
 
                         decryptedAccount.balance = account.balance;
@@ -37,7 +34,7 @@ export default class Keystore {
 
                         decryptedAccount.nonce = account.nonce;
 
-                        this.accounts.push(decryptedAccount);
+                        accounts.push(decryptedAccount);
                     })
                 );
             }
@@ -46,7 +43,7 @@ export default class Keystore {
         return Promise.all(promises)
             .then(() => {
                 return new Promise<Account[]>(resolve => {
-                    resolve(this.accounts);
+                    resolve(accounts);
                 });
             })
             .catch(() => {
@@ -66,7 +63,7 @@ export default class Keystore {
             if (fs.existsSync(outputPath)) {
                 output = outputPath;
             } else {
-                warning(`Output path provided does not exists: ${outputPath}. Using default...`);
+                Globals.warning(`Output path provided does not exists: ${outputPath}. Using default...`);
             }
         }
 
@@ -74,7 +71,7 @@ export default class Keystore {
             if (fs.existsSync(pass)) {
                 password = fs.readFileSync(pass, 'utf8');
             } else {
-                warning(`Password file provided does not exists: ${pass}. Using default...`);
+                Globals.warning(`Password file provided does not exists: ${pass}. Using default...`);
             }
         }
 

@@ -1,8 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {error, success} from "../utils/globals";
-
+import Globals from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -47,9 +46,9 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
                         args.options.password = password;
                     }
 
-                    success(session.keystore.create(args.options.output, args.options.password));
+                    Globals.success(session.keystore.create(args.options.output, args.options.password));
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
 
                 resolve();
