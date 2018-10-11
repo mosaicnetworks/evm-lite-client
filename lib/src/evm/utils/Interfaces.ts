@@ -9,6 +9,13 @@ export interface BaseTX {
     gasPrice?: number,
 }
 
+
+export interface BaseAccount {
+    address: string,
+    nonce: number,
+    balance: any
+}
+
 export interface TX extends BaseTX {
     from: string,
     to?: string,

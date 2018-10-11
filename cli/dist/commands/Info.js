@@ -20,7 +20,7 @@ function commandInfo(evmlc, session) {
                         Object.keys(information).forEach(function (key) {
                             table.addRow(key, information[key]);
                         });
-                        globals_1.info(table.toString());
+                        globals_1.success(table.toString());
                         resolve();
                     }
                     else {

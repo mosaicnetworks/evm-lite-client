@@ -4,7 +4,9 @@ import * as inquirer from 'inquirer';
 import {error, success} from "../utils/globals";
 
 import {Controller} from "../../../lib";
+
 import Session from "../classes/Session";
+
 
 export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
@@ -24,24 +26,17 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
             string: ['t', 'to', 'f', 'from'],
         })
         .action((args: Vorpal.Args): Promise<void> => {
-
             return new Promise<void>((resolve) => {
-
                 let interactive = args.options.interactive || session.interactive;
 
-                // connect to API endpoints
                 session.connect()
                     .then((connection: Controller) => {
-
                         session.keystore.decrypt(connection)
                             .then((accounts) => {
-
-                                // handles signing and sending transaction
                                 let handleTransfer = (tx) => {
                                     let account = accounts.find((acc) => {
                                         return acc.address === tx.from;
                                     });
-
                                     if (account) {
                                         tx.chainId = 1;
                                         tx.nonce = account.nonce;
@@ -49,8 +44,8 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                                         account.signTransaction(tx)
                                             .then((signed: any) => {
                                                 connection.api.sendRawTx(signed.rawTransaction)
-                                                    .then(resp => {
-                                                        success(`Transferred.`);
+                                                    .then(() => {
+                                                        success(`Transaction submitted.`);
                                                         resolve();
                                                     })
                                                     .catch(err => {
@@ -63,12 +58,9 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                                     }
 
                                 };
-
-
                                 let choices: string[] = accounts.map((account) => {
                                     return account.address;
                                 });
-
                                 let questions = [
                                     {
                                         name: 'from',
@@ -122,17 +114,13 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                                         error('Provide from, to and a value.');
                                         resolve();
                                     }
-
                                 }
-
                             })
                             .catch(err => error(err));
 
                     })
                     .catch(err => error(err))
-
             });
-
         })
 
 };

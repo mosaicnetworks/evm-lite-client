@@ -11,4 +11,13 @@ export default class Transactions {
         DataDirectory.createOrReadFile(this.database, '');
     }
 
+    createTables() {
+    }
+
+    insertTransaction() {
+    }
+
+    getAllTransactions() {
+    }
+
 }

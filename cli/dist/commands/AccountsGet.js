@@ -20,30 +20,23 @@ function commandAccountsGet(evmlc, session) {
             session.connect()
                 .then((connection) => {
                 let handleAccountGet = () => {
-                    // request JSON from 'account/<address>'
-                    connection.api.getAccount(args.address).then((a) => {
+                    connection.getRemoteAccount(args.address)
+                        .then((account) => {
                         let counter = 0;
-                        // blank ASCII table
                         let accountsTable = new ASCIITable();
                         let formatted = args.options.formatted || false;
-                        let account = JSONBig.parse(a);
-                        let balance = account.balance;
-                        if (typeof balance === 'object')
-                            balance = account.balance.toFormat(0);
-                        // add account details to ASCII table
                         accountsTable
                             .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                            .addRow(counter, account.address, balance, account.nonce);
-                        formatted ? globals_1.info(accountsTable.toString()) : globals_1.info(a);
+                            .addRow(counter, account.address, account.balance, account.nonce);
+                        formatted ? globals_1.info(accountsTable.toString()) : globals_1.info(JSONBig.stringify(account));
                         resolve();
-                    });
+                    })
+                        .catch(err => globals_1.error(err));
                 };
                 if (args.address) {
-                    // address provided
                     handleAccountGet();
                 }
                 else if (interactive) {
-                    // no address but interactive
                     let questions = [
                         {
                             name: 'address',
@@ -61,7 +54,6 @@ function commandAccountsGet(evmlc, session) {
                     });
                 }
                 else {
-                    // if -a or --address are not provided
                     globals_1.error('Provide an address. Usage: accounts get <address>');
                     resolve();
                 }

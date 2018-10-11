@@ -12,7 +12,7 @@ export default function commandConfigUser(evmlc: Vorpal, session: Session) {
 
     return evmlc.command('config view').alias('c v')
         .description(description)
-        .action((args: Vorpal.Args): Promise<void> => {
+        .action((): Promise<void> => {
             return new Promise<void>(resolve => {
                 success(session.config.toTOML());
                 resolve();

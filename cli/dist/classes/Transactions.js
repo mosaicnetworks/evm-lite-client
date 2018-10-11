@@ -7,5 +7,11 @@ class Transactions {
         this.database = path.join(dataDir, 'db.sqlite3');
         DataDirectory_1.default.createOrReadFile(this.database, '');
     }
+    createTables() {
+    }
+    insertTransaction() {
+    }
+    getAllTransactions() {
+    }
 }
 exports.default = Transactions;

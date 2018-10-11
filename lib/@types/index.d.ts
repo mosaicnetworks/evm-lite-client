@@ -9,6 +9,12 @@ declare namespace EVMLClient {
         gasPrice?: number;
     }
 
+    interface BaseAccount {
+        address: string,
+        nonce: number,
+        balance: any
+    }
+
     interface TX extends BaseTX {
         from: string;
         to?: string;
@@ -315,6 +321,9 @@ declare namespace EVMLClient {
          */
         constructor(host: string, port?: number);
 
+        getRemoteAccounts(): Promise<BaseAccount[]>;
+        getRemoteAccount(address: string): Promise<BaseAccount>;
+
         /**
          * Generates Javascript instance from Solidity Contract File.
          *
@@ -430,6 +439,8 @@ declare namespace EVMLClient {
         signTransaction(tx: string): any;
 
         encrypt(password: string): v3JSONKeyStore;
+
+        toBaseAccount(): BaseAccount;
     }
 }
 

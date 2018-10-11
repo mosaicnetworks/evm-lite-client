@@ -19,12 +19,10 @@ function commandTransfer(evmlc, session) {
         .action((args) => {
         return new Promise((resolve) => {
             let interactive = args.options.interactive || session.interactive;
-            // connect to API endpoints
             session.connect()
                 .then((connection) => {
                 session.keystore.decrypt(connection)
                     .then((accounts) => {
-                    // handles signing and sending transaction
                     let handleTransfer = (tx) => {
                         let account = accounts.find((acc) => {
                             return acc.address === tx.from;
@@ -35,8 +33,8 @@ function commandTransfer(evmlc, session) {
                             account.signTransaction(tx)
                                 .then((signed) => {
                                 connection.api.sendRawTx(signed.rawTransaction)
-                                    .then(resp => {
-                                    globals_1.success(`Transferred.`);
+                                    .then(() => {
+                                    globals_1.success(`Transaction submitted.`);
                                     resolve();
                                 })
                                     .catch(err => {

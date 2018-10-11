@@ -1,8 +1,9 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import Session from "../classes/Session";
 import {success} from "../utils/globals";
+
+import Session from "../classes/Session";
 
 
 export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {

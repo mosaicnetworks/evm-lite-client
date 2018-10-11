@@ -27,16 +27,12 @@ function commandAccountsList(evmlc, session) {
                                 counter++;
                                 table.addRow(counter, account.address, account.balance, account.nonce);
                             });
-                            globals_1.info(table.toString());
+                            globals_1.success(table.toString());
                         }
                         else {
                             let parsedAccounts = [];
                             accounts.forEach(account => {
-                                parsedAccounts.push({
-                                    address: account.address,
-                                    balance: account.balance,
-                                    nonce: account.nonce
-                                });
+                                parsedAccounts.push(account.toBaseAccount());
                             });
                             globals_1.success(JSONBig.stringify(parsedAccounts));
                         }
@@ -45,24 +41,20 @@ function commandAccountsList(evmlc, session) {
                         .catch((err) => globals_1.error(err));
                 }
                 else {
-                    connection.api.getAccounts()
-                        .then((a) => {
-                        let accounts = JSONBig.parse(a).accounts;
+                    connection.getRemoteAccounts()
+                        .then((accounts) => {
                         let counter = 0;
                         let table = new ASCIITable()
                             .setHeading('#', 'Account Address', 'Balance', 'Nonce');
                         if (formatted) {
                             accounts.forEach((account) => {
-                                let balance = account.balance;
-                                if (typeof balance === 'object')
-                                    balance = account.balance.toFormat(0);
                                 counter++;
-                                table.addRow(counter, account.address, balance, account.nonce);
+                                table.addRow(counter, account.address, account.balance, account.nonce);
                             });
-                            globals_1.info(table.toString());
+                            globals_1.success(table.toString());
                         }
                         else {
-                            globals_1.success(a);
+                            globals_1.success(JSONBig.stringify(accounts));
                         }
                         resolve();
                     })

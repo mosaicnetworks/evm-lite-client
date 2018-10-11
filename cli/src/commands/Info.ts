@@ -27,7 +27,7 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
                                         table.addRow(key, information[key]);
                                     });
 
-                                    info(table.toString());
+                                    success(table.toString());
                                     resolve();
                                 } else {
                                     success(res);

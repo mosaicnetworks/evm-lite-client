@@ -8,7 +8,7 @@ import * as JSONBig from 'json-bigint'
 import * as fs from "fs";
 import * as solidityCompiler from 'solc'
 
-import {ABI, BaseTX, SolidityCompilerOutput} from "./evm/utils/Interfaces";
+import {ABI, BaseAccount, BaseTX, SolidityCompilerOutput} from "./evm/utils/Interfaces";
 
 import SolidityContract from "./evm/SolidityContract";
 import Client from "./evm/Client";
@@ -18,7 +18,6 @@ import Account from "./evm/Account"
 interface DefaultTXOptions extends BaseTX {
     from?: string,
 }
-
 
 /**
  * The root class to interactive with EVM-Lite.
@@ -106,6 +105,37 @@ export default class Controller {
         this._defaultTXOptions.gasPrice = gasPrice;
     }
 
+    getRemoteAccounts(): Promise<BaseAccount[]> {
+        return new Promise<BaseAccount[]>((resolve, reject) => {
+            this.api.getAccounts()
+                .then((response: string) => {
+                    let json: { accounts: BaseAccount[] } = JSONBig.parse(response);
+                    let accounts: BaseAccount[] = [];
+                    json.accounts.forEach((account) => {
+                        if (typeof account.balance === 'object') {
+                            account.balance = account.balance.toFormat(0);
+                        }
+                        accounts.push(account);
+                    });
+                    resolve(accounts);
+                }).catch(() => reject('Could not get remote accounts.'));
+        });
+    }
+
+    getRemoteAccount(address: string): Promise<BaseAccount> {
+        return new Promise<BaseAccount>((resolve, reject) => {
+            this.api.getAccount(address)
+                .then((response: string) => {
+                    let account: BaseAccount = JSONBig.parse(response);
+                    if (typeof account.balance === 'object') {
+                        account.balance = account.balance.toFormat(0);
+                    }
+                    resolve(account);
+                })
+                .catch(() => reject(`Could not get account: ${address}`));
+        });
+    }
+
     /**
      * Generates Javascript instance from Solidity Contract File.
      *
@@ -189,8 +219,5 @@ export default class Controller {
             throw new Error('Set default `from` address. use `EVML.defaultFrom(<address>)`');
         }
     };
-
-    transferRaw(from: string, to: string, value: number) {
-    }
 
 }

@@ -2,7 +2,7 @@ import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
 import * as ASCIITable from 'ascii-table';
 
-import {BaseAccount, error, info, success} from "../utils/globals";
+import {BaseAccount, error, success} from "../utils/globals";
 
 import {Account} from '../../../lib';
 
@@ -29,7 +29,7 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
 
                         if (!remote) {
                             session.keystore.decrypt(connection)
-                                .then((accounts) => {
+                                .then((accounts: Account[]) => {
                                     let counter = 0;
                                     let table = new ASCIITable()
                                         .setHeading('#', 'Account Address', 'Balance', 'Nonce');
@@ -39,48 +39,39 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
                                             counter++;
                                             table.addRow(counter, account.address, account.balance, account.nonce)
                                         });
-                                        info(table.toString());
+                                        success(table.toString());
                                     } else {
                                         let parsedAccounts: BaseAccount[] = [];
                                         accounts.forEach(account => {
-                                            parsedAccounts.push({
-                                                address: account.address,
-                                                balance: account.balance,
-                                                nonce: account.nonce
-                                            })
+                                            parsedAccounts.push(account.toBaseAccount())
                                         });
                                         success(JSONBig.stringify(parsedAccounts));
                                     }
+
                                     resolve();
                                 })
                                 .catch((err) => error(err));
                         } else {
-                            connection.api.getAccounts()
-                                .then((a: string) => {
-                                    let accounts: BaseAccount[] = JSONBig.parse(a).accounts;
+                            connection.getRemoteAccounts()
+                                .then((accounts: BaseAccount[]) => {
                                     let counter = 0;
                                     let table = new ASCIITable()
                                         .setHeading('#', 'Account Address', 'Balance', 'Nonce');
 
                                     if (formatted) {
                                         accounts.forEach((account) => {
-                                            let balance = account.balance;
-
-                                            if (typeof balance === 'object')
-                                                balance = account.balance.toFormat(0);
-
                                             counter++;
-                                            table.addRow(counter, account.address, balance, account.nonce)
+                                            table.addRow(counter, account.address, account.balance, account.nonce)
                                         });
-
-                                        info(table.toString());
+                                        success(table.toString());
                                     } else {
-                                        success(a);
+                                        success(JSONBig.stringify(accounts));
                                     }
 
                                     resolve();
                                 })
-                                .catch(err => error(err))
+                                .catch(err => error(err));
+
                         }
                     })
                     .catch(err => error(err));

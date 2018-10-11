@@ -15,77 +15,74 @@ function commandConfigSet(evmlc, session) {
         .option('--keystore <path>', 'keystore path')
         .option('--pwd <path>', 'password path')
         .types({
-        string: ['h', 'host', 'from', 'keystore', 'pwd', 'config']
+        string: ['h', 'host', 'from', 'keystore', 'pwd']
     })
         .action((args) => {
         return new Promise(resolve => {
-            let config = session.config;
             let interactive = args.options.interactive || session.interactive;
-            // handles updating config file
-            let handleConfig = () => {
-                for (let prop in args.options) {
-                    if (prop.toLowerCase() === 'host') {
-                        if (config.data.connection.host !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.connection.host = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'port') {
-                        if (config.data.connection.port !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.connection.port = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'from') {
-                        if (config.data.defaults.from !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.defaults.from = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'gas') {
-                        if (config.data.defaults.gas !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.defaults.gas = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'gasprice') {
-                        if (config.data.defaults.gasPrice !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.defaults.gasPrice = args.options[prop];
-                    }
-                }
-                config.save();
-            };
             let questions = [
                 {
                     name: 'host',
-                    default: config.data.connection.host,
+                    default: session.config.data.connection.host,
                     type: 'input',
                     message: 'Host: '
                 },
                 {
                     name: 'port',
-                    default: config.data.connection.port,
+                    default: session.config.data.connection.port,
                     type: 'input',
                     message: 'Port: '
                 },
                 {
                     name: 'from',
-                    default: config.data.defaults.from,
+                    default: session.config.data.defaults.from,
                     type: 'input',
                     message: 'Default From Address: '
                 },
                 {
                     name: 'gas',
-                    default: config.data.defaults.gas,
+                    default: session.config.data.defaults.gas,
                     type: 'input',
                     message: 'Default Gas: '
                 },
                 {
                     name: 'gasPrice',
-                    default: config.data.defaults.gasPrice,
+                    default: session.config.data.defaults.gasPrice,
                     type: 'input',
                     message: 'Default Gas Price: '
                 },
             ];
+            let handleConfig = () => {
+                for (let prop in args.options) {
+                    if (prop.toLowerCase() === 'host') {
+                        if (session.config.data.connection.host !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.connection.host = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'port') {
+                        if (session.config.data.connection.port !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.connection.port = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'from') {
+                        if (session.config.data.defaults.from !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.defaults.from = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'gas') {
+                        if (session.config.data.defaults.gas !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.defaults.gas = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'gasprice') {
+                        if (session.config.data.defaults.gasPrice !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.defaults.gasPrice = args.options[prop];
+                    }
+                }
+                session.config.save();
+            };
             if (interactive) {
-                // interactive mode
                 inquirer.prompt(questions)
                     .then((answers) => {
                     args.options.host = answers.host;
@@ -105,7 +102,7 @@ function commandConfigSet(evmlc, session) {
                     resolve();
                 }
                 else {
-                    globals_1.warning('No options provided. To enter interactive mode use: -i, --interactive.');
+                    globals_1.error('No options provided. To enter interactive mode use: -i, --interactive.');
                     resolve();
                 }
             }
