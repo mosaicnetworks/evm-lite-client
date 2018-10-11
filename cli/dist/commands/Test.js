@@ -1,25 +1,26 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const JSONBig = require("json-bigint");
-function commandTest(evmlc) {
+const globals_1 = require("../utils/globals");
+function commandTest(evmlc, session) {
     return evmlc.command('test').alias('test')
-        .option('-c, --config <path>', 'set config file path')
         .hidden()
         .action((args) => {
-        return new Promise(resolve => {
-            // connect(getConfig(undefined))
-            //     .then((node) => {
-            //         node.api.getAccount('0x6005153de588828f1ae4f3bac5129bf8ba7a82e4')
-            //             .then((a) => {
-            //                 console.log(JSONBig.parse(a));
-            //             });
-            //     })
-            //     .catch();
-            let string = '{"address":"0x6005153de588828f1Ae4F3BaC5129BF8BA7A82E4","balance":1337000000000000000000,"nonce":0}';
-            let json = JSONBig.parse(string);
-            console.log(typeof json.balance);
-            console.log(json.balance.toFormat(0));
-        });
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            let fntest = (msg, test) => {
+                return new Promise((resolve, reject) => {
+                    reject(msg + test);
+                });
+            };
+            globals_1.catchErrors(fntest)('hello123', 'test123123');
+        }));
     })
         .description('Testing purposes.');
 }

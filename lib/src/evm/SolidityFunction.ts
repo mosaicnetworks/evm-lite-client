@@ -47,7 +47,7 @@ export default class SolidityFunction {
     }
 
     /**
-     * Generates Transaction object to be sent or called.
+     * Generates Transaction instance to be sent or called.
      *
      * Creates the scaffolding needed for the transaction to be executed.
      *

@@ -5,6 +5,7 @@
  */
 
 import * as Web3Accounts from 'web3-eth-accounts';
+import {BaseAccount} from "./utils/Interfaces";
 
 
 interface Web3Account {
@@ -86,6 +87,14 @@ export default class Account {
 
     encrypt(password: string): v3JSONKeyStore {
         return this._account.encrypt(password);
+    }
+
+    toBaseAccount(): BaseAccount {
+        return {
+            address: this.address,
+            balance: this.balance,
+            nonce: this.nonce
+        }
     }
 
 }

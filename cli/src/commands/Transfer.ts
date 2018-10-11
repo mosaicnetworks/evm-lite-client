@@ -1,25 +1,16 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {connect, decryptLocalAccounts, error, getConfig, getInteractive, success} from "../utils/globals";
+import {error, success} from "../utils/globals";
 
-import {Controller} from "../../../lib";
+import Session from "../classes/Session";
 
 
-/**
- * Should return a Vorpal command instance used for transferring tokens.
- *
- * This function should return a Vorpal command which should transfer
- * specified value to the desired to address.
- *
- * @param {Vorpal} evmlc - The command line object.
- * @returns Vorpal Command instance
- */
-export default function commandTransfer(evmlc: Vorpal) {
+export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
     let description =
-        `Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the 
-        configuration file.`;
+        'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
+        ' configuration file.';
 
     return evmlc.command('transfer').alias('t')
         .description(description)
@@ -28,122 +19,89 @@ export default function commandTransfer(evmlc: Vorpal) {
         .option('-g, --gas <value>', 'gas to send at')
         .option('-gp, --gasprice <value>', 'gas price to send at')
         .option('-t, --to <address>', 'address to send to')
-        .option('-c, --config <path>', 'set config file path')
         .option('-f, --from <address>', 'address to send from')
         .types({
             string: ['t', 'to', 'f', 'from'],
         })
         .action((args: Vorpal.Args): Promise<void> => {
+            return new Promise<void>(async (resolve) => {
+                try {
+                    let interactive = args.options.interactive || session.interactive;
+                    let connection = await session.connect();
+                    let accounts = await session.keystore.decrypt(connection);
+                    let choices: string[] = accounts.map((account) => {
+                        return account.address;
+                    });
+                    let questions = [
+                        {
+                            name: 'from',
+                            type: 'list',
+                            message: 'From: ',
+                            choices: choices
+                        },
+                        {
+                            name: 'to',
+                            type: 'input',
+                            message: 'To'
+                        },
+                        {
+                            name: 'value',
+                            type: 'input',
+                            default: '100',
+                            message: 'Value: '
+                        },
+                        {
+                            name: 'gas',
+                            type: 'input',
+                            default: session.config.data.defaults.gas || 10000,
+                            message: 'Gas: '
+                        },
+                        {
+                            name: 'gasPrice',
+                            type: 'input',
+                            default: session.config.data.defaults.gasPrice || 0,
+                            message: 'Gas Price: '
+                        }
+                    ];
+                    let tx: any = {};
 
-            return new Promise<void>((resolve) => {
+                    tx.from = args.options.from || undefined;
+                    tx.to = args.options.to || undefined;
+                    tx.value = args.options.value || undefined;
+                    tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
+                    tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
 
-                let i = getInteractive(args.options.interactive);
-                let config = getConfig(args.options.config);
+                    if (interactive) {
+                        tx = await inquirer.prompt(questions)
+                    }
 
-                // connect to API endpoints
-                connect(config)
-                    .then((node: Controller) => {
+                    if (!tx.from && !tx.to && !tx.value) {
+                        error('Provide from, to and a value.');
+                        resolve();
+                    }
 
-                        decryptLocalAccounts(node, config.data.storage.keystore, config.data.storage.password)
-                            .then((accounts) => {
+                    let account = accounts.find((acc) => {
+                        return acc.address === tx.from;
+                    });
 
-                                // handles signing and sending transaction
-                                let handleTransfer = (tx) => {
-                                    let account = accounts.find((acc) => {
-                                        return acc.address === tx.from;
-                                    });
+                    if (!account) {
+                        error('Cannot find associated local account.')
+                    }
 
-                                    if (account) {
-                                        tx.chainId = 1;
-                                        tx.nonce = account.nonce;
+                    tx.chainId = 1;
+                    tx.nonce = account.nonce;
 
-                                        account.signTransaction(tx)
-                                            .then((signed: any) => {
-                                                node.api.sendRawTx(signed.rawTransaction)
-                                                    .then(resp => {
-                                                        success(`Transferred.`);
-                                                        resolve();
-                                                    })
-                                                    .catch(err => {
-                                                        console.log(err);
-                                                        resolve();
-                                                    })
-                                            });
-                                    } else {
-                                        error('Cannot find associated local account.')
-                                    }
+                    let signed = await account.signTransaction(tx);
 
-                                };
+                    let txHash = await connection.api.sendRawTx(signed.rawTransaction);
 
-
-                                let choices: string[] = accounts.map((account) => {
-                                    return account.address;
-                                });
-
-                                let questions = [
-                                    {
-                                        name: 'from',
-                                        type: 'list',
-                                        message: 'From: ',
-                                        choices: choices
-                                    },
-                                    {
-                                        name: 'to',
-                                        type: 'input',
-                                        message: 'To'
-                                    },
-                                    {
-                                        name: 'value',
-                                        type: 'input',
-                                        default: '100',
-                                        message: 'Value: '
-                                    },
-                                    {
-                                        name: 'gas',
-                                        type: 'input',
-                                        default: config.data.defaults.gas || 10000,
-                                        message: 'Gas: '
-                                    },
-                                    {
-                                        name: 'gasPrice',
-                                        type: 'input',
-                                        default: config.data.defaults.gasPrice || 0,
-                                        message: 'Gas Price: '
-                                    }
-                                ];
-
-                                if (i) {
-                                    inquirer.prompt(questions)
-                                        .then(tx => {
-                                            handleTransfer(tx);
-                                        });
-
-                                } else {
-                                    let tx: any = {};
-
-                                    tx.from = args.options.from || undefined;
-                                    tx.to = args.options.to || undefined;
-                                    tx.value = args.options.value || undefined;
-                                    tx.gas = args.options.gas || config.data.defaults.gas || 100000;
-                                    tx.gasPrice = args.options.gasprice || config.data.defaults.gasPrice || 0;
-
-                                    if (tx.from && tx.to && tx.value) {
-                                        handleTransfer(tx);
-                                    } else {
-                                        error('Provide from, to and a value.');
-                                        resolve();
-                                    }
-
-                                }
-
-                            })
-                            .catch(err => error(err));
-
-                    })
-                    .catch(err => error(err))
-
+                    console.log(txHash);
+                    success(`Transaction submitted.`);
+                } catch (err) {
+                    (typeof err === 'object') ? console.log(err) : error(err);
+                }
+                resolve();
             });
-
         })
 
 };

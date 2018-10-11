@@ -1,15 +1,17 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
 const globals_1 = require("../utils/globals");
-/**
- * Should return a Vorpal command instance used for updating the config file.
- *
- * @param {Vorpal} evmlc - The command line object.
- * @returns Vorpal Command instance
- */
-function commandConfigSet(evmlc) {
-    let description = `Set values of the default config file or the one provided with -c, --config flag.`;
+function commandConfigSet(evmlc, session) {
+    let description = 'Set values of the configuration inside the data directory.';
     return evmlc.command('config set').alias('c s')
         .description(description)
         .option('-i, --interactive', 'enter into interactive command')
@@ -18,104 +20,93 @@ function commandConfigSet(evmlc) {
         .option('--from <from>', 'default from')
         .option('--gas <gas>', 'default gas')
         .option('--gasprice <gasprice>', 'gas price')
-        .option('-c, --config <path>', 'set config file path')
         .option('--keystore <path>', 'keystore path')
         .option('--pwd <path>', 'password path')
         .types({
-        string: ['h', 'host', 'from', 'keystore', 'pwd', 'config']
+        string: ['h', 'host', 'from', 'keystore', 'pwd']
     })
         .action((args) => {
-        return new Promise(resolve => {
-            let config = globals_1.getConfig(args.options.config);
-            let interactive = globals_1.getInteractive(args.options.interactive);
-            // handles updating config file
-            let handleGlobals = () => {
-                for (let prop in args.options) {
-                    if (prop.toLowerCase() === 'host') {
-                        if (config.data.connection.host !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.connection.host = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'port') {
-                        if (config.data.connection.port !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.connection.port = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'from') {
-                        if (config.data.defaults.from !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.defaults.from = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'gas') {
-                        if (config.data.defaults.gas !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.defaults.gas = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'gasprice') {
-                        if (config.data.defaults.gasPrice !== args.options[prop])
-                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        config.data.defaults.gasPrice = args.options[prop];
-                    }
-                }
-                config.save();
-            };
-            let questions = [
-                {
-                    name: 'host',
-                    default: config.data.connection.host,
-                    type: 'input',
-                    message: 'Host: '
-                },
-                {
-                    name: 'port',
-                    default: config.data.connection.port,
-                    type: 'input',
-                    message: 'Port: '
-                },
-                {
-                    name: 'from',
-                    default: config.data.defaults.from,
-                    type: 'input',
-                    message: 'Default From Address: '
-                },
-                {
-                    name: 'gas',
-                    default: config.data.defaults.gas,
-                    type: 'input',
-                    message: 'Default Gas: '
-                },
-                {
-                    name: 'gasPrice',
-                    default: config.data.defaults.gasPrice,
-                    type: 'input',
-                    message: 'Default Gas Price: '
-                },
-            ];
-            if (interactive) {
-                // interactive mode
-                inquirer.prompt(questions)
-                    .then((answers) => {
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let interactive = args.options.interactive || session.interactive;
+                let questions = [
+                    {
+                        name: 'host',
+                        default: session.config.data.connection.host,
+                        type: 'input',
+                        message: 'Host: '
+                    },
+                    {
+                        name: 'port',
+                        default: session.config.data.connection.port,
+                        type: 'input',
+                        message: 'Port: '
+                    },
+                    {
+                        name: 'from',
+                        default: session.config.data.defaults.from,
+                        type: 'input',
+                        message: 'Default From Address: '
+                    },
+                    {
+                        name: 'gas',
+                        default: session.config.data.defaults.gas,
+                        type: 'input',
+                        message: 'Default Gas: '
+                    },
+                    {
+                        name: 'gasPrice',
+                        default: session.config.data.defaults.gasPrice,
+                        type: 'input',
+                        message: 'Default Gas Price: '
+                    },
+                ];
+                if (interactive) {
+                    let answers = yield inquirer.prompt(questions);
                     args.options.host = answers.host;
                     args.options.port = answers.port;
                     args.options.from = answers.from;
                     args.options.gas = answers.gas;
                     args.options.gasprice = answers.gasPrice;
-                })
-                    .then(() => {
-                    handleGlobals();
-                    resolve();
-                });
-            }
-            else {
-                if (Object.keys(args.options).length) {
-                    handleGlobals();
+                }
+                if (!Object.keys(args.options).length) {
+                    globals_1.error('No options provided. To enter interactive mode use: -i, --interactive.');
                     resolve();
                 }
-                else {
-                    globals_1.warning('No options provided. To enter interactive mode use: -i, --interactive.');
+                for (let prop in args.options) {
+                    if (prop.toLowerCase() === 'host') {
+                        if (session.config.data.connection.host !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.connection.host = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'port') {
+                        if (session.config.data.connection.port !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.connection.port = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'from') {
+                        if (session.config.data.defaults.from !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.defaults.from = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'gas') {
+                        if (session.config.data.defaults.gas !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.defaults.gas = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'gasprice') {
+                        if (session.config.data.defaults.gasPrice !== args.options[prop])
+                            globals_1.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.defaults.gasPrice = args.options[prop];
+                    }
                 }
+                session.config.save();
             }
-        });
+            catch (err) {
+                (typeof err === 'object') ? console.log(err) : globals_1.error(err);
+            }
+            resolve();
+        }));
     });
 }
 exports.default = commandConfigSet;
