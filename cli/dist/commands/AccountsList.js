@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
-const ASCIITable = require("ascii-table");
 const globals_1 = require("../utils/globals");
 function commandAccountsList(evmlc, session) {
     let description = 'List all accounts in the local keystore directory provided by the configuration file. This command will ' +
@@ -24,39 +23,17 @@ function commandAccountsList(evmlc, session) {
                 let connection = yield session.connect();
                 let formatted = args.options.formatted || false;
                 let remote = args.options.remote || false;
+                let accounts;
                 if (!remote) {
-                    let accounts = yield session.keystore.decrypt((connection));
-                    let counter = 0;
-                    let table = new ASCIITable().setHeading('#', 'Account Address', 'Balance', 'Nonce');
-                    if (formatted) {
-                        accounts.forEach((account) => {
-                            counter++;
-                            table.addRow(counter, account.address, account.balance, account.nonce);
-                        });
-                        globals_1.success(table.toString());
-                    }
-                    else {
-                        let parsedAccounts = accounts.map(account => {
-                            return account.toBaseAccount();
-                        });
-                        globals_1.success(JSONBig.stringify(parsedAccounts));
-                    }
+                    let accs = yield session.keystore.decrypt((connection));
+                    accounts = accs.map((account) => {
+                        return account.toBaseAccount();
+                    });
                 }
                 else {
-                    let accounts = yield connection.getRemoteAccounts();
-                    let counter = 0;
-                    let table = new ASCIITable().setHeading('#', 'Account Address', 'Balance', 'Nonce');
-                    if (formatted) {
-                        accounts.forEach((account) => {
-                            counter++;
-                            table.addRow(counter, account.address, account.balance, account.nonce);
-                        });
-                        globals_1.success(table.toString());
-                    }
-                    else {
-                        globals_1.success(JSONBig.stringify(accounts));
-                    }
+                    accounts = yield connection.getRemoteAccounts();
                 }
+                (formatted) ? console.table(accounts) : globals_1.success(JSONBig.stringify(accounts));
             }
             catch (err) {
                 (typeof err === 'object') ? console.log(err) : globals_1.error(err);

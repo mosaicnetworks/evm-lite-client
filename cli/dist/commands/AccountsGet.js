@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
 const globals_1 = require("../utils/globals");
@@ -43,13 +42,8 @@ function commandAccountsGet(evmlc, session) {
                     resolve();
                 }
                 let account = yield connection.getRemoteAccount(args.address);
-                let counter = 0;
-                let accountsTable = new ASCIITable();
                 let formatted = args.options.formatted || false;
-                accountsTable
-                    .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                    .addRow(counter, account.address, account.balance, account.nonce);
-                formatted ? globals_1.info(accountsTable.toString()) : globals_1.info(JSONBig.stringify(account));
+                formatted ? console.table(account) : globals_1.info(JSONBig.stringify(account));
             }
             catch (err) {
                 (typeof err === 'object') ? console.log(err) : globals_1.error(err);

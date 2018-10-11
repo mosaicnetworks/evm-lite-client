@@ -39,12 +39,14 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
                             type: 'input'
                         }
                     ];
+
                     if (interactive) {
                         let answers = await inquirer.prompt(questions);
 
                         args.options.output = answers.outputPath;
                         args.options.password = answers.passwordPath;
                     }
+
                     success(session.keystore.create(args.options.output, args.options.password));
                 } catch (err) {
                     (typeof err === 'object') ? console.log(err) : error(err);

@@ -1,5 +1,4 @@
 import * as Vorpal from "vorpal";
-import * as ASCIITable from 'ascii-table';
 import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 
@@ -25,6 +24,7 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                 try {
                     let interactive = args.options.interactive || session.interactive;
                     let connection = await session.connect();
+
                     if (interactive) {
                         let questions = [
                             {
@@ -38,18 +38,16 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
 
                         args.address = answers.address;
                     }
+
                     if (!args.address && !interactive) {
                         error('Provide an address. Usage: accounts get <address>');
                         resolve();
                     }
+
                     let account: BaseAccount = await connection.getRemoteAccount(args.address);
-                    let counter: number = 0;
-                    let accountsTable: ASCIITable = new ASCIITable();
                     let formatted = args.options.formatted || false;
-                    accountsTable
-                        .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                        .addRow(counter, account.address, account.balance, account.nonce);
-                    formatted ? info(accountsTable.toString()) : info(JSONBig.stringify(account));
+
+                    formatted ? console.table(account) : info(JSONBig.stringify(account));
                 } catch (err) {
                     (typeof err === 'object') ? console.log(err) : error(err);
                 }

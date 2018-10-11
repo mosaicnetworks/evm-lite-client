@@ -9,29 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
-const ASCIITable = require("ascii-table");
 const globals_1 = require("../utils/globals");
 function commandInfo(evmlc, session) {
     return evmlc.command('info')
         .description('Prints information about node as JSON or --formatted.')
         .option('-f, --formatted', 'format output')
         .action((args) => {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let formatted = args.options.formatted || false;
                 let connection = yield session.connect();
                 let response = yield connection.api.getInfo();
                 let information = JSONBig.parse(response);
-                if (formatted) {
-                    let table = new ASCIITable('Info');
-                    Object.keys(information).forEach(function (key) {
-                        table.addRow(key, information[key]);
-                    });
-                    globals_1.success(table.toString());
-                }
-                else {
-                    globals_1.success(response);
-                }
+                (formatted) ? console.table(information) : globals_1.success(response);
             }
             catch (err) {
                 (typeof err === 'object') ? console.log(err) : globals_1.error(err);
