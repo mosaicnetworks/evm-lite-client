@@ -5,13 +5,18 @@ const toml = require("toml");
 const tomlify = require("tomlify-j0.4");
 const mkdir = require("mkdirp");
 const Globals_1 = require("../utils/Globals");
+const path = require("path");
+const Keystore_1 = require("./Keystore");
+const DataDirectory_1 = require("./DataDirectory");
 class Config {
-    constructor(path) {
-        this.path = path;
-        this.data = Config.default();
-        this._initialData = Config.default();
-        if (fs.existsSync(path)) {
-            let tomlData = Config.readFile(path);
+    constructor(datadir, filename) {
+        this.datadir = datadir;
+        this.filename = filename;
+        this.data = Config.default(this.datadir);
+        this._initialData = Config.default(this.datadir);
+        this.path = path.join(datadir, filename);
+        if (fs.existsSync(this.path)) {
+            let tomlData = Config.readFile(this.path);
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
         }
@@ -21,7 +26,7 @@ class Config {
             return fs.readFileSync(path, 'utf8');
         }
     }
-    static default() {
+    static default(datadir) {
         return {
             connection: {
                 host: '127.0.0.1',
@@ -29,13 +34,17 @@ class Config {
             },
             defaults: {
                 from: '',
-                gas: 0,
+                gas: 10000,
                 gasPrice: 0
+            },
+            storage: {
+                keystore: path.join(datadir, 'keystore'),
+                password: path.join(datadir, 'pwd.txt'),
             }
         };
     }
-    static defaultTOML() {
-        return tomlify.toToml(Config.default(), { spaces: 2 });
+    static defaultTOML(datadir) {
+        return tomlify.toToml(Config.default(datadir), { spaces: 2 });
     }
     toTOML() {
         return tomlify.toToml(this.data, { spaces: 2 });
@@ -58,6 +67,15 @@ class Config {
             Globals_1.default.success('Configuration file updated.');
             return true;
         }
+    }
+    getOrCreateKeystore(password) {
+        DataDirectory_1.default.createDirectoryIfNotExists(this.data.storage.keystore);
+        return new Keystore_1.default(this.data.storage.keystore, password);
+    }
+    getOrCreatePasswordFile() {
+        let password = 'supersecurepassword';
+        DataDirectory_1.default.createOrReadFile(this.data.storage.password, password);
+        return this.data.storage.password;
     }
 }
 exports.default = Config;

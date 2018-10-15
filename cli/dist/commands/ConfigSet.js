@@ -29,38 +29,25 @@ function commandConfigSet(evmlc, session) {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let interactive = args.options.interactive || session.interactive;
-                let questions = [
-                    {
-                        name: 'host',
-                        default: session.config.data.connection.host,
-                        type: 'input',
-                        message: 'Host: '
-                    },
-                    {
-                        name: 'port',
-                        default: session.config.data.connection.port,
-                        type: 'input',
-                        message: 'Port: '
-                    },
-                    {
-                        name: 'from',
-                        default: session.config.data.defaults.from,
-                        type: 'input',
-                        message: 'Default From Address: '
-                    },
-                    {
-                        name: 'gas',
-                        default: session.config.data.defaults.gas,
-                        type: 'input',
-                        message: 'Default Gas: '
-                    },
-                    {
-                        name: 'gasPrice',
-                        default: session.config.data.defaults.gasPrice,
-                        type: 'input',
-                        message: 'Default Gas Price: '
-                    },
-                ];
+                let questions = [];
+                function populateQuestions(object) {
+                    for (let key in object) {
+                        if (object.hasOwnProperty(key)) {
+                            if (typeof object[key] === 'object') {
+                                populateQuestions(object[key]);
+                            }
+                            else {
+                                questions.push({
+                                    name: key,
+                                    default: object[key],
+                                    type: 'input',
+                                    message: `${key}: `
+                                });
+                            }
+                        }
+                    }
+                }
+                populateQuestions(session.config.data);
                 if (interactive) {
                     let answers = yield inquirer.prompt(questions);
                     args.options.host = answers.host;
@@ -68,6 +55,8 @@ function commandConfigSet(evmlc, session) {
                     args.options.from = answers.from;
                     args.options.gas = answers.gas;
                     args.options.gasprice = answers.gasPrice;
+                    args.options.keystore = answers.keystore;
+                    args.options.password = answers.password;
                 }
                 if (!Object.keys(args.options).length) {
                     Globals_1.default.error('No options provided. To enter interactive mode use: -i, --interactive.');
@@ -98,6 +87,16 @@ function commandConfigSet(evmlc, session) {
                         if (session.config.data.defaults.gasPrice !== args.options[prop])
                             Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
                         session.config.data.defaults.gasPrice = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'keystore') {
+                        if (session.config.data.storage.keystore !== args.options[prop])
+                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.storage.keystore = args.options[prop];
+                    }
+                    if (prop.toLowerCase() === 'password') {
+                        if (session.config.data.defaults.password !== args.options[prop])
+                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                        session.config.data.storage.password = args.options[prop];
                     }
                 }
                 session.config.save();

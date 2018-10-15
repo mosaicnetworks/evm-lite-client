@@ -28,26 +28,12 @@ export default class DataDirectory {
         return fs.readFileSync(path, 'utf8');
     }
 
-    createAndGetKeystore(password: string): Keystore {
-        let keystorePath = path.join(this.path, 'keystore');
-        DataDirectory.createDirectoryIfNotExists(keystorePath);
-
-        return new Keystore(keystorePath, password);
-    }
-
     createAndGetConfig(): Config {
         let configFilePath = path.join(this.path, 'config.toml');
 
-        DataDirectory.createOrReadFile(configFilePath, Config.defaultTOML());
-        return new Config(configFilePath);
+        DataDirectory.createOrReadFile(configFilePath, Config.defaultTOML(this.path));
+        return new Config(this.path, 'config.toml');
     }
 
-    createAndGetPasswordFilePath() {
-        let password: string = 'supersecurepassword';
-        let passwordFilePath = path.join(this.path, 'pwd.txt');
-        DataDirectory.createOrReadFile(passwordFilePath, password);
-
-        return passwordFilePath;
-    }
 
 }

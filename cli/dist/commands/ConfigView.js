@@ -8,6 +8,7 @@ function commandConfigUser(evmlc, session) {
         .action(() => {
         return new Promise(resolve => {
             try {
+                Globals_1.default.info(`Config file location: ${session.config.path}`);
                 Globals_1.default.success(session.config.toTOML());
             }
             catch (err) {

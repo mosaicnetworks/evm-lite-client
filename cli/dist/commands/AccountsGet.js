@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
+const ASCIITable = require("ascii-table");
 const Globals_1 = require("../utils/Globals");
 function commandAccountsGet(evmlc, session) {
     let description = 'Gets account balance and nonce from a node with a valid connection.';
@@ -17,15 +18,18 @@ function commandAccountsGet(evmlc, session) {
         .description(description)
         .option('-f, --formatted', 'format output')
         .option('-i, --interactive', 'use interactive mode')
+        .option('-h, --host <ip>', 'override config parameter host')
+        .option('-p, --port <port>', 'override config parameter port')
         .types({
-        string: ['_']
+        string: ['_', 'h', 'host']
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
+                let accountTable = new ASCIITable().setHeading('#', 'Address', 'Balance', 'Nonce');
                 let interactive = args.options.interactive || session.interactive;
                 let formatted = args.options.formatted || false;
-                let connection = yield session.connect();
+                let connection = yield session.connect(args.options.host, args.options.port);
                 let questions = [
                     {
                         name: 'address',
@@ -43,7 +47,13 @@ function commandAccountsGet(evmlc, session) {
                     resolve();
                 }
                 let account = yield connection.getRemoteAccount(args.address);
-                formatted ? console.table(account) : Globals_1.default.info(JSONBig.stringify(account));
+                if (formatted) {
+                    accountTable.addRow('1', account.address, account.balance, account.nonce);
+                    Globals_1.default.success(accountTable.toString());
+                }
+                else {
+                    Globals_1.default.success(JSONBig.stringify(account));
+                }
             }
             catch (err) {
                 (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);

@@ -27,38 +27,27 @@ export default function commandConfigSet(evmlc: Vorpal, session: Session) {
             return new Promise<void>(async (resolve) => {
                 try {
                     let interactive = args.options.interactive || session.interactive;
-                    let questions = [
-                        {
-                            name: 'host',
-                            default: session.config.data.connection.host,
-                            type: 'input',
-                            message: 'Host: '
-                        },
-                        {
-                            name: 'port',
-                            default: session.config.data.connection.port,
-                            type: 'input',
-                            message: 'Port: '
-                        },
-                        {
-                            name: 'from',
-                            default: session.config.data.defaults.from,
-                            type: 'input',
-                            message: 'Default From Address: '
-                        },
-                        {
-                            name: 'gas',
-                            default: session.config.data.defaults.gas,
-                            type: 'input',
-                            message: 'Default Gas: '
-                        },
-                        {
-                            name: 'gasPrice',
-                            default: session.config.data.defaults.gasPrice,
-                            type: 'input',
-                            message: 'Default Gas Price: '
-                        },
-                    ];
+                    let questions = [];
+
+                    function populateQuestions(object) {
+                        for (let key in object) {
+                            if (object.hasOwnProperty(key)) {
+                                if (typeof object[key] === 'object') {
+                                    populateQuestions(object[key]);
+                                } else {
+                                    questions.push({
+                                        name: key,
+                                        default: object[key],
+                                        type: 'input',
+                                        message: `${key}: `
+                                    });
+
+                                }
+                            }
+                        }
+                    }
+
+                    populateQuestions(session.config.data);
 
                     if (interactive) {
                         let answers = await inquirer.prompt(questions);
@@ -68,6 +57,8 @@ export default function commandConfigSet(evmlc: Vorpal, session: Session) {
                         args.options.from = answers.from;
                         args.options.gas = answers.gas;
                         args.options.gasprice = answers.gasPrice;
+                        args.options.keystore = answers.keystore;
+                        args.options.password = answers.password;
                     }
 
                     if (!Object.keys(args.options).length) {
@@ -105,6 +96,18 @@ export default function commandConfigSet(evmlc: Vorpal, session: Session) {
                                 Globals.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
 
                             session.config.data.defaults.gasPrice = args.options[prop];
+                        }
+                        if (prop.toLowerCase() === 'keystore') {
+                            if (session.config.data.storage.keystore !== args.options[prop])
+                                Globals.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+
+                            session.config.data.storage.keystore = args.options[prop];
+                        }
+                        if (prop.toLowerCase() === 'password') {
+                            if (session.config.data.defaults.password !== args.options[prop])
+                                Globals.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+
+                            session.config.data.storage.password = args.options[prop];
                         }
                     }
 

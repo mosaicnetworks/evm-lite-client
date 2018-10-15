@@ -1,5 +1,6 @@
 import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
+import * as ASCIITable from 'ascii-table';
 
 import Globals, {BaseAccount} from "../utils/Globals";
 import Session from "../classes/Session";
@@ -15,13 +16,19 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
         .description(description)
         .option('-f, --formatted', 'format output')
         .option('-r, --remote', 'list remote accounts')
+        .option('-h, --host <ip>', 'override config parameter host')
+        .option('-p, --port <port>', 'override config parameter port')
+        .types({
+            string: ['h', 'host']
+        })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
                 try {
-                    let connection = await session.connect();
+                    let connection = await session.connect(args.options.host, args.options.port);
                     let formatted: boolean = args.options.formatted || false;
                     let remote = args.options.remote || false;
                     let accounts: BaseAccount[] = [];
+                    let accountsTable = new ASCIITable().setHeading('#', 'Address', 'Balance', 'Nonce');
 
                     if (!remote) {
                         accounts = (await session.keystore.decrypt(connection)).map(account => account.toBaseAccount());
@@ -29,7 +36,19 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
                         accounts = await connection.getRemoteAccounts();
                     }
 
-                    (formatted) ? console.table(accounts) : Globals.success(JSONBig.stringify(accounts));
+                    if (formatted) {
+                        let counter = 1;
+                        accounts.forEach(account => {
+                            accountsTable.addRow(counter, account.address, account.balance, account.nonce);
+                            counter++;
+                        });
+                    }
+
+                    if (accounts.length) {
+                        Globals.success((formatted) ? accountsTable.toString() : JSONBig.stringify(accounts));
+                    } else {
+                        Globals.warning('No accounts.');
+                    }
                 } catch (err) {
                     (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
