@@ -34,7 +34,7 @@ class Config {
             },
             defaults: {
                 from: '',
-                gas: 0,
+                gas: 10000,
                 gasPrice: 0
             },
             storage: {
