@@ -3,7 +3,7 @@ import * as toml from "toml";
 import * as tomlify from 'tomlify-j0.4';
 import * as mkdir from 'mkdirp';
 
-import {info, isEquivalentObjects, success, warning} from "../utils/globals";
+import Globals from "../utils/Globals";
 
 
 export default class Config {
@@ -12,33 +12,24 @@ export default class Config {
     private _initialData: any;
 
     constructor(public path: string) {
-
         this.data = Config.default();
         this._initialData = Config.default();
 
         if (fs.existsSync(path)) {
-
             let tomlData: string = Config.readFile(path);
 
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
-
-        } else {
-
         }
-
     }
 
     static readFile(path: string): string {
-
         if (fs.existsSync(path)) {
             return fs.readFileSync(path, 'utf8');
         }
-
     }
 
     static default() {
-
         return {
             connection: {
                 host: '127.0.0.1',
@@ -50,7 +41,6 @@ export default class Config {
                 gasPrice: 0
             }
         }
-
     }
 
     static defaultTOML() {
@@ -62,17 +52,11 @@ export default class Config {
     }
 
     save(): boolean {
-
-        info(`Config is being read from and updated at ${this.path}`);
-
-        if (isEquivalentObjects(this.data, this._initialData)) {
-
-            warning('No changes in configuration detected.');
-
+        Globals.info(`Config is being read from and updated at ${this.path}`);
+        if (Globals.isEquivalentObjects(this.data, this._initialData)) {
+            Globals.warning('No changes in configuration detected.');
             return false;
-
         } else {
-
             let list = this.path.split('/');
             list.pop();
 
@@ -83,15 +67,11 @@ export default class Config {
             }
 
             fs.writeFileSync(this.path, this.toTOML());
-
             this._initialData = toml.parse(this.toTOML());
-
-            success('Configuration file updated.');
+            Globals.success('Configuration file updated.');
 
             return true;
-
         }
-
     }
 
 }

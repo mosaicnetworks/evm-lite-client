@@ -1,8 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {error, success} from "../utils/globals";
-
+import Globals from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -27,27 +26,29 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
                     let interactive = args.options.interactive || session.interactive;
                     let questions = [
                         {
-                            name: 'outputPath',
+                            name: 'output',
                             message: 'Enter keystore output path: ',
                             default: session.keystore.path,
                             type: 'input'
                         },
                         {
-                            name: 'passwordPath',
+                            name: 'password',
                             message: 'Enter password file path: ',
                             default: session.passwordPath,
                             type: 'input'
                         }
                     ];
-                    if (interactive) {
-                        let answers = await inquirer.prompt(questions);
 
-                        args.options.output = answers.outputPath;
-                        args.options.password = answers.passwordPath;
+                    if (interactive) {
+                        let {output, password} = await inquirer.prompt(questions);
+
+                        args.options.output = output;
+                        args.options.password = password;
                     }
-                    success(session.keystore.create(args.options.output, args.options.password));
+
+                    Globals.success(session.keystore.create(args.options.output, args.options.password));
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
 
                 resolve();

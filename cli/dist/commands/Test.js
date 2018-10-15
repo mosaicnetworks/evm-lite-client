@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const globals_1 = require("../utils/globals");
 function commandTest(evmlc, session) {
     return evmlc.command('test').alias('test')
         .hidden()
@@ -19,7 +18,6 @@ function commandTest(evmlc, session) {
                     reject(msg + test);
                 });
             };
-            globals_1.catchErrors(fntest)('hello123', 'test123123');
         }));
     })
         .description('Testing purposes.');

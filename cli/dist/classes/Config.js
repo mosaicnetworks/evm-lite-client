@@ -4,7 +4,7 @@ const fs = require("fs");
 const toml = require("toml");
 const tomlify = require("tomlify-j0.4");
 const mkdir = require("mkdirp");
-const globals_1 = require("../utils/globals");
+const Globals_1 = require("../utils/Globals");
 class Config {
     constructor(path) {
         this.path = path;
@@ -14,8 +14,6 @@ class Config {
             let tomlData = Config.readFile(path);
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
-        }
-        else {
         }
     }
     static readFile(path) {
@@ -43,9 +41,9 @@ class Config {
         return tomlify.toToml(this.data, { spaces: 2 });
     }
     save() {
-        globals_1.info(`Config is being read from and updated at ${this.path}`);
-        if (globals_1.isEquivalentObjects(this.data, this._initialData)) {
-            globals_1.warning('No changes in configuration detected.');
+        Globals_1.default.info(`Config is being read from and updated at ${this.path}`);
+        if (Globals_1.default.isEquivalentObjects(this.data, this._initialData)) {
+            Globals_1.default.warning('No changes in configuration detected.');
             return false;
         }
         else {
@@ -57,7 +55,7 @@ class Config {
             }
             fs.writeFileSync(this.path, this.toTOML());
             this._initialData = toml.parse(this.toTOML());
-            globals_1.success('Configuration file updated.');
+            Globals_1.default.success('Configuration file updated.');
             return true;
         }
     }

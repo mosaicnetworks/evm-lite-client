@@ -1,8 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 
-import {error, success} from "../utils/globals";
-
+import Globals from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -29,15 +28,12 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                     let interactive = args.options.interactive || session.interactive;
                     let connection = await session.connect();
                     let accounts = await session.keystore.decrypt(connection);
-                    let choices: string[] = accounts.map((account) => {
-                        return account.address;
-                    });
                     let questions = [
                         {
                             name: 'from',
                             type: 'list',
                             message: 'From: ',
-                            choices: choices
+                            choices: accounts.map((account) => account.address)
                         },
                         {
                             name: 'to',
@@ -65,40 +61,35 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                     ];
                     let tx: any = {};
 
-                    tx.from = args.options.from || undefined;
-                    tx.to = args.options.to || undefined;
-                    tx.value = args.options.value || undefined;
-                    tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
-                    tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
-
                     if (interactive) {
                         tx = await inquirer.prompt(questions)
+                    } else {
+                        tx.from = args.options.from || undefined;
+                        tx.to = args.options.to || undefined;
+                        tx.value = args.options.value || undefined;
+                        tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
+                        tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
                     }
 
                     if (!tx.from && !tx.to && !tx.value) {
-                        error('Provide from, to and a value.');
+                        Globals.error('Provide from, to and a value.');
                         resolve();
                     }
 
-                    let account = accounts.find((acc) => {
-                        return acc.address === tx.from;
-                    });
+                    let account = accounts.find((acc) => acc.address === tx.from);
 
-                    if (!account) {
-                        error('Cannot find associated local account.')
-                    }
+                    if (!account) Globals.error('Cannot find associated local account.');
 
                     tx.chainId = 1;
                     tx.nonce = account.nonce;
 
                     let signed = await account.signTransaction(tx);
-
                     let txHash = await connection.api.sendRawTx(signed.rawTransaction);
 
                     console.log(txHash);
-                    success(`Transaction submitted.`);
+                    Globals.success(`Transaction submitted.`);
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
                 resolve();
             });

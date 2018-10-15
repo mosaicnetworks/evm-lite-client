@@ -1,10 +1,8 @@
 import * as Vorpal from "vorpal";
-import * as ASCIITable from 'ascii-table';
 import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 
-import {BaseAccount, error, info} from "../utils/globals";
-
+import Globals, {BaseAccount} from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -24,9 +22,9 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
             return new Promise<void>(async (resolve) => {
                 try {
                     let interactive = args.options.interactive || session.interactive;
+                    let formatted = args.options.formatted || false;
                     let connection = await session.connect();
-                    if (interactive) {
-                        let questions = [
+                    let questions = [
                             {
                                 name: 'address',
                                 type: 'input',
@@ -34,24 +32,23 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                                 message: 'Address: '
                             }
                         ];
-                        let answers = await inquirer.prompt(questions);
 
-                        args.address = answers.address;
+                    if (interactive) {
+                        let {address} = await inquirer.prompt(questions);
+
+                        args.address = address;
                     }
+
                     if (!args.address && !interactive) {
-                        error('Provide an address. Usage: accounts get <address>');
+                        Globals.error('Provide an address. Usage: accounts get <address>');
                         resolve();
                     }
+
                     let account: BaseAccount = await connection.getRemoteAccount(args.address);
-                    let counter: number = 0;
-                    let accountsTable: ASCIITable = new ASCIITable();
-                    let formatted = args.options.formatted || false;
-                    accountsTable
-                        .setHeading('#', 'Account Address', 'Balance', 'Nonce')
-                        .addRow(counter, account.address, account.balance, account.nonce);
-                    formatted ? info(accountsTable.toString()) : info(JSONBig.stringify(account));
+
+                    formatted ? console.table(account) : Globals.info(JSONBig.stringify(account));
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : error(err);
+                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }
                 resolve();
             });
