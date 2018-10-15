@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import * as Vorpal from "vorpal";
-import * as figlet from 'figlet';
 import * as fs from "fs";
 import * as mkdir from 'mkdirp';
 
@@ -83,10 +82,8 @@ init()
     .then((cli: { instance: Vorpal, session: Session }) => {
         if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
             cli.session.interactive = true;
-            figlet('EVM-Lite CLI', (err, data) => {
-                Globals.info(`${data} \n Entered interactive mode with configuration file: ${cli.session.config.path}`);
-                cli.instance.delimiter('evmlc$').show();
-            });
+            Globals.info(`Entered interactive mode with data directory: ${cli.session.directory.path}`);
+            cli.instance.delimiter('evmlc$').show();
         } else {
             cli.instance.parse(process.argv);
         }

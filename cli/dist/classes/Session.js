@@ -17,17 +17,19 @@ class Session {
     get password() {
         return fs.readFileSync(this.passwordPath, 'utf8');
     }
-    connect() {
+    connect(forcedHost, forcedPort) {
         return new Promise((resolve, reject) => {
             if (!this.connection) {
-                let host = this.config.data.connection.host || '127.0.0.1';
-                let port = this.config.data.connection.port || 8080;
+                let host = forcedHost || this.config.data.connection.host || '127.0.0.1';
+                let port = forcedPort || this.config.data.connection.port || 8080;
                 let node = new lib_1.Controller(host, port);
                 node.testConnection()
                     .then((success) => {
                     if (success) {
-                        this.connection = node;
-                        resolve(this.connection);
+                        if (!forcedHost && !forcedPort) {
+                            this.connection = node;
+                        }
+                        resolve(node);
                     }
                 })
                     .catch((err) => {

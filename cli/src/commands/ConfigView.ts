@@ -14,6 +14,7 @@ export default function commandConfigUser(evmlc: Vorpal, session: Session) {
         .action((): Promise<void> => {
             return new Promise<void>(resolve => {
                 try {
+                    Globals.info(`Config file location: ${session.config.path}`);
                     Globals.success(session.config.toTOML());
                 } catch (err) {
                     (typeof err === 'object') ? console.log(err) : Globals.error(err);

@@ -16,8 +16,10 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
         .description(description)
         .option('-f, --formatted', 'format output')
         .option('-i, --interactive', 'use interactive mode')
+        .option('-h, --host <ip>', 'override config parameter host')
+        .option('-p, --port <port>', 'override config parameter port')
         .types({
-            string: ['_']
+            string: ['_', 'h', 'host']
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
@@ -25,7 +27,7 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                     let accountTable = new ASCIITable().setHeading('#', 'Address', 'Balance', 'Nonce');
                     let interactive = args.options.interactive || session.interactive;
                     let formatted = args.options.formatted || false;
-                    let connection = await session.connect();
+                    let connection = await session.connect(args.options.host, args.options.port);
                     let questions = [
                             {
                                 name: 'address',

@@ -21,14 +21,16 @@ function commandTransfer(evmlc, session) {
         .option('-gp, --gasprice <value>', 'gas price to send at')
         .option('-t, --to <address>', 'address to send to')
         .option('-f, --from <address>', 'address to send from')
+        .option('-h, --host <ip>', 'override config parameter host')
+        .option('-p, --port <port>', 'override config parameter port')
         .types({
-        string: ['t', 'to', 'f', 'from'],
+        string: ['t', 'to', 'f', 'from', 'h', 'host'],
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let interactive = args.options.interactive || session.interactive;
-                let connection = yield session.connect();
+                let connection = yield session.connect(args.options.host, args.options.port);
                 let accounts = yield session.keystore.decrypt(connection);
                 let questions = [
                     {

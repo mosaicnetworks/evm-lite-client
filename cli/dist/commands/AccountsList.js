@@ -18,10 +18,15 @@ function commandAccountsList(evmlc, session) {
         .description(description)
         .option('-f, --formatted', 'format output')
         .option('-r, --remote', 'list remote accounts')
+        .option('-h, --host <ip>', 'override config parameter host')
+        .option('-p, --port <port>', 'override config parameter port')
+        .types({
+        string: ['h', 'host']
+    })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let connection = yield session.connect();
+                let connection = yield session.connect(args.options.host, args.options.port);
                 let formatted = args.options.formatted || false;
                 let remote = args.options.remote || false;
                 let accounts = [];

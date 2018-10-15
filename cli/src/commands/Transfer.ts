@@ -19,14 +19,16 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
         .option('-gp, --gasprice <value>', 'gas price to send at')
         .option('-t, --to <address>', 'address to send to')
         .option('-f, --from <address>', 'address to send from')
+        .option('-h, --host <ip>', 'override config parameter host')
+        .option('-p, --port <port>', 'override config parameter port')
         .types({
-            string: ['t', 'to', 'f', 'from'],
+            string: ['t', 'to', 'f', 'from', 'h', 'host'],
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
                 try {
                     let interactive = args.options.interactive || session.interactive;
-                    let connection = await session.connect();
+                    let connection = await session.connect(args.options.host, args.options.port);
                     let accounts = await session.keystore.decrypt(connection);
                     let questions = [
                         {
