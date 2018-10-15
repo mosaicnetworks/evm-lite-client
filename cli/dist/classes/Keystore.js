@@ -41,7 +41,7 @@ class Keystore {
             });
         });
     }
-    create(outputPath = undefined, pass = undefined) {
+    create(outputPath, pass) {
         let account = lib_1.Account.create();
         let output = this.path;
         let password = this.password;
@@ -63,7 +63,9 @@ class Keystore {
         }
         let encryptedAccount = account.encrypt(password);
         let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-        let fileName = `UTC--date--timestamp--${account.address}`;
+        let fileName = `UTC--${JSONBig.stringify(new Date())}--${account.address}`
+            .replace(/"/g, '')
+            .replace(/:/g, '-');
         fs.writeFileSync(path.join(output, fileName), stringEncryptedAccount);
         return stringEncryptedAccount;
     }

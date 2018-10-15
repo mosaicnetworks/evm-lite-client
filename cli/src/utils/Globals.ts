@@ -8,9 +8,20 @@ export interface BaseAccount {
     balance: any
 }
 
+export interface SentTx {
+    from: string,
+    to: string,
+    value: number,
+    gas: number,
+    nonce: number,
+    gasPrice: number,
+    date: any,
+    txHash: string
+}
+
 export default class Globals {
 
-    static evmlcDir: string = path.join(require('os').homedir(), '.evmlc');
+    static evmlcDir: string = path.join(require('os').homedir(), 'evmlc');
 
     constructor() {
     }

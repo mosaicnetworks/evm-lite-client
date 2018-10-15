@@ -1,32 +1,34 @@
-import * as path from "path";
-import * as sqlite3 from 'sqlite3';
+import {SentTx} from "../utils/Globals";
 
 
 export default class Transactions {
 
-    public database: sqlite3.Database;
-    public databasePath: string;
-
-    constructor(dataDir: string) {
-        this.databasePath = path.join(dataDir, 'db.sqlite3');
-        this.database = new sqlite3.Database(this.databasePath);
-    }
-
-    makeTransactionsTable(): Promise<boolean> {
-        return new Promise<boolean>(async (resolve) => {
-            await this.database.serialize(async function () {
-                this.run('CREATE TABLE lorem (info TEXT)');
-            });
-
-            await this.database.close();
-            resolve(true);
+    constructor(private dbPath: string, private _transactions: SentTx[]) {
+        this._transactions.sort(function (a, b) {
+            // @ts-ignore
+            return new Date(b.date) - new Date(a.date);
         });
     }
 
-    insertTransaction() {
+    all(): SentTx[] {
+        return this._transactions;
     }
 
-    getAllTransactions() {
+    add(tx: any): void {
+        delete tx.chainId;
+        delete tx.data;
+
+        tx.value = parseInt(tx.value, 16);
+        tx.gas = parseInt(tx.gas, 16);
+        tx.gasPrice = parseInt(tx.gasPrice, 16);
+        tx.nonce = parseInt(tx.nonce, 16);
+        tx.date = new Date();
+
+        this._transactions.push(tx);
+    }
+
+    getTransactionHash(txHash: string) {
+        console.log(txHash);
     }
 
 }

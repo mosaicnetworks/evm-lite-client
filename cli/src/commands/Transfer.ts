@@ -1,5 +1,6 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
+import * as JSONBig from 'json-bigint';
 
 import Globals from "../utils/Globals";
 import Session from "../classes/Session";
@@ -80,15 +81,22 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
                     let account = accounts.find((acc) => acc.address === tx.from);
 
-                    if (!account) Globals.error('Cannot find associated local account.');
+                    if (!account) {
+                        Globals.error('Cannot find associated local account.');
+                        resolve();
+                    }
 
                     tx.chainId = 1;
                     tx.nonce = account.nonce;
 
                     let signed = await account.signTransaction(tx);
-                    let txHash = await connection.api.sendRawTx(signed.rawTransaction);
+                    let txHash: any = JSONBig.parse(await connection.api.sendRawTx(signed.rawTransaction));
 
-                    console.log(txHash);
+                    tx.txHash = txHash.txHash;
+
+                    session.database.transactions.add(tx);
+                    session.database.save();
+
                     Globals.success(`Transaction submitted.`);
                 } catch (err) {
                     (typeof err === 'object') ? console.log(err) : Globals.error(err);

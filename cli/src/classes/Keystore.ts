@@ -53,7 +53,7 @@ export default class Keystore {
             })
     }
 
-    create(outputPath: string = undefined, pass: string = undefined): string {
+    create(outputPath: string, pass: string): string {
         let account: Account = Account.create();
 
         let output = this.path;
@@ -77,7 +77,9 @@ export default class Keystore {
 
         let encryptedAccount = account.encrypt(password);
         let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-        let fileName = `UTC--date--timestamp--${account.address}`;
+        let fileName = `UTC--${JSONBig.stringify(new Date())}--${account.address}`
+            .replace(/"/g, '')
+            .replace(/:/g, '-');
 
         fs.writeFileSync(path.join(output, fileName), stringEncryptedAccount);
 

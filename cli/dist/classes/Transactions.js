@@ -1,34 +1,29 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const path = require("path");
-const sqlite3 = require("sqlite3");
 class Transactions {
-    constructor(dataDir) {
-        this.databasePath = path.join(dataDir, 'db.sqlite3');
-        this.database = new sqlite3.Database(this.databasePath);
+    constructor(dbPath, _transactions) {
+        this.dbPath = dbPath;
+        this._transactions = _transactions;
+        this._transactions.sort(function (a, b) {
+            // @ts-ignore
+            return new Date(b.date) - new Date(a.date);
+        });
     }
-    makeTransactionsTable() {
-        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            yield this.database.serialize(function () {
-                return __awaiter(this, void 0, void 0, function* () {
-                    this.run('CREATE TABLE lorem (info TEXT)');
-                });
-            });
-            yield this.database.close();
-            resolve(true);
-        }));
+    all() {
+        return this._transactions;
     }
-    insertTransaction() {
+    add(tx) {
+        delete tx.chainId;
+        delete tx.data;
+        tx.value = parseInt(tx.value, 16);
+        tx.gas = parseInt(tx.gas, 16);
+        tx.gasPrice = parseInt(tx.gasPrice, 16);
+        tx.nonce = parseInt(tx.nonce, 16);
+        tx.date = new Date();
+        this._transactions.push(tx);
     }
-    getAllTransactions() {
+    getTransactionHash(txHash) {
+        console.log(txHash);
     }
 }
 exports.default = Transactions;

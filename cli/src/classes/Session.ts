@@ -5,7 +5,8 @@ import {Controller} from "../../../lib";
 import Config from "./Config";
 import DataDirectory from "./DataDirectory";
 import Keystore from "./Keystore";
-import Transactions from "./Transactions";
+import Database from "./Database";
+import * as path from "path";
 
 
 export default class Session {
@@ -17,7 +18,7 @@ export default class Session {
     public connection: Controller;
     public keystore: Keystore;
     public config: Config;
-    public transactions: Transactions;
+    public database: Database;
 
 
     constructor(dataDirPath: string) {
@@ -25,7 +26,7 @@ export default class Session {
         this.connection = null;
 
         this.directory = new DataDirectory(dataDirPath);
-        this.transactions = new Transactions(dataDirPath);
+        this.database = new Database(path.join(dataDirPath, 'db.json'));
 
         this.config = this.directory.createAndGetConfig();
         this.passwordPath = this.config.getOrCreatePasswordFile();

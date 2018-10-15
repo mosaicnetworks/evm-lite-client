@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
+const JSONBig = require("json-bigint");
 const Globals_1 = require("../utils/Globals");
 function commandTransfer(evmlc, session) {
     let description = 'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
@@ -79,13 +80,17 @@ function commandTransfer(evmlc, session) {
                     resolve();
                 }
                 let account = accounts.find((acc) => acc.address === tx.from);
-                if (!account)
+                if (!account) {
                     Globals_1.default.error('Cannot find associated local account.');
+                    resolve();
+                }
                 tx.chainId = 1;
                 tx.nonce = account.nonce;
                 let signed = yield account.signTransaction(tx);
-                let txHash = yield connection.api.sendRawTx(signed.rawTransaction);
-                console.log(txHash);
+                let txHash = JSONBig.parse(yield connection.api.sendRawTx(signed.rawTransaction));
+                tx.txHash = txHash.txHash;
+                session.database.transactions.add(tx);
+                session.database.save();
                 Globals_1.default.success(`Transaction submitted.`);
             }
             catch (err) {

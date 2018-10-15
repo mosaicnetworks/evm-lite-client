@@ -1,5 +1,6 @@
 import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
+import * as ASCIITable from 'ascii-table';
 
 import Globals from "../utils/Globals";
 import Session from "../classes/Session";
@@ -16,10 +17,25 @@ export default function TransactionsList(evmlc: Vorpal, session: Session) {
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
                 try {
-                    let made: boolean = await session.transactions.makeTransactionsTable();
-                    console.log(made);
+                    let formatted = args.options.formatted || false;
+                    let counter =0;
+                    let table = new ASCIITable();
+                    table.setHeading('Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Date Time');
+
+                    if (formatted) {
+                        if (session.database.transactions.all().length) {
+                            session.database.transactions.all().forEach(tx => {
+                                table.addRow(tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, tx.date);
+                            });
+                            Globals.success(table.toString());
+                        } else {
+                            Globals.warning('No transactions.')
+                        }
+                    } else {
+                        Globals.success(JSONBig.stringify(session.database.transactions.all()));
+                    }
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                    (typeof err === 'object') ? console.log(err) : console.log(err);
                 }
                 resolve();
             });
