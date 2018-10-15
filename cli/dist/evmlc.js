@@ -7,6 +7,7 @@ const fs = require("fs");
 const mkdir = require("mkdirp");
 const Globals_1 = require("./utils/Globals");
 const Session_1 = require("./classes/Session");
+const TransactionsList_1 = require("./commands/TransactionsList");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
 const AccountsGet_1 = require("./commands/AccountsGet");
@@ -57,6 +58,7 @@ init()
         Transfer_1.default,
         Info_1.default,
         Test_1.default,
+        TransactionsList_1.default,
     ].forEach(command => {
         command(evmlc, session);
     });

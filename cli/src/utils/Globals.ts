@@ -10,7 +10,7 @@ export interface BaseAccount {
 
 export default class Globals {
 
-    static evmlcDir: string = path.join(require('os').homedir(), '.evmlc');
+    static evmlcDir: string = path.join(require('os').homedir(), 'evmlc');
 
     constructor() {
     }

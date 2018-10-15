@@ -3,11 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const lib_1 = require("../../../lib");
 const DataDirectory_1 = require("./DataDirectory");
+const Transactions_1 = require("./Transactions");
 class Session {
     constructor(dataDirPath) {
         this.interactive = false;
         this.connection = null;
         this.directory = new DataDirectory_1.default(dataDirPath);
+        this.transactions = new Transactions_1.default(dataDirPath);
         this.passwordPath = this.directory.createAndGetPasswordFilePath();
         this.keystore = this.directory.createAndGetKeystore(this.password);
         this.config = this.directory.createAndGetConfig();

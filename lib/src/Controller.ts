@@ -118,14 +118,18 @@ export default class Controller {
             this.api.getAccounts()
                 .then((response: string) => {
                     let json: { accounts: BaseAccount[] } = JSONBig.parse(response);
-                    let accounts: BaseAccount[] = [];
-                    json.accounts.forEach((account) => {
-                        if (typeof account.balance === 'object') {
-                            account.balance = account.balance.toFormat(0);
-                        }
-                        accounts.push(account);
-                    });
-                    resolve(accounts);
+                    if (json.accounts) {
+                        let accounts: BaseAccount[] = [];
+                        json.accounts.forEach((account) => {
+                            if (typeof account.balance === 'object') {
+                                account.balance = account.balance.toFormat(0);
+                            }
+                            accounts.push(account);
+                        });
+                        resolve(accounts);
+                    } else {
+                        resolve([]);
+                    }
                 }).catch(() => reject('Could not get remote accounts.'));
         });
     }

@@ -8,6 +8,7 @@ import * as mkdir from 'mkdirp';
 import Globals from "./utils/Globals";
 import Session from "./classes/Session";
 
+import TransactionsList from "./commands/TransactionsList";
 import AccountCreate from './commands/AccountsCreate';
 import AccountsList from './commands/AccountsList';
 import AccountsGet from './commands/AccountsGet';
@@ -69,6 +70,7 @@ init()
             Transfer,
             Info,
             Test,
+            TransactionsList,
         ].forEach(command => {
             command(evmlc, session);
         });
