@@ -16,13 +16,8 @@ export default function TransactionsList(evmlc: Vorpal, session: Session) {
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
                 try {
-                    let made = await session.transactions.makeTransactionsTable();
-                    if (made) {
-                        console.log(session.transactions);
-                    } else {
-                        Globals.error('Nope.')
-                    }
-
+                    let made: boolean = await session.transactions.makeTransactionsTable();
+                    console.log(made);
                 } catch (err) {
                     (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }

@@ -27,9 +27,9 @@ export default class Session {
         this.directory = new DataDirectory(dataDirPath);
         this.transactions = new Transactions(dataDirPath);
 
-        this.passwordPath = this.directory.createAndGetPasswordFilePath();
-        this.keystore = this.directory.createAndGetKeystore(this.password);
         this.config = this.directory.createAndGetConfig();
+        this.passwordPath = this.config.getOrCreatePasswordFile();
+        this.keystore = this.config.getOrCreateKeystore(this.password);
     }
 
     get password(): string {

@@ -4,7 +4,6 @@ const fs = require("fs");
 const mkdir = require("mkdirp");
 const path = require("path");
 const Config_1 = require("./Config");
-const Keystore_1 = require("./Keystore");
 class DataDirectory {
     constructor(path) {
         this.path = path;
@@ -22,21 +21,10 @@ class DataDirectory {
         }
         return fs.readFileSync(path, 'utf8');
     }
-    createAndGetKeystore(password) {
-        let keystorePath = path.join(this.path, 'keystore');
-        DataDirectory.createDirectoryIfNotExists(keystorePath);
-        return new Keystore_1.default(keystorePath, password);
-    }
     createAndGetConfig() {
         let configFilePath = path.join(this.path, 'config.toml');
-        DataDirectory.createOrReadFile(configFilePath, Config_1.default.defaultTOML());
-        return new Config_1.default(configFilePath);
-    }
-    createAndGetPasswordFilePath() {
-        let password = 'supersecurepassword';
-        let passwordFilePath = path.join(this.path, 'pwd.txt');
-        DataDirectory.createOrReadFile(passwordFilePath, password);
-        return passwordFilePath;
+        DataDirectory.createOrReadFile(configFilePath, Config_1.default.defaultTOML(this.path));
+        return new Config_1.default(this.path, 'config.toml');
     }
 }
 exports.default = DataDirectory;

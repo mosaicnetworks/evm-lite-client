@@ -37,5 +37,5 @@ class Globals {
         return true;
     }
 }
-Globals.evmlcDir = path.join(require('os').homedir(), 'evmlc');
+Globals.evmlcDir = path.join(require('os').homedir(), '.evmlc');
 exports.default = Globals;

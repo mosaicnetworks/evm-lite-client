@@ -18,12 +18,7 @@ function TransactionsList(evmlc, session) {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let made = yield session.transactions.makeTransactionsTable();
-                if (made) {
-                    console.log(session.transactions);
-                }
-                else {
-                    Globals_1.default.error('Nope.');
-                }
+                console.log(made);
             }
             catch (err) {
                 (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);

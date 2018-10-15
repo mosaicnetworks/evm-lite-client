@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const sqlite3 = require("sqlite3");
@@ -8,13 +16,15 @@ class Transactions {
         this.database = new sqlite3.Database(this.databasePath);
     }
     makeTransactionsTable() {
-        return new Promise((resolve) => {
-            this.database.serialize(function () {
-                this.run('CREATE TABLE `transactions` (`id` INT(255) NOT NULL AUTO_INCREMENT, `from` VARCHAR(255),' +
-                    ' to` VARCHAR(255), `value` INT(255), `gas` INT(255), `gasprice` VARCHAR(255), `txhash` VARCHAR(255), `date` DATE(255), PRIMARY KEY (`id`) ENGINE=InnoDB;);');
-                resolve(true);
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            yield this.database.serialize(function () {
+                return __awaiter(this, void 0, void 0, function* () {
+                    this.run('CREATE TABLE lorem (info TEXT)');
+                });
             });
-        }).then(() => this.database.close());
+            yield this.database.close();
+            resolve(true);
+        }));
     }
     insertTransaction() {
     }

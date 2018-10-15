@@ -10,9 +10,9 @@ class Session {
         this.connection = null;
         this.directory = new DataDirectory_1.default(dataDirPath);
         this.transactions = new Transactions_1.default(dataDirPath);
-        this.passwordPath = this.directory.createAndGetPasswordFilePath();
-        this.keystore = this.directory.createAndGetKeystore(this.password);
         this.config = this.directory.createAndGetConfig();
+        this.passwordPath = this.config.getOrCreatePasswordFile();
+        this.keystore = this.config.getOrCreateKeystore(this.password);
     }
     get password() {
         return fs.readFileSync(this.passwordPath, 'utf8');
