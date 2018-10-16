@@ -7,23 +7,28 @@ import DataDirectory from "./DataDirectory";
 import Keystore from "./Keystore";
 import Database from "./Database";
 import * as path from "path";
+import Log from "./Log";
 
 
 export default class Session {
 
     public interactive: boolean;
     public passwordPath: string;
+    public logpath: string;
 
     public directory: DataDirectory;
     public connection: Controller;
     public keystore: Keystore;
     public config: Config;
     public database: Database;
+    public logs: Log[];
 
 
     constructor(dataDirPath: string) {
         this.interactive = false;
         this.connection = null;
+        this.logs = [];
+        this.logpath = path.join(dataDirPath, 'logs');
 
         this.directory = new DataDirectory(dataDirPath);
         this.database = new Database(path.join(dataDirPath, 'db.json'));
@@ -61,5 +66,11 @@ export default class Session {
             }
         });
     };
+
+    log(): Log {
+        let log = new Log(this.logpath);
+        this.logs.push(log);
+        return log;
+    }
 
 }

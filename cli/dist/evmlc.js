@@ -16,6 +16,8 @@ const ConfigSet_1 = require("./commands/ConfigSet");
 const Transfer_1 = require("./commands/Transfer");
 const Test_1 = require("./commands/Test");
 const Info_1 = require("./commands/Info");
+const LogsView_1 = require("./commands/LogsView");
+const LogsClear_1 = require("./commands/LogsClear");
 const init = () => {
     return new Promise(resolve => {
         if (!fs.existsSync(Globals_1.default.evmlcDir)) {
@@ -58,6 +60,8 @@ init()
         Info_1.default,
         Test_1.default,
         TransactionsList_1.default,
+        LogsView_1.default,
+        LogsClear_1.default,
     ].forEach(command => {
         command(evmlc, session);
     });

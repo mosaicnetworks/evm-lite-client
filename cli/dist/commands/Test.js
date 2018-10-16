@@ -13,11 +13,8 @@ function commandTest(evmlc, session) {
         .hidden()
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let fntest = (msg, test) => {
-                return new Promise((resolve, reject) => {
-                    reject(msg + test);
-                });
-            };
+            console.log(session.logs);
+            resolve();
         }));
     })
         .description('Testing purposes.');

@@ -17,6 +17,8 @@ import ConfigSet from "./commands/ConfigSet";
 import Transfer from "./commands/Transfer";
 import Test from "./commands/Test";
 import Info from "./commands/Info";
+import LogsView from "./commands/LogsView";
+import LogsClear from "./commands/LogsClear";
 
 
 const init = (): Promise<void> => {
@@ -70,6 +72,8 @@ init()
             Info,
             Test,
             TransactionsList,
+            LogsView,
+            LogsClear,
         ].forEach(command => {
             command(evmlc, session);
         });

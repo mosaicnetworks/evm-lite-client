@@ -8,11 +8,8 @@ export default function commandTest(evmlc: Vorpal, session: Session) {
         .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async resolve => {
-                let fntest = (msg: string, test: string) => {
-                    return new Promise((resolve, reject) => {
-                        reject(msg + test);
-                    });
-                };
+                console.log(session.logs);
+                resolve();
             });
         })
         .description('Testing purposes.');

@@ -25,6 +25,7 @@ function commandAccountsGet(evmlc, session) {
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            let l = session.log().withCommand('accounts get');
             try {
                 let accountTable = new ASCIITable().setHeading('#', 'Address', 'Balance', 'Nonce');
                 let interactive = args.options.interactive || session.interactive;
@@ -39,25 +40,40 @@ function commandAccountsGet(evmlc, session) {
                     }
                 ];
                 if (interactive) {
+                    l.append('mode', 'interactive');
                     let { address } = yield inquirer.prompt(questions);
                     args.address = address;
                 }
-                if (!args.address && !interactive) {
+                if (!args.address) {
+                    l.append('error', 'no account address provided');
                     Globals_1.default.error('Provide an address. Usage: accounts get <address>');
-                    resolve();
-                }
-                let account = yield connection.getRemoteAccount(args.address);
-                if (formatted) {
-                    accountTable.addRow('1', account.address, account.balance, account.nonce);
-                    Globals_1.default.success(accountTable.toString());
                 }
                 else {
-                    Globals_1.default.success(JSONBig.stringify(account));
+                    l.append('address', args.address);
+                    let account = yield connection.getRemoteAccount(args.address);
+                    if (formatted) {
+                        l.append('formatted', 'true');
+                        accountTable.addRow('1', account.address, account.balance, account.nonce);
+                        Globals_1.default.success(accountTable.toString());
+                    }
+                    else {
+                        l.append('formatted', 'false');
+                        Globals_1.default.success(JSONBig.stringify(account));
+                    }
                 }
             }
             catch (err) {
-                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
+                l.append('status', 'failed');
+                if (typeof err === 'object') {
+                    l.append(err.name, err.text);
+                    console.log(err);
+                }
+                else {
+                    l.append('error', err);
+                    Globals_1.default.error(err);
+                }
             }
+            l.write();
             resolve();
         }));
     });

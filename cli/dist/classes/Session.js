@@ -5,10 +5,13 @@ const lib_1 = require("../../../lib");
 const DataDirectory_1 = require("./DataDirectory");
 const Database_1 = require("./Database");
 const path = require("path");
+const Log_1 = require("./Log");
 class Session {
     constructor(dataDirPath) {
         this.interactive = false;
         this.connection = null;
+        this.logs = [];
+        this.logpath = path.join(dataDirPath, 'logs');
         this.directory = new DataDirectory_1.default(dataDirPath);
         this.database = new Database_1.default(path.join(dataDirPath, 'db.json'));
         this.config = this.directory.createAndGetConfig();
@@ -44,5 +47,10 @@ class Session {
         });
     }
     ;
+    log() {
+        let log = new Log_1.default(this.logpath);
+        this.logs.push(log);
+        return log;
+    }
 }
 exports.default = Session;

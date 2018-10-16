@@ -17,14 +17,21 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
+                let l = session.log().withCommand('command info');
                 try {
                     let formatted = args.options.formatted || false;
+
                     let connection = await session.connect(args.options.host, args.options.port);
+                    l.append('connection', 'successful');
+
                     let response = await connection.api.getInfo();
+                    l.append('request', 'successful');
+
                     let information = JSONBig.parse(response);
                     let table = new ASCIITable().setHeading('Name', 'Value');
 
                     if (formatted) {
+                        l.append('formatted', 'true');
                         for (let key in information) {
                             if (information.hasOwnProperty(key)) {
                                 table.addRow(key, information[key]);
@@ -32,6 +39,7 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
                         }
                         Globals.success(table.toString());
                     } else {
+                        l.append('formatted', 'false');
                         Globals.success(response);
                     }
 
@@ -40,7 +48,6 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
                 }
                 resolve();
             });
-        })
-        .description('Testing purposes.');
+        });
 };
 

@@ -23,41 +23,57 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
+                let l = session.log().withCommand('accounts get');
+
                 try {
                     let accountTable = new ASCIITable().setHeading('#', 'Address', 'Balance', 'Nonce');
                     let interactive = args.options.interactive || session.interactive;
                     let formatted = args.options.formatted || false;
                     let connection = await session.connect(args.options.host, args.options.port);
                     let questions = [
-                            {
-                                name: 'address',
-                                type: 'input',
-                                required: true,
-                                message: 'Address: '
-                            }
-                        ];
+                        {
+                            name: 'address',
+                            type: 'input',
+                            required: true,
+                            message: 'Address: '
+                        }
+                    ];
 
                     if (interactive) {
+                        l.append('mode', 'interactive');
                         let {address} = await inquirer.prompt(questions);
 
                         args.address = address;
                     }
 
-                    if (!args.address && !interactive) {
+                    if (!args.address) {
+                        l.append('error', 'no account address provided');
                         Globals.error('Provide an address. Usage: accounts get <address>');
-                        resolve();
-                    }
-
-                    let account: BaseAccount = await connection.getRemoteAccount(args.address);
-                    if (formatted) {
-                        accountTable.addRow('1', account.address, account.balance, account.nonce);
-                        Globals.success(accountTable.toString());
                     } else {
-                        Globals.success(JSONBig.stringify(account))
+                        l.append('address', args.address);
+                        let account: BaseAccount = await connection.getRemoteAccount(args.address);
+
+                        if (formatted) {
+                            l.append('formatted', 'true');
+                            accountTable.addRow('1', account.address, account.balance, account.nonce);
+                            Globals.success(accountTable.toString());
+                        } else {
+                            l.append('formatted', 'false');
+                            Globals.success(JSONBig.stringify(account))
+                        }
+
                     }
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                    l.append('status', 'failed');
+                    if (typeof err === 'object') {
+                        l.append(err.name, err.text);
+                        console.log(err);
+                    } else {
+                        l.append('error', err);
+                        Globals.error(err);
+                    }
                 }
+                l.write();
                 resolve();
             });
         });

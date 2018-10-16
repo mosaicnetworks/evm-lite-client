@@ -44,20 +44,21 @@ export default function TransactionsList(evmlc: Vorpal, session: Session) {
                     if (formatted) {
                         if (transactions.length) {
                             if (verbose) {
-                                table.setHeading('Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Date Time', 'Status');
+                                table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
                                 for (let tx of transactions) {
                                     let date = new Date(tx.date);
+                                    let d = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+                                    let t = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
                                     let receipt: TXReceipt = await connection.getReceipt(tx.txHash);
-                                    table.addRow(tx.txHash, tx.from, tx.to, tx.value,
-                                        tx.gas, tx.gasPrice, `${date.toDateString()} ${date.toTimeString()}`,
-                                        (receipt) ? ((!receipt.failed) ?  'Success' : 'Failed') : 'Failed');
+                                    table.addRow(`${d} ${t}`, tx.txHash, tx.from, tx.to, tx.value,tx.gas, tx.gasPrice,
+                                        (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
                                 }
                             } else {
                                 table.setHeading('From', 'To', 'Value', 'Status');
                                 for (let tx of transactions) {
                                     let receipt: TXReceipt = await connection.getReceipt(tx.txHash);
                                     table.addRow(tx.from, tx.to, tx.value,
-                                        (receipt) ? ((!receipt.failed) ?  'Success' : 'Failed') : 'Failed');
+                                        (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
                                 }
                             }
                             Globals.success(table.toString());

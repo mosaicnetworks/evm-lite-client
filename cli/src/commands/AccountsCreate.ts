@@ -22,6 +22,8 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
+                let l = session.log().withCommand('accounts create');
+
                 try {
                     let interactive = args.options.interactive || session.interactive;
                     let questions = [
@@ -40,17 +42,33 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
                     ];
 
                     if (interactive) {
+                        l.append('mode', 'interactive');
                         let {output, password} = await inquirer.prompt(questions);
 
                         args.options.output = output;
                         args.options.password = password;
+                    } else {
+                        l.append('mode', 'non-interactive');
                     }
 
+                    l.append('output directory', (args.options.output) ? args.options.output : 'default');
+                    l.append('password file', (args.options.password) ? args.options.password : 'default');
+
                     Globals.success(session.keystore.create(args.options.output, args.options.password));
+
+                    l.append('status', 'success');
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                    l.append('status', 'failed');
+                    if (typeof err === 'object') {
+                        l.append(err.name, err.text);
+                        console.log(err);
+                    } else {
+                        l.append('error', err);
+                        Globals.error(err);
+                    }
                 }
 
+                l.write();
                 resolve();
             })
         });
