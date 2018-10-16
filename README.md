@@ -149,17 +149,19 @@ accounts). They rely on public key cryptography to sign transactions so that the
 EVM can securely validate the identity of a transaction sender.
 
 Using the same account model as Ethereum doesn't mean that existing Ethereum
-accounts automatically have the same balance in EVM-Lite (or vice versa). In
-Ethereum, balances are denoted in Ether, the cryptocurrency maintained by the
-public Ethereum network. On the other hand, every EVM-Lite network (even a
-single node network) maintains a completely separate ledger, and may use any
-name for the corresponding coin.
+accounts automatically have the same balance in EVM-Lite (or vice versa). In 
+Ethereum, balances are denoted in Ether, the cryptocurrency maintained by the 
+public Ethereum network. On the other hand, every EVM-Lite network (even a 
+single node network) maintains a completely separate ledger, and may use any 
+name for the corresponding coin. 
 
-Accounts are objects in the EVM-Lite State. They come in two types: Externally
-owned accounts, and Contract accounts. Externally owned accounts have a balance,
-and Contract accounts have a balance and storage. The EVM-Lite State is the
-state of all accounts which is updated with every transaction. The underlying
-consensus engine ensures that every participant in an EVM-Lite network processes
+What follows is mostly taken from the [Ethereum Docs](http://ethdocs.org/en/latest/account-management.html):
+
+Accounts are objects in the EVM-Lite State. They come in two types: Externally 
+owned accounts, and Contract accounts. Externally owned accounts have a balance, 
+and Contract accounts have a balance and storage. The EVM-Lite State is the 
+state of all accounts which is updated with every transaction. The underlying 
+consensus engine ensures that every participant in an EVM-Lite network processes 
 the same transactions in the same order, thereby arriving at the same State.
 
 Restricting EVM-Lite to externally owned accounts makes for an “altcoin” system
