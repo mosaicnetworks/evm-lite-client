@@ -29,6 +29,7 @@ function commandTransfer(evmlc, session) {
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            let l = session.log().withCommand('transfer');
             try {
                 let interactive = args.options.interactive || session.interactive;
                 let connection = yield session.connect(args.options.host, args.options.port);
@@ -66,9 +67,11 @@ function commandTransfer(evmlc, session) {
                 ];
                 let tx = {};
                 if (interactive) {
+                    l.append('mode', 'interactive');
                     tx = yield inquirer.prompt(questions);
                 }
                 else {
+                    l.append('mode', 'non-interactive');
                     tx.from = args.options.from || undefined;
                     tx.to = args.options.to || undefined;
                     tx.value = args.options.value || undefined;
@@ -82,11 +85,14 @@ function commandTransfer(evmlc, session) {
                 let account = accounts.find((acc) => acc.address === tx.from);
                 if (!account) {
                     Globals_1.default.error('Cannot find associated local account.');
+                    l.append('account', 'cannot find account');
                 }
                 else {
+                    l.append('account', 'located successfully');
                     tx.chainId = 1;
                     tx.nonce = account.nonce;
                     let signed = yield account.signTransaction(tx);
+                    l.append('tx', JSONBig.stringify(tx));
                     connection.api.sendRawTx(signed.rawTransaction)
                         .then((resp) => {
                         let response = JSONBig.parse(resp);
@@ -98,15 +104,25 @@ function commandTransfer(evmlc, session) {
                         resolve();
                     })
                         .catch(() => {
+                        l.append('error', 'ran out of gas');
                         Globals_1.default.error('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16));
                         resolve();
                     });
                 }
             }
             catch (err) {
-                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
+                l.append('status', 'failed');
+                if (typeof err === 'object') {
+                    l.append(err.name, err.text);
+                    console.log(err);
+                }
+                else {
+                    l.append('error', err);
+                    Globals_1.default.error(err);
+                }
                 resolve();
             }
+            l.write();
         }));
     });
 }

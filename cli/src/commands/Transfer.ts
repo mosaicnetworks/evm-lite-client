@@ -27,6 +27,7 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
+                let l = session.log().withCommand('transfer');
                 try {
                     let interactive = args.options.interactive || session.interactive;
                     let connection = await session.connect(args.options.host, args.options.port);
@@ -65,8 +66,10 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                     let tx: any = {};
 
                     if (interactive) {
+                    l.append('mode', 'interactive');
                         tx = await inquirer.prompt(questions)
                     } else {
+                    l.append('mode', 'non-interactive');
                         tx.from = args.options.from || undefined;
                         tx.to = args.options.to || undefined;
                         tx.value = args.options.value || undefined;
@@ -83,11 +86,14 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
                     if (!account) {
                         Globals.error('Cannot find associated local account.');
+                        l.append('account', 'cannot find account');
                     } else {
+                        l.append('account', 'located successfully');
                         tx.chainId = 1;
                         tx.nonce = account.nonce;
 
                         let signed = await account.signTransaction(tx);
+                        l.append('tx', JSONBig.stringify(tx));
 
                         connection.api.sendRawTx(signed.rawTransaction)
                             .then((resp) => {
@@ -102,15 +108,24 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                                 resolve();
                             })
                             .catch(() => {
+                                l.append('error', 'ran out of gas');
                                 Globals.error('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16));
                                 resolve();
                             })
                     }
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                    l.append('status', 'failed');
+                    if (typeof err === 'object') {
+                        l.append(err.name, err.text);
+                        console.log(err);
+                    } else {
+                        l.append('error', err);
+                        Globals.error(err);
+                    }
                     resolve();
                 }
 
+                l.write();
             });
         })
 

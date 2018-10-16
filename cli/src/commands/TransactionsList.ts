@@ -34,10 +34,14 @@ export default function TransactionsList(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
+                let l = session.log().withCommand('transactions list');
                 try {
                     let connection = await session.connect(args.options.host, args.options.port);
+                    l.append('connection', 'successful');
                     let formatted = args.options.formatted || false;
+                    l.append('formatted', formatted);
                     let verbose = args.options.verbose || false;
+                    l.append('verbose', 'verbose');
                     let table = new ASCIITable();
                     let transactions = session.database.transactions.all();
 
@@ -69,8 +73,17 @@ export default function TransactionsList(evmlc: Vorpal, session: Session) {
                         Globals.success(JSONBig.stringify(session.database.transactions.all()));
                     }
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : console.log(err);
+                    l.append('status', 'failed');
+                    if (typeof err === 'object') {
+                        l.append(err.name, err.text);
+                        console.log(err);
+                    } else {
+                        l.append('error', err);
+                        Globals.error(err);
+                    }
                 }
+
+                l.write();
                 resolve();
             });
         });

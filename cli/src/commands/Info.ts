@@ -44,8 +44,17 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
                     }
 
                 } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                    l.append('status', 'failed');
+                    if (typeof err === 'object') {
+                        l.append(err.name, err.text);
+                        console.log(err);
+                    } else {
+                        l.append('error', err);
+                        Globals.error(err);
+                    }
                 }
+
+                l.write();
                 resolve();
             });
         });

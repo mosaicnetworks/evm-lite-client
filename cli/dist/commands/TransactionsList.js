@@ -24,10 +24,14 @@ function TransactionsList(evmlc, session) {
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            let l = session.log().withCommand('transactions list');
             try {
                 let connection = yield session.connect(args.options.host, args.options.port);
+                l.append('connection', 'successful');
                 let formatted = args.options.formatted || false;
+                l.append('formatted', formatted);
                 let verbose = args.options.verbose || false;
+                l.append('verbose', 'verbose');
                 let table = new ASCIITable();
                 let transactions = session.database.transactions.all();
                 if (formatted) {
@@ -60,8 +64,17 @@ function TransactionsList(evmlc, session) {
                 }
             }
             catch (err) {
-                (typeof err === 'object') ? console.log(err) : console.log(err);
+                l.append('status', 'failed');
+                if (typeof err === 'object') {
+                    l.append(err.name, err.text);
+                    console.log(err);
+                }
+                else {
+                    l.append('error', err);
+                    Globals_1.default.error(err);
+                }
             }
+            l.write();
             resolve();
         }));
     });
