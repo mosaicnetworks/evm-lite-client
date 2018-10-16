@@ -21,7 +21,7 @@ export interface SentTx {
 
 export default class Globals {
 
-    static evmlcDir: string = path.join(require('os').homedir(), 'evmlc');
+    static evmlcDir: string = path.join(require('os').homedir(), '.evmlc');
 
     constructor() {
     }
@@ -47,7 +47,7 @@ export default class Globals {
         let aProps = Object.getOwnPropertyNames(objectA);
         let bProps = Object.getOwnPropertyNames(objectB);
 
-        if (aProps.length != bProps.length) {
+        if (aProps.length !== bProps.length) {
             return false;
         }
 

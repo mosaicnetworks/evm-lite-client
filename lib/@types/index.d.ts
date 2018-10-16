@@ -54,6 +54,7 @@ declare namespace EVMLClient {
         contractAddress: string;
         logs: [];
         logsBloom: string;
+        failed: boolean;
     }
 
     interface SolidityCompilerOutput {
@@ -322,6 +323,7 @@ declare namespace EVMLClient {
         constructor(host: string, port?: number);
 
         testConnection(): Promise<boolean>;
+        getReceipt(transactionHash: string): Promise<TXReceipt>;
         getRemoteAccounts(): Promise<BaseAccount[]>;
         getRemoteAccount(address: string): Promise<BaseAccount>;
 

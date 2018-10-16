@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
+const fs = require("fs");
 const Transactions_1 = require("./Transactions");
 const DataDirectory_1 = require("./DataDirectory");
-const fs = require("fs");
 class Database {
     constructor(path) {
         this.path = path;

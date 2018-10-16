@@ -52,7 +52,7 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                         {
                             name: 'gas',
                             type: 'input',
-                            default: session.config.data.defaults.gas || 10000,
+                            default: session.config.data.defaults.gas || 100000,
                             message: 'Gas: '
                         },
                         {
@@ -83,21 +83,22 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
                     if (!account) {
                         Globals.error('Cannot find associated local account.');
-                        resolve();
+                    } else {
+                        tx.chainId = 1;
+                        tx.nonce = account.nonce;
+
+                        let signed = await account.signTransaction(tx);
+                        let txHash: any = JSONBig.parse(await connection.api.sendRawTx(signed.rawTransaction));
+
+                        tx.txHash = txHash.txHash;
+
+                        session.database.transactions.add(tx);
+                        session.database.save();
+
+                        Globals.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
+                        Globals.success(`Transaction submitted.`);
                     }
 
-                    tx.chainId = 1;
-                    tx.nonce = account.nonce;
-
-                    let signed = await account.signTransaction(tx);
-                    let txHash: any = JSONBig.parse(await connection.api.sendRawTx(signed.rawTransaction));
-
-                    tx.txHash = txHash.txHash;
-
-                    session.database.transactions.add(tx);
-                    session.database.save();
-
-                    Globals.success(`Transaction submitted.`);
                 } catch (err) {
                     (typeof err === 'object') ? console.log(err) : Globals.error(err);
                 }

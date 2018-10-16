@@ -8,7 +8,7 @@ import * as JSONBig from 'json-bigint'
 import * as fs from "fs";
 import * as solidityCompiler from 'solc'
 
-import {ABI, BaseAccount, BaseTX, SolidityCompilerOutput} from "./evm/utils/Interfaces";
+import {ABI, BaseAccount, BaseTX, SolidityCompilerOutput, TXReceipt} from "./evm/utils/Interfaces";
 
 import SolidityContract from "./evm/SolidityContract";
 import Client from "./evm/Client";
@@ -110,6 +110,16 @@ export default class Controller {
             this.getRemoteAccounts()
                 .then(() => resolve(true))
                 .catch(() => reject('Could not connect to node.'))
+        });
+    }
+
+    getReceipt(transactionHash: string): Promise<TXReceipt> {
+        return new Promise<TXReceipt>((resolve) => {
+            this.api.getReceipt(transactionHash)
+                .then((resp: string) => {
+                    let receipt: TXReceipt = JSONBig.parse(resp);
+                    resolve(receipt);
+                }).catch(() => resolve(undefined))
         });
     }
 

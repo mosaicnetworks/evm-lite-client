@@ -49,7 +49,6 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                     }
 
                     let account: BaseAccount = await connection.getRemoteAccount(args.address);
-
                     if (formatted) {
                         accountTable.addRow('1', account.address, account.balance, account.nonce);
                         Globals.success(accountTable.toString());

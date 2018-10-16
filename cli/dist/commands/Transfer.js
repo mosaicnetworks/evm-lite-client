@@ -54,7 +54,7 @@ function commandTransfer(evmlc, session) {
                     {
                         name: 'gas',
                         type: 'input',
-                        default: session.config.data.defaults.gas || 10000,
+                        default: session.config.data.defaults.gas || 100000,
                         message: 'Gas: '
                     },
                     {
@@ -82,16 +82,18 @@ function commandTransfer(evmlc, session) {
                 let account = accounts.find((acc) => acc.address === tx.from);
                 if (!account) {
                     Globals_1.default.error('Cannot find associated local account.');
-                    resolve();
                 }
-                tx.chainId = 1;
-                tx.nonce = account.nonce;
-                let signed = yield account.signTransaction(tx);
-                let txHash = JSONBig.parse(yield connection.api.sendRawTx(signed.rawTransaction));
-                tx.txHash = txHash.txHash;
-                session.database.transactions.add(tx);
-                session.database.save();
-                Globals_1.default.success(`Transaction submitted.`);
+                else {
+                    tx.chainId = 1;
+                    tx.nonce = account.nonce;
+                    let signed = yield account.signTransaction(tx);
+                    let txHash = JSONBig.parse(yield connection.api.sendRawTx(signed.rawTransaction));
+                    tx.txHash = txHash.txHash;
+                    session.database.transactions.add(tx);
+                    session.database.save();
+                    Globals_1.default.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
+                    Globals_1.default.success(`Transaction submitted.`);
+                }
             }
             catch (err) {
                 (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);

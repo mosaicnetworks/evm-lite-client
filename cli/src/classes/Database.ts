@@ -1,10 +1,10 @@
 import * as JSONBig from 'json-bigint';
+import * as fs from "fs";
 
 import {SentTx} from "../utils/Globals";
 
 import Transactions from "./Transactions";
 import DataDirectory from "./DataDirectory";
-import * as fs from "fs";
 
 
 interface Schema {
@@ -13,7 +13,7 @@ interface Schema {
 
 export default class Database {
 
-    transactions: Transactions;
+    public transactions: Transactions;
     readonly _data: Schema;
 
     constructor(readonly path: string) {

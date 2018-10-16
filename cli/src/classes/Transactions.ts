@@ -4,10 +4,7 @@ import {SentTx} from "../utils/Globals";
 export default class Transactions {
 
     constructor(private dbPath: string, private _transactions: SentTx[]) {
-        this._transactions.sort(function (a, b) {
-            // @ts-ignore
-            return new Date(b.date) - new Date(a.date);
-        });
+        this.sort();
     }
 
     all(): SentTx[] {
@@ -25,10 +22,13 @@ export default class Transactions {
         tx.date = new Date();
 
         this._transactions.push(tx);
+        this.sort();
     }
 
-    getTransactionHash(txHash: string) {
-        console.log(txHash);
+    sort() {
+        this._transactions.sort(function (a, b) {
+            return b.nonce - a.nonce;
+        });
     }
 
 }

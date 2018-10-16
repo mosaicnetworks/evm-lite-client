@@ -43,7 +43,7 @@ export default class Config {
             },
             defaults: {
                 from: '',
-                gas: 10000,
+                gas: 100000,
                 gasPrice: 0
             },
             storage: {

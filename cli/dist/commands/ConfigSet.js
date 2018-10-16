@@ -62,44 +62,46 @@ function commandConfigSet(evmlc, session) {
                     Globals_1.default.error('No options provided. To enter interactive mode use: -i, --interactive.');
                     resolve();
                 }
-                for (let prop in args.options) {
-                    if (prop.toLowerCase() === 'host') {
-                        if (session.config.data.connection.host !== args.options[prop])
-                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        session.config.data.connection.host = args.options[prop];
+                else {
+                    for (let prop in args.options) {
+                        if (prop.toLowerCase() === 'host') {
+                            if (session.config.data.connection.host !== args.options[prop])
+                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                            session.config.data.connection.host = args.options[prop];
+                        }
+                        if (prop.toLowerCase() === 'port') {
+                            if (session.config.data.connection.port !== args.options[prop])
+                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                            session.config.data.connection.port = args.options[prop];
+                        }
+                        if (prop.toLowerCase() === 'from') {
+                            if (session.config.data.defaults.from !== args.options[prop])
+                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                            session.config.data.defaults.from = args.options[prop];
+                        }
+                        if (prop.toLowerCase() === 'gas') {
+                            if (session.config.data.defaults.gas !== args.options[prop])
+                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                            session.config.data.defaults.gas = args.options[prop];
+                        }
+                        if (prop.toLowerCase() === 'gasprice') {
+                            if (session.config.data.defaults.gasPrice !== args.options[prop])
+                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                            session.config.data.defaults.gasPrice = args.options[prop];
+                        }
+                        if (prop.toLowerCase() === 'keystore') {
+                            if (session.config.data.storage.keystore !== args.options[prop])
+                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                            session.config.data.storage.keystore = args.options[prop];
+                        }
+                        if (prop.toLowerCase() === 'password') {
+                            if (session.config.data.defaults.password !== args.options[prop])
+                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
+                            session.config.data.storage.password = args.options[prop];
+                        }
                     }
-                    if (prop.toLowerCase() === 'port') {
-                        if (session.config.data.connection.port !== args.options[prop])
-                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        session.config.data.connection.port = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'from') {
-                        if (session.config.data.defaults.from !== args.options[prop])
-                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        session.config.data.defaults.from = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'gas') {
-                        if (session.config.data.defaults.gas !== args.options[prop])
-                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        session.config.data.defaults.gas = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'gasprice') {
-                        if (session.config.data.defaults.gasPrice !== args.options[prop])
-                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        session.config.data.defaults.gasPrice = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'keystore') {
-                        if (session.config.data.storage.keystore !== args.options[prop])
-                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        session.config.data.storage.keystore = args.options[prop];
-                    }
-                    if (prop.toLowerCase() === 'password') {
-                        if (session.config.data.defaults.password !== args.options[prop])
-                            Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                        session.config.data.storage.password = args.options[prop];
-                    }
+                    session.config.save();
                 }
-                session.config.save();
             }
             catch (err) {
                 (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);

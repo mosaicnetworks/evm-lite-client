@@ -147,7 +147,7 @@ $ evmlc interactive
  | |___  \ V / | |  | |_____| |___| | ||  __/ | |___| |___ | |
  |_____|  \_/  |_|  |_|     |_____|_|\__\___|  \____|_____|___|
 
-Entered interactive mode with configuration file: [...]/.evmlc/config/config.toml
+Entered interactive mode with configuration file: [...]/.evmlc/config.toml
 evmlc$
 
 ```
@@ -165,6 +165,10 @@ port = "8080"
 from = ""
 gas = 0.0
 gasPrice = 0.0
+
+[storage]
+keystore = "~/.evmlc/keystore"
+password = "~/.evmlc/pwd.txt"
 ```
 
 To change default config values run `config set` or `c s`. You will be taken to an interactive prompt to change connection and default values.

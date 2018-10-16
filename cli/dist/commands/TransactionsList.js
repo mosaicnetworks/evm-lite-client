@@ -16,22 +16,41 @@ function TransactionsList(evmlc, session) {
     return evmlc.command('transactions list').alias('t l')
         .description(description)
         .option('-f, --formatted', 'format output')
+        .option('-v, --verbose', 'verbose output')
+        .option('-h, --host <ip>', 'override config parameter host')
+        .option('-p, --port <port>', 'override config parameter port')
+        .types({
+        string: ['h', 'host']
+    })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
+                let connection = yield session.connect(args.options.host, args.options.port);
                 let formatted = args.options.formatted || false;
-                let counter = 0;
+                let verbose = args.options.verbose || false;
                 let table = new ASCIITable();
-                table.setHeading('Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Date Time');
+                let transactions = session.database.transactions.all();
                 if (formatted) {
-                    if (session.database.transactions.all().length) {
-                        session.database.transactions.all().forEach(tx => {
-                            table.addRow(tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, tx.date);
-                        });
+                    if (transactions.length) {
+                        if (verbose) {
+                            table.setHeading('Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Date Time', 'Status');
+                            for (let tx of transactions) {
+                                let date = new Date(tx.date);
+                                let receipt = yield connection.getReceipt(tx.txHash);
+                                table.addRow(tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, `${date.toDateString()} ${date.toTimeString()}`, (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
+                            }
+                        }
+                        else {
+                            table.setHeading('From', 'To', 'Value', 'Status');
+                            for (let tx of transactions) {
+                                let receipt = yield connection.getReceipt(tx.txHash);
+                                table.addRow(tx.from, tx.to, tx.value, (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
+                            }
+                        }
                         Globals_1.default.success(table.toString());
                     }
                     else {
-                        Globals_1.default.warning('No transactions.');
+                        Globals_1.default.warning('No transactions submitted.');
                     }
                 }
                 else {
