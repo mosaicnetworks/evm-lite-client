@@ -68,8 +68,8 @@ init()
 })
     .then((cli) => {
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-        cli.session.interactive = true;
         Globals_1.default.info(`Entered interactive mode with data directory: ${cli.session.directory.path}`);
+        cli.session.interactive = true;
         cli.instance.delimiter('evmlc$').show();
     }
     else {

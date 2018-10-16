@@ -88,21 +88,29 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
                         tx.nonce = account.nonce;
 
                         let signed = await account.signTransaction(tx);
-                        let txHash: any = JSONBig.parse(await connection.api.sendRawTx(signed.rawTransaction));
 
-                        tx.txHash = txHash.txHash;
+                        connection.api.sendRawTx(signed.rawTransaction)
+                            .then((resp) => {
+                                let response: any = JSONBig.parse(resp);
+                                tx.txHash = response.txHash;
 
-                        session.database.transactions.add(tx);
-                        session.database.save();
+                                session.database.transactions.add(tx);
+                                session.database.save();
 
-                        Globals.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
-                        Globals.success(`Transaction submitted.`);
+                                Globals.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
+                                Globals.success(`Transaction submitted.`);
+                                resolve();
+                            })
+                            .catch(() => {
+                                Globals.error('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16));
+                                resolve();
+                            })
                     }
-
                 } catch (err) {
                     (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                    resolve();
                 }
-                resolve();
+
             });
         })
 

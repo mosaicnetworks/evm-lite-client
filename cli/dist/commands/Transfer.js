@@ -87,18 +87,26 @@ function commandTransfer(evmlc, session) {
                     tx.chainId = 1;
                     tx.nonce = account.nonce;
                     let signed = yield account.signTransaction(tx);
-                    let txHash = JSONBig.parse(yield connection.api.sendRawTx(signed.rawTransaction));
-                    tx.txHash = txHash.txHash;
-                    session.database.transactions.add(tx);
-                    session.database.save();
-                    Globals_1.default.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
-                    Globals_1.default.success(`Transaction submitted.`);
+                    connection.api.sendRawTx(signed.rawTransaction)
+                        .then((resp) => {
+                        let response = JSONBig.parse(resp);
+                        tx.txHash = response.txHash;
+                        session.database.transactions.add(tx);
+                        session.database.save();
+                        Globals_1.default.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
+                        Globals_1.default.success(`Transaction submitted.`);
+                        resolve();
+                    })
+                        .catch(() => {
+                        Globals_1.default.error('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16));
+                        resolve();
+                    });
                 }
             }
             catch (err) {
                 (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
+                resolve();
             }
-            resolve();
         }));
     });
 }

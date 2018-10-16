@@ -81,8 +81,8 @@ init()
     })
     .then((cli: { instance: Vorpal, session: Session }) => {
         if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-            cli.session.interactive = true;
             Globals.info(`Entered interactive mode with data directory: ${cli.session.directory.path}`);
+            cli.session.interactive = true;
             cli.instance.delimiter('evmlc$').show();
         } else {
             cli.instance.parse(process.argv);

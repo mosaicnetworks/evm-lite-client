@@ -22,7 +22,8 @@ class Transactions {
     }
     sort() {
         this._transactions.sort(function (a, b) {
-            return b.nonce - a.nonce;
+            // @ts-ignore
+            return new Date(b.date) - new Date(a.date);
         });
     }
 }
