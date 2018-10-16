@@ -155,6 +155,8 @@ public Ethereum network. On the other hand, every EVM-Lite network (even a
 single node network) maintains a completely separate ledger, and may use any 
 name for the corresponding coin. 
 
+What follows is mostly taken from the [Ethereum Docs](http://ethdocs.org/en/latest/account-management.html):
+
 Accounts are objects in the EVM-Lite State. They come in two types: Externally 
 owned accounts, and Contract accounts. Externally owned accounts have a balance, 
 and Contract accounts have a balance and storage. The EVM-Lite State is the 
