@@ -2,8 +2,6 @@
 // Project: https://github.com/mosaicnetworks/evml-client
 // Definitions by: Mosaic Networks <https://github.com/mosaicnetworks>
 
-import {BaseAccount} from "../src/evm/utils/Interfaces";
-
 declare namespace EVMLClient {
 
     interface BaseTX {
@@ -73,19 +71,19 @@ declare namespace EVMLClient {
 
         constructor(host: string, port: number);
 
-        getAccount(address: string): Promise<BaseAccount>;
+        getAccount(address: string): Promise<BaseAccount | void>;
 
-        getAccounts(): Promise<BaseAccount[]>;
+        getAccounts(): Promise<BaseAccount[] | void>;
 
-        testConnection(): Promise<boolean>;
+        testConnection(): Promise<boolean | void>;
 
-        getInfo(): Promise<Object | Error>;
+        getInfo(): Promise<Object | void>;
 
-        call(tx: string): Promise<{}>;
+        call(tx: string): Promise<string>;
 
-        sendTx(tx: string): Promise<{}>;
+        sendTx(tx: string): Promise<string>;
 
-        sendRawTx(tx: string): Promise<{}>;
+        sendRawTx(tx: string): Promise<string>;
 
         getReceipt(txHash: string): Promise<TXReceipt>;
     }
@@ -325,12 +323,6 @@ declare namespace EVMLClient {
          * @constructor
          */
         constructor(host: string, port?: number);
-
-        testConnection(): Promise<boolean>;
-        getReceipt(transactionHash: string): Promise<TXReceipt>;
-        getInfo(): Promise<Object | Error>;
-        getRemoteAccounts(): Promise<BaseAccount[]>;
-        getRemoteAccount(address: string): Promise<BaseAccount>;
 
         /**
          * Generates Javascript instance from Solidity Contract File.
