@@ -7,6 +7,7 @@ const mkdir = require("mkdirp");
 const Globals_1 = require("./utils/Globals");
 const Session_1 = require("./classes/Session");
 const TransactionsList_1 = require("./commands/TransactionsList");
+const TransactionsGet_1 = require("./commands/TransactionsGet");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
 const AccountsGet_1 = require("./commands/AccountsGet");
@@ -60,6 +61,7 @@ init()
         Info_1.default,
         Test_1.default,
         TransactionsList_1.default,
+        TransactionsGet_1.default,
         LogsView_1.default,
         LogsClear_1.default,
     ].forEach(command => {

@@ -9,6 +9,7 @@ export default function commandLogsShow(evmlc: Vorpal, session: Session) {
     return evmlc.command('logs view').alias('l v')
         .description('Prints log information to screen in plain text.')
         .option('-s, --session', 'output session logs')
+        .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>((resolve) => {
                 try {

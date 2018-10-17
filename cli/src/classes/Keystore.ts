@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as JSONBig from 'json-bigint';
 
-import Globals, {BaseAccount} from "../utils/Globals";
+import Globals from "../utils/Globals";
 
 import {Account, Controller} from "../../../lib";
 
@@ -24,18 +24,11 @@ export default class Keystore {
 
                 promises.push(
                     connection.api.getAccount(decryptedAccount.address)
-                        .then((a) => {
-                        let account: BaseAccount = JSONBig.parse(a);
-
-                        decryptedAccount.balance = account.balance;
-
-                        if (typeof account.balance === 'object')
-                            decryptedAccount.balance = account.balance.toFormat(0);
-
-                        decryptedAccount.nonce = account.nonce;
-
-                        accounts.push(decryptedAccount);
-                    })
+                        .then(({balance, nonce}) => {
+                            decryptedAccount.nonce = nonce;
+                            decryptedAccount.balance = balance;
+                            accounts.push(decryptedAccount);
+                        })
                 );
             }
         });

@@ -19,6 +19,20 @@ export interface SentTx {
     txHash: string
 }
 
+export interface TXReceipt {
+    root: string,
+    transactionHash: string,
+    from: string,
+    to?: string,
+    gasUsed: number,
+    cumulativeGasUsed: number,
+    contractAddress: string,
+    logs: [],
+    logsBloom: string,
+    failed: boolean
+}
+
+
 export default class Globals {
 
     static evmlcDir: string = path.join(require('os').homedir(), '.evmlc');

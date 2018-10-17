@@ -22,27 +22,22 @@ class Session {
         return fs.readFileSync(this.passwordPath, 'utf8');
     }
     connect(forcedHost, forcedPort) {
-        return new Promise((resolve, reject) => {
-            if (!this.connection) {
-                let host = forcedHost || this.config.data.connection.host || '127.0.0.1';
-                let port = forcedPort || this.config.data.connection.port || 8080;
-                let node = new lib_1.Controller(host, port);
-                node.testConnection()
-                    .then((success) => {
-                    if (success) {
-                        if (!forcedHost && !forcedPort) {
-                            this.connection = node;
-                        }
-                        resolve(node);
-                    }
-                })
-                    .catch((err) => {
-                    this.connection = null;
-                    reject(err);
-                });
+        let host = forcedHost || this.config.data.connection.host || '127.0.0.1';
+        let port = forcedPort || this.config.data.connection.port || 8080;
+        let node = new lib_1.Controller(host, port);
+        return node.api.testConnection()
+            .then((success) => {
+            if (success) {
+                if (this.connection) {
+                    return this.connection;
+                }
+                if (!forcedHost && !forcedPort) {
+                    this.connection = node;
+                }
+                return node;
             }
             else {
-                resolve(this.connection);
+                return null;
             }
         });
     }

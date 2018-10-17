@@ -2,8 +2,8 @@ import * as Vorpal from "vorpal";
 import * as JSONBig from 'json-bigint';
 import * as ASCIITable from 'ascii-table';
 
-import Globals from "../utils/Globals";
 import Session from "../classes/Session";
+import Globals from "../utils/Globals";
 
 
 export default function commandInfo(evmlc: Vorpal, session: Session) {
@@ -17,21 +17,17 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
-                let l = session.log().withCommand('command info');
-                try {
-                    let formatted = args.options.formatted || false;
+                let connection = await session.connect(args.options.host, args.options.port);
 
-                    let connection = await session.connect(args.options.host, args.options.port);
-                    l.append('connection', 'successful');
+                if (!connection) resolve();
 
-                    let response = await connection.api.getInfo();
-                    l.append('request', 'successful');
+                let formatted = args.options.formatted || false;
+                let table = new ASCIITable().setHeading('Name', 'Value');
 
-                    let information = JSONBig.parse(response);
-                    let table = new ASCIITable().setHeading('Name', 'Value');
+                let information = await connection.api.getInfo();
 
+                if (information) {
                     if (formatted) {
-                        l.append('formatted', 'true');
                         for (let key in information) {
                             if (information.hasOwnProperty(key)) {
                                 table.addRow(key, information[key]);
@@ -39,22 +35,10 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
                         }
                         Globals.success(table.toString());
                     } else {
-                        l.append('formatted', 'false');
-                        Globals.success(response);
-                    }
-
-                } catch (err) {
-                    l.append('status', 'failed');
-                    if (typeof err === 'object') {
-                        l.append(err.name, err.text);
-                        console.log(err);
-                    } else {
-                        l.append('error', err);
-                        Globals.error(err);
+                        Globals.success(JSONBig.stringify(information));
                     }
                 }
 
-                l.write();
                 resolve();
             });
         });

@@ -6,6 +6,7 @@ function commandLogsShow(evmlc, session) {
     return evmlc.command('logs view').alias('l v')
         .description('Prints log information to screen in plain text.')
         .option('-s, --session', 'output session logs')
+        .hidden()
         .action((args) => {
         return new Promise((resolve) => {
             try {

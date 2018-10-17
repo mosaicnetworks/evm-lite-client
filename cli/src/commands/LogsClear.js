@@ -5,6 +5,7 @@ const Globals_1 = require("../utils/Globals");
 function commandLogsClear(evmlc, session) {
     return evmlc.command('logs clear').alias('l c')
         .description('Clears log information.')
+        .hidden()
         .action((args) => {
         return new Promise((resolve) => {
             try {

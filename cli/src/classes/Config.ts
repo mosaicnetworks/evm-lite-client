@@ -8,7 +8,6 @@ import * as path from "path";
 import Keystore from "./Keystore";
 import DataDirectory from "./DataDirectory";
 
-
 export default class Config {
 
     public data: any;

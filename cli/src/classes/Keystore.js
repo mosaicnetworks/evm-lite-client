@@ -19,12 +19,9 @@ class Keystore {
                 let v3JSONKeyStore = JSONBig.parse(fs.readFileSync(keystoreFile, 'utf8'));
                 let decryptedAccount = lib_1.Account.decrypt(v3JSONKeyStore, this.password);
                 promises.push(connection.api.getAccount(decryptedAccount.address)
-                    .then((a) => {
-                    let account = JSONBig.parse(a);
-                    decryptedAccount.balance = account.balance;
-                    if (typeof account.balance === 'object')
-                        decryptedAccount.balance = account.balance.toFormat(0);
-                    decryptedAccount.nonce = account.nonce;
+                    .then(({ balance, nonce }) => {
+                    decryptedAccount.nonce = nonce;
+                    decryptedAccount.balance = balance;
                     accounts.push(decryptedAccount);
                 }));
             }

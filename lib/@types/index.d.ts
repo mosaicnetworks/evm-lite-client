@@ -2,6 +2,8 @@
 // Project: https://github.com/mosaicnetworks/evml-client
 // Definitions by: Mosaic Networks <https://github.com/mosaicnetworks>
 
+import {BaseAccount} from "../src/evm/utils/Interfaces";
+
 declare namespace EVMLClient {
 
     interface BaseTX {
@@ -71,11 +73,13 @@ declare namespace EVMLClient {
 
         constructor(host: string, port: number);
 
-        getAccount(address: string): Promise<string>;
+        getAccount(address: string): Promise<BaseAccount>;
 
-        getAccounts(): Promise<string>;
+        getAccounts(): Promise<BaseAccount[]>;
 
-        getInfo(): Promise<string>;
+        testConnection(): Promise<boolean>;
+
+        getInfo(): Promise<Object | Error>;
 
         call(tx: string): Promise<{}>;
 
@@ -83,7 +87,7 @@ declare namespace EVMLClient {
 
         sendRawTx(tx: string): Promise<{}>;
 
-        getReceipt(txHash: string): Promise<{}>;
+        getReceipt(txHash: string): Promise<TXReceipt>;
     }
 
     class Transaction {
@@ -324,6 +328,7 @@ declare namespace EVMLClient {
 
         testConnection(): Promise<boolean>;
         getReceipt(transactionHash: string): Promise<TXReceipt>;
+        getInfo(): Promise<Object | Error>;
         getRemoteAccounts(): Promise<BaseAccount[]>;
         getRemoteAccount(address: string): Promise<BaseAccount>;
 

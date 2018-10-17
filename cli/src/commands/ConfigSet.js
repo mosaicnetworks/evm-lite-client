@@ -27,7 +27,6 @@ function commandConfigSet(evmlc, session) {
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let l = session.log().withCommand('config set');
             try {
                 let interactive = args.options.interactive || session.interactive;
                 let questions = [];
@@ -50,7 +49,6 @@ function commandConfigSet(evmlc, session) {
                 }
                 populateQuestions(session.config.data);
                 if (interactive) {
-                    l.append('mode', 'interactive');
                     let answers = yield inquirer.prompt(questions);
                     args.options.host = answers.host;
                     args.options.port = answers.port;
@@ -60,81 +58,60 @@ function commandConfigSet(evmlc, session) {
                     args.options.keystore = answers.keystore;
                     args.options.password = answers.password;
                 }
-                else {
-                    l.append('mode', 'non-interactive');
-                }
                 if (!Object.keys(args.options).length) {
                     Globals_1.default.error('No options provided. To enter interactive mode use: -i, --interactive.');
-                    l.append('error', 'no options provided to update');
                 }
                 else {
                     for (let prop in args.options) {
                         if (prop.toLowerCase() === 'host') {
                             if (session.config.data.connection.host !== args.options[prop]) {
                                 Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                                l.append('update', `'${(prop)}' with value ${(args.options[prop])}.`);
                             }
                             session.config.data.connection.host = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'port') {
                             if (session.config.data.connection.port !== args.options[prop]) {
                                 Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                                l.append('update', `'${(prop)}' with value ${(args.options[prop])}.`);
                             }
                             session.config.data.connection.port = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'from') {
                             if (session.config.data.defaults.from !== args.options[prop]) {
                                 Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                                l.append('update', `'${(prop)}' with value ${(args.options[prop])}.`);
                             }
                             session.config.data.defaults.from = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'gas') {
                             if (session.config.data.defaults.gas !== args.options[prop]) {
                                 Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                                l.append('update', `'${(prop)}' with value ${(args.options[prop])}.`);
                             }
                             session.config.data.defaults.gas = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'gasprice') {
                             if (session.config.data.defaults.gasPrice !== args.options[prop]) {
                                 Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                                l.append('update', `'${(prop)}' with value ${(args.options[prop])}.`);
                             }
                             session.config.data.defaults.gasPrice = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'keystore') {
                             if (session.config.data.storage.keystore !== args.options[prop]) {
                                 Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                                l.append('update', `'${(prop)}' with value ${(args.options[prop])}.`);
                             }
                             session.config.data.storage.keystore = args.options[prop];
                         }
                         if (prop.toLowerCase() === 'password') {
                             if (session.config.data.storage.password !== args.options[prop]) {
                                 Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                                l.append('update', `'${(prop)}' with value ${(args.options[prop])}.`);
                             }
                             session.config.data.storage.password = args.options[prop];
                         }
                     }
                     session.config.save();
-                    l.append('status', 'success');
                 }
             }
             catch (err) {
-                l.append('status', 'failed');
-                if (typeof err === 'object') {
-                    l.append(err.name, err.text);
-                    console.log(err);
-                }
-                else {
-                    l.append('error', err);
-                    Globals_1.default.error(err);
-                }
+                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
             }
-            l.write();
             resolve();
         }));
     });

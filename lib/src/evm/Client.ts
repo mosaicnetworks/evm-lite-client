@@ -5,88 +5,102 @@
  */
 
 import * as http from 'http'
+import * as JSONBig from 'json-bigint'
+import * as Chalk from "chalk";
 
-let request = (options, callback) => {
-    return http.request(options, (response) => {
-        // console.log(`${options.method} ${options.host}:${options.port}${options.path}`);
-        let data = '';
-        response.on('data', (chunk) => {
-            data += chunk;
+import {BaseAccount, TXReceipt} from "./utils/Interfaces";
+
+
+const error = (message: any): void => {
+    console.log(Chalk.default.red(message));
+};
+
+let request = (tx, options): Promise<string> => {
+    return new Promise<string>((resolve, reject) => {
+        const req = http.request(options, (response) => {
+            let data = '';
+            response.on('data', (chunk) => data += chunk);
+            response.on('end', () => resolve(data));
+            response.on('error', (err) => reject(err));
         });
-        response.on('end', () => {
-            callback(data);
+
+        req.on('error', (err) => {
+            reject(err);
         });
-    })
+
+        if (tx) req.write(tx);
+
+        req.end();
+    });
 };
 
 export default class Client {
     public constructor(readonly host: string, readonly port: number) {
     }
 
-    public getAccount(address: string): Promise<string> {
-        let options = this._constructOptions('GET', `/account/${address}`);
-        return new Promise((resolve, reject) => {
-            let req = request(options, resolve);
-            req.on('error', (err) => reject(err));
-            req.end();
-        });
+    public getAccount(address: string): Promise<BaseAccount | void> {
+        return request(null, this._constructOptions('GET', `/account/${address}`))
+            .then((response: string) => {
+                let account = JSONBig.parse(response);
+                if (typeof account.balance === 'object') {
+                    account.balance = account.balance.toFormat(0);
+                }
+                return account
+            })
+            .catch(() => error('Could not fetch account.'));
     }
 
-    public getAccounts(): Promise<string> {
-        let options = this._constructOptions('GET', '/accounts');
-        return new Promise((resolve, reject) => {
-            let req = request(options, resolve);
-            req.on('error', (err) => reject(err));
-            req.end();
-        });
+    public testConnection(): Promise<boolean | void> {
+        return request(null, this._constructOptions('GET', '/info'))
+            .then(() => true)
+            .catch(() => error('Could connect to node.'));
     }
 
-    public getInfo(): Promise<string> {
-        let options = this._constructOptions('GET', '/info');
-        return new Promise((resolve, reject) => {
-            let req = request(options, resolve);
-            req.on('error', (err) => reject(err));
-            req.end();
-        });
+    public getAccounts(): Promise<BaseAccount[] | void> {
+        return request(null, this._constructOptions('GET', '/accounts'))
+            .then((response: string) => {
+                let json = JSONBig.parse(response);
+                if (json.accounts) {
+                    return json.accounts.map((account) => {
+                        if (typeof account.balance === 'object') {
+                            account.balance = account.balance.toFormat(0);
+                        }
+                        return account
+                    });
+                } else {
+                    return []
+                }
+            })
+            .catch(() => error('Could not fetch accounts.'));
     }
 
-    public call(tx: string): Promise<string> {
-        let options = this._constructOptions('POST', '/call');
-        return new Promise((resolve, reject) => {
-            let req = request(options, resolve);
-            req.write(tx);
-            req.on('error', (err) => reject(err));
-            req.end()
-        });
+    public getInfo(): Promise<Object | void> {
+        return request(null, this._constructOptions('GET', '/info'))
+            .then((response: string) => JSONBig.parse(response))
+            .catch(() => error('Could not fetch information.'));
     }
 
-    public sendTx(tx: string): Promise<string> {
-        let options = this._constructOptions('POST', '/tx');
-        return new Promise((resolve, reject) => {
-            let req = request(options, resolve);
-            req.write(tx);
-            req.on('error', (err) => reject(err));
-            req.end();
-        })
+    public call(tx: string): Promise<string | void> {
+        return request(tx, this._constructOptions('POST', '/call'))
+            .then((response) => response)
+            .catch(err => error(err));
     }
 
-    public sendRawTx(tx: string) {
-        let options = this._constructOptions('POST', '/rawtx');
-        return new Promise((resolve, reject) => {
-            let req = request(options, resolve);
-            req.write(tx);
-            req.on('error', (err) => reject(err));
-            req.end();
-        });
+    public sendTx(tx: string): Promise<string | void> {
+        return request(tx, this._constructOptions('POST', '/tx'))
+            .then((response) => response)
+            .catch(err => error(err));
     }
 
-    public getReceipt(txHash: string) {
-        let options = this._constructOptions('GET', `/tx/${txHash}`);
-        return new Promise((resolve, reject) => {
-            let req = request(options, resolve);
-            req.on('error', (err) => reject(err));
-            req.end();
-        })
+    public sendRawTx(tx: string): Promise<string | void> {
+        return request(tx, this._constructOptions('POST', '/rawtx'))
+            .then((response) => response)
+    }
+
+    public getReceipt(txHash: string): Promise<TXReceipt | void> {
+        return request(null, this._constructOptions('GET', `/tx/${txHash}`))
+            .then((response: string) => JSONBig.parse(response))
+            .catch(() => error(`Could not fetch receipt for hash: ${txHash}`));
     }
 
     private _constructOptions(method, path: string) {

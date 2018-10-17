@@ -8,6 +8,7 @@ import Globals from "./utils/Globals";
 import Session from "./classes/Session";
 
 import TransactionsList from "./commands/TransactionsList";
+import TransactionsGet from "./commands/TransactionsGet";
 import AccountCreate from './commands/AccountsCreate';
 import AccountsList from './commands/AccountsList';
 import AccountsGet from './commands/AccountsGet';
@@ -72,6 +73,7 @@ init()
             Info,
             Test,
             TransactionsList,
+            TransactionsGet,
             LogsView,
             LogsClear,
         ].forEach(command => {

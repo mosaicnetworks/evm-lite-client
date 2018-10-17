@@ -27,105 +27,87 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
-                let l = session.log().withCommand('transfer');
-                try {
-                    let interactive = args.options.interactive || session.interactive;
-                    let connection = await session.connect(args.options.host, args.options.port);
-                    let accounts = await session.keystore.decrypt(connection);
-                    let questions = [
-                        {
-                            name: 'from',
-                            type: 'list',
-                            message: 'From: ',
-                            choices: accounts.map((account) => account.address)
-                        },
-                        {
-                            name: 'to',
-                            type: 'input',
-                            message: 'To'
-                        },
-                        {
-                            name: 'value',
-                            type: 'input',
-                            default: '100',
-                            message: 'Value: '
-                        },
-                        {
-                            name: 'gas',
-                            type: 'input',
-                            default: session.config.data.defaults.gas || 100000,
-                            message: 'Gas: '
-                        },
-                        {
-                            name: 'gasPrice',
-                            type: 'input',
-                            default: session.config.data.defaults.gasPrice || 0,
-                            message: 'Gas Price: '
-                        }
-                    ];
-                    let tx: any = {};
+                let connection = await session.connect(args.options.host, args.options.port);
 
-                    if (interactive) {
-                    l.append('mode', 'interactive');
-                        tx = await inquirer.prompt(questions)
-                    } else {
-                    l.append('mode', 'non-interactive');
-                        tx.from = args.options.from || undefined;
-                        tx.to = args.options.to || undefined;
-                        tx.value = args.options.value || undefined;
-                        tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
-                        tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
+                if (!connection) resolve();
+
+                let interactive = args.options.interactive || session.interactive;
+                let accounts = await session.keystore.decrypt(connection);
+                let questions = [
+                    {
+                        name: 'from',
+                        type: 'list',
+                        message: 'From: ',
+                        choices: accounts.map((account) => account.address)
+                    },
+                    {
+                        name: 'to',
+                        type: 'input',
+                        message: 'To'
+                    },
+                    {
+                        name: 'value',
+                        type: 'input',
+                        default: '100',
+                        message: 'Value: '
+                    },
+                    {
+                        name: 'gas',
+                        type: 'input',
+                        default: session.config.data.defaults.gas || 100000,
+                        message: 'Gas: '
+                    },
+                    {
+                        name: 'gasPrice',
+                        type: 'input',
+                        default: session.config.data.defaults.gasPrice || 0,
+                        message: 'Gas Price: '
                     }
+                ];
+                let tx: any = {};
 
-                    if (!tx.from && !tx.to && !tx.value) {
-                        Globals.error('Provide from, to and a value.');
-                        resolve();
-                    }
+                if (interactive) {
+                    tx = await inquirer.prompt(questions)
+                } else {
+                    tx.from = args.options.from || undefined;
+                    tx.to = args.options.to || undefined;
+                    tx.value = args.options.value || undefined;
+                    tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
+                    tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
+                }
 
-                    let account = accounts.find((acc) => acc.address === tx.from);
-
-                    if (!account) {
-                        Globals.error('Cannot find associated local account.');
-                        l.append('account', 'cannot find account');
-                    } else {
-                        l.append('account', 'located successfully');
-                        tx.chainId = 1;
-                        tx.nonce = account.nonce;
-
-                        let signed = await account.signTransaction(tx);
-                        l.append('tx', JSONBig.stringify(tx));
-
-                        connection.api.sendRawTx(signed.rawTransaction)
-                            .then((resp) => {
-                                let response: any = JSONBig.parse(resp);
-                                tx.txHash = response.txHash;
-
-                                session.database.transactions.add(tx);
-                                session.database.save();
-
-                                Globals.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
-                                Globals.success(`Transaction submitted.`);
-                                resolve();
-                            })
-                            .catch(() => {
-                                l.append('error', 'ran out of gas');
-                                Globals.error('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16));
-                                resolve();
-                            })
-                    }
-                } catch (err) {
-                    l.append('status', 'failed');
-                    if (typeof err === 'object') {
-                        l.append(err.name, err.text);
-                        console.log(err);
-                    } else {
-                        l.append('error', err);
-                        Globals.error(err);
-                    }
+                if (!tx.from && !tx.to && !tx.value) {
+                    Globals.error('Provide from, to and a value.');
                     resolve();
                 }
 
-                l.write();
+                let account = accounts.find((acc) => acc.address === tx.from);
+
+                if (!account) {
+                    Globals.error('Cannot find associated local account.');
+                } else {
+                    tx.chainId = 1;
+                    tx.nonce = account.nonce;
+
+                    let signed = await account.signTransaction(tx);
+
+                    connection.api.sendRawTx(signed.rawTransaction)
+                        .then((resp) => {
+                            let response: any = JSONBig.parse(resp);
+                            tx.txHash = response.txHash;
+
+                            session.database.transactions.add(tx);
+                            session.database.save();
+
+                            Globals.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
+                            Globals.success(`Transaction submitted.`);
+                            resolve();
+                        })
+                        .catch(() => {
+                            Globals.error('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16));
+                            resolve();
+                        })
+                }
             });
         })
 

@@ -21,7 +21,7 @@
     "vorpal": "^1.12.0"
   },
   "bin": {
-    "evmlc": "./dist/evmlc.js"
+    "evmlc": "./src/evmlc.js"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",

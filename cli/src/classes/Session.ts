@@ -8,6 +8,7 @@ import Keystore from "./Keystore";
 import Database from "./Database";
 import * as path from "path";
 import Log from "./Log";
+import Globals from "../utils/Globals";
 
 
 export default class Session {
@@ -43,28 +44,25 @@ export default class Session {
     }
 
     connect(forcedHost: string, forcedPort: number): Promise<Controller> {
-        return new Promise<Controller>((resolve, reject) => {
-            if (!this.connection) {
-                let host: string = forcedHost || this.config.data.connection.host || '127.0.0.1';
-                let port: number = forcedPort || this.config.data.connection.port || 8080;
-                let node = new Controller(host, port);
-                node.testConnection()
-                    .then((success) => {
-                        if (success) {
-                            if (!forcedHost && !forcedPort) {
-                                this.connection = node;
-                            }
-                            resolve(node);
-                        }
-                    })
-                    .catch((err) => {
-                        this.connection = null;
-                        reject(err);
-                    });
-            } else {
-                resolve(this.connection);
-            }
-        });
+        let host: string = forcedHost || this.config.data.connection.host || '127.0.0.1';
+        let port: number = forcedPort || this.config.data.connection.port || 8080;
+        let node = new Controller(host, port);
+
+        return node.api.testConnection()
+            .then((success: boolean) => {
+                if (success) {
+                    if (this.connection) {
+                        return this.connection
+                    }
+
+                    if (!forcedHost && !forcedPort) {
+                        this.connection = node;
+                    }
+                    return node;
+                } else {
+                    return null;
+                }
+            })
     };
 
     log(): Log {

@@ -22,17 +22,14 @@ function commandInfo(evmlc, session) {
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let l = session.log().withCommand('command info');
-            try {
-                let formatted = args.options.formatted || false;
-                let connection = yield session.connect(args.options.host, args.options.port);
-                l.append('connection', 'successful');
-                let response = yield connection.api.getInfo();
-                l.append('request', 'successful');
-                let information = JSONBig.parse(response);
-                let table = new ASCIITable().setHeading('Name', 'Value');
+            let connection = yield session.connect(args.options.host, args.options.port);
+            if (!connection)
+                resolve();
+            let formatted = args.options.formatted || false;
+            let table = new ASCIITable().setHeading('Name', 'Value');
+            let information = yield connection.api.getInfo();
+            if (information) {
                 if (formatted) {
-                    l.append('formatted', 'true');
                     for (let key in information) {
                         if (information.hasOwnProperty(key)) {
                             table.addRow(key, information[key]);
@@ -41,22 +38,9 @@ function commandInfo(evmlc, session) {
                     Globals_1.default.success(table.toString());
                 }
                 else {
-                    l.append('formatted', 'false');
-                    Globals_1.default.success(response);
+                    Globals_1.default.success(JSONBig.stringify(information));
                 }
             }
-            catch (err) {
-                l.append('status', 'failed');
-                if (typeof err === 'object') {
-                    l.append(err.name, err.text);
-                    console.log(err);
-                }
-                else {
-                    l.append('error', err);
-                    Globals_1.default.error(err);
-                }
-            }
-            l.write();
             resolve();
         }));
     });
