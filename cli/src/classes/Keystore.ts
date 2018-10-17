@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as JSONBig from 'json-bigint';
 
-import Globals, {BaseAccount} from "../utils/Globals";
+import Globals from "../utils/Globals";
 
 import {Account, Controller} from "../../../lib";
 
@@ -24,18 +24,11 @@ export default class Keystore {
 
                 promises.push(
                     connection.api.getAccount(decryptedAccount.address)
-                        .then((a) => {
-                        let account: BaseAccount = JSONBig.parse(a);
-
-                        decryptedAccount.balance = account.balance;
-
-                        if (typeof account.balance === 'object')
-                            decryptedAccount.balance = account.balance.toFormat(0);
-
-                        decryptedAccount.nonce = account.nonce;
-
-                        accounts.push(decryptedAccount);
-                    })
+                        .then(({balance, nonce}) => {
+                            decryptedAccount.nonce = nonce;
+                            decryptedAccount.balance = balance;
+                            accounts.push(decryptedAccount);
+                        })
                 );
             }
         });
@@ -53,7 +46,7 @@ export default class Keystore {
             })
     }
 
-    create(outputPath: string = undefined, pass: string = undefined): string {
+    create(outputPath: string, pass: string): string {
         let account: Account = Account.create();
 
         let output = this.path;
@@ -77,7 +70,9 @@ export default class Keystore {
 
         let encryptedAccount = account.encrypt(password);
         let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-        let fileName = `UTC--date--timestamp--${account.address}`;
+        let fileName = `UTC--${JSONBig.stringify(new Date())}--${account.address}`
+            .replace(/"/g, '')
+            .replace(/:/g, '-');
 
         fs.writeFileSync(path.join(output, fileName), stringEncryptedAccount);
 

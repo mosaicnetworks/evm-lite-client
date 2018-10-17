@@ -20,7 +20,7 @@ class Globals {
     static isEquivalentObjects(objectA, objectB) {
         let aProps = Object.getOwnPropertyNames(objectA);
         let bProps = Object.getOwnPropertyNames(objectB);
-        if (aProps.length != bProps.length) {
+        if (aProps.length !== bProps.length) {
             return false;
         }
         for (let i = 0; i < aProps.length; i++) {

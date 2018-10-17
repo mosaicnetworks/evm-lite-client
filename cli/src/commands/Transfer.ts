@@ -1,5 +1,6 @@
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
+import * as JSONBig from 'json-bigint';
 
 import Globals from "../utils/Globals";
 import Session from "../classes/Session";
@@ -26,74 +27,87 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
-                try {
-                    let interactive = args.options.interactive || session.interactive;
-                    let connection = await session.connect(args.options.host, args.options.port);
-                    let accounts = await session.keystore.decrypt(connection);
-                    let questions = [
-                        {
-                            name: 'from',
-                            type: 'list',
-                            message: 'From: ',
-                            choices: accounts.map((account) => account.address)
-                        },
-                        {
-                            name: 'to',
-                            type: 'input',
-                            message: 'To'
-                        },
-                        {
-                            name: 'value',
-                            type: 'input',
-                            default: '100',
-                            message: 'Value: '
-                        },
-                        {
-                            name: 'gas',
-                            type: 'input',
-                            default: session.config.data.defaults.gas || 10000,
-                            message: 'Gas: '
-                        },
-                        {
-                            name: 'gasPrice',
-                            type: 'input',
-                            default: session.config.data.defaults.gasPrice || 0,
-                            message: 'Gas Price: '
-                        }
-                    ];
-                    let tx: any = {};
+                let connection = await session.connect(args.options.host, args.options.port);
 
-                    if (interactive) {
-                        tx = await inquirer.prompt(questions)
-                    } else {
-                        tx.from = args.options.from || undefined;
-                        tx.to = args.options.to || undefined;
-                        tx.value = args.options.value || undefined;
-                        tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
-                        tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
+                if (!connection) resolve();
+
+                let interactive = args.options.interactive || session.interactive;
+                let accounts = await session.keystore.decrypt(connection);
+                let questions = [
+                    {
+                        name: 'from',
+                        type: 'list',
+                        message: 'From: ',
+                        choices: accounts.map((account) => account.address)
+                    },
+                    {
+                        name: 'to',
+                        type: 'input',
+                        message: 'To'
+                    },
+                    {
+                        name: 'value',
+                        type: 'input',
+                        default: '100',
+                        message: 'Value: '
+                    },
+                    {
+                        name: 'gas',
+                        type: 'input',
+                        default: session.config.data.defaults.gas || 100000,
+                        message: 'Gas: '
+                    },
+                    {
+                        name: 'gasPrice',
+                        type: 'input',
+                        default: session.config.data.defaults.gasPrice || 0,
+                        message: 'Gas Price: '
                     }
+                ];
+                let tx: any = {};
 
-                    if (!tx.from && !tx.to && !tx.value) {
-                        Globals.error('Provide from, to and a value.');
-                        resolve();
-                    }
+                if (interactive) {
+                    tx = await inquirer.prompt(questions)
+                } else {
+                    tx.from = args.options.from || undefined;
+                    tx.to = args.options.to || undefined;
+                    tx.value = args.options.value || undefined;
+                    tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
+                    tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
+                }
 
-                    let account = accounts.find((acc) => acc.address === tx.from);
+                if (!tx.from && !tx.to && !tx.value) {
+                    Globals.error('Provide from, to and a value.');
+                    resolve();
+                }
 
-                    if (!account) Globals.error('Cannot find associated local account.');
+                let account = accounts.find((acc) => acc.address === tx.from);
 
+                if (!account) {
+                    Globals.error('Cannot find associated local account.');
+                } else {
                     tx.chainId = 1;
                     tx.nonce = account.nonce;
 
                     let signed = await account.signTransaction(tx);
-                    let txHash = await connection.api.sendRawTx(signed.rawTransaction);
 
-                    console.log(txHash);
-                    Globals.success(`Transaction submitted.`);
-                } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                    connection.api.sendRawTx(signed.rawTransaction)
+                        .then((resp) => {
+                            let response: any = JSONBig.parse(resp);
+                            tx.txHash = response.txHash;
+
+                            session.database.transactions.add(tx);
+                            session.database.save();
+
+                            Globals.info(`(From) ${tx.from} -> (To) ${tx.to} (${tx.value})`);
+                            Globals.success(`Transaction submitted.`);
+                            resolve();
+                        })
+                        .catch(() => {
+                            Globals.error('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16));
+                            resolve();
+                        })
                 }
-                resolve();
             });
         })
 

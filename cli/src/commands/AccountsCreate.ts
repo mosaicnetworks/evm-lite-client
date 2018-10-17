@@ -22,35 +22,29 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
-                try {
-                    let interactive = args.options.interactive || session.interactive;
-                    let questions = [
-                        {
-                            name: 'output',
-                            message: 'Enter keystore output path: ',
-                            default: session.keystore.path,
-                            type: 'input'
-                        },
-                        {
-                            name: 'password',
-                            message: 'Enter password file path: ',
-                            default: session.passwordPath,
-                            type: 'input'
-                        }
-                    ];
-
-                    if (interactive) {
-                        let {output, password} = await inquirer.prompt(questions);
-
-                        args.options.output = output;
-                        args.options.password = password;
+                let interactive = args.options.interactive || session.interactive;
+                let questions = [
+                    {
+                        name: 'output',
+                        message: 'Enter keystore output path: ',
+                        default: session.keystore.path,
+                        type: 'input'
+                    },
+                    {
+                        name: 'password',
+                        message: 'Enter password file path: ',
+                        default: session.passwordPath,
+                        type: 'input'
                     }
+                ];
 
-                    Globals.success(session.keystore.create(args.options.output, args.options.password));
-                } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                if (interactive) {
+                    let {output, password} = await inquirer.prompt(questions);
+                    args.options.output = output;
+                    args.options.password = password;
                 }
 
+                Globals.success(session.keystore.create(args.options.output, args.options.password));
                 resolve();
             })
         });

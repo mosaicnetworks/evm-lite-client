@@ -19,12 +19,9 @@ class Keystore {
                 let v3JSONKeyStore = JSONBig.parse(fs.readFileSync(keystoreFile, 'utf8'));
                 let decryptedAccount = lib_1.Account.decrypt(v3JSONKeyStore, this.password);
                 promises.push(connection.api.getAccount(decryptedAccount.address)
-                    .then((a) => {
-                    let account = JSONBig.parse(a);
-                    decryptedAccount.balance = account.balance;
-                    if (typeof account.balance === 'object')
-                        decryptedAccount.balance = account.balance.toFormat(0);
-                    decryptedAccount.nonce = account.nonce;
+                    .then(({ balance, nonce }) => {
+                    decryptedAccount.nonce = nonce;
+                    decryptedAccount.balance = balance;
                     accounts.push(decryptedAccount);
                 }));
             }
@@ -41,7 +38,7 @@ class Keystore {
             });
         });
     }
-    create(outputPath = undefined, pass = undefined) {
+    create(outputPath, pass) {
         let account = lib_1.Account.create();
         let output = this.path;
         let password = this.password;
@@ -63,7 +60,9 @@ class Keystore {
         }
         let encryptedAccount = account.encrypt(password);
         let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-        let fileName = `UTC--date--timestamp--${account.address}`;
+        let fileName = `UTC--${JSONBig.stringify(new Date())}--${account.address}`
+            .replace(/"/g, '')
+            .replace(/:/g, '-');
         fs.writeFileSync(path.join(output, fileName), stringEncryptedAccount);
         return stringEncryptedAccount;
     }

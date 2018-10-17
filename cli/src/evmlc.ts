@@ -8,6 +8,7 @@ import Globals from "./utils/Globals";
 import Session from "./classes/Session";
 
 import TransactionsList from "./commands/TransactionsList";
+import TransactionsGet from "./commands/TransactionsGet";
 import AccountCreate from './commands/AccountsCreate';
 import AccountsList from './commands/AccountsList';
 import AccountsGet from './commands/AccountsGet';
@@ -17,6 +18,8 @@ import ConfigSet from "./commands/ConfigSet";
 import Transfer from "./commands/Transfer";
 import Test from "./commands/Test";
 import Info from "./commands/Info";
+import LogsView from "./commands/LogsView";
+import LogsClear from "./commands/LogsClear";
 
 
 const init = (): Promise<void> => {
@@ -70,6 +73,9 @@ init()
             Info,
             Test,
             TransactionsList,
+            TransactionsGet,
+            LogsView,
+            LogsClear,
         ].forEach(command => {
             command(evmlc, session);
         });
@@ -81,8 +87,8 @@ init()
     })
     .then((cli: { instance: Vorpal, session: Session }) => {
         if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-            cli.session.interactive = true;
             Globals.info(`Entered interactive mode with data directory: ${cli.session.directory.path}`);
+            cli.session.interactive = true;
             cli.instance.delimiter('evmlc$').show();
         } else {
             cli.instance.parse(process.argv);

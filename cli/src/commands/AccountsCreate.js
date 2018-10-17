@@ -24,32 +24,27 @@ function commandAccountsCreate(evmlc, session) {
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                let interactive = args.options.interactive || session.interactive;
-                let questions = [
-                    {
-                        name: 'output',
-                        message: 'Enter keystore output path: ',
-                        default: session.keystore.path,
-                        type: 'input'
-                    },
-                    {
-                        name: 'password',
-                        message: 'Enter password file path: ',
-                        default: session.passwordPath,
-                        type: 'input'
-                    }
-                ];
-                if (interactive) {
-                    let { output, password } = yield inquirer.prompt(questions);
-                    args.options.output = output;
-                    args.options.password = password;
+            let interactive = args.options.interactive || session.interactive;
+            let questions = [
+                {
+                    name: 'output',
+                    message: 'Enter keystore output path: ',
+                    default: session.keystore.path,
+                    type: 'input'
+                },
+                {
+                    name: 'password',
+                    message: 'Enter password file path: ',
+                    default: session.passwordPath,
+                    type: 'input'
                 }
-                Globals_1.default.success(session.keystore.create(args.options.output, args.options.password));
+            ];
+            if (interactive) {
+                let { output, password } = yield inquirer.prompt(questions);
+                args.options.output = output;
+                args.options.password = password;
             }
-            catch (err) {
-                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
-            }
+            Globals_1.default.success(session.keystore.create(args.options.output, args.options.password));
             resolve();
         }));
     });

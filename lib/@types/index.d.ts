@@ -54,6 +54,7 @@ declare namespace EVMLClient {
         contractAddress: string;
         logs: [];
         logsBloom: string;
+        failed: boolean;
     }
 
     interface SolidityCompilerOutput {
@@ -70,19 +71,21 @@ declare namespace EVMLClient {
 
         constructor(host: string, port: number);
 
-        getAccount(address: string): Promise<string>;
+        getAccount(address: string): Promise<BaseAccount | void>;
 
-        getAccounts(): Promise<string>;
+        getAccounts(): Promise<BaseAccount[] | void>;
 
-        getInfo(): Promise<string>;
+        testConnection(): Promise<boolean | void>;
 
-        call(tx: string): Promise<{}>;
+        getInfo(): Promise<Object | void>;
 
-        sendTx(tx: string): Promise<{}>;
+        call(tx: string): Promise<string>;
 
-        sendRawTx(tx: string): Promise<{}>;
+        sendTx(tx: string): Promise<string>;
 
-        getReceipt(txHash: string): Promise<{}>;
+        sendRawTx(tx: string): Promise<string>;
+
+        getReceipt(txHash: string): Promise<TXReceipt>;
     }
 
     class Transaction {
@@ -320,10 +323,6 @@ declare namespace EVMLClient {
          * @constructor
          */
         constructor(host: string, port?: number);
-
-        testConnection(): Promise<boolean>;
-        getRemoteAccounts(): Promise<BaseAccount[]>;
-        getRemoteAccount(address: string): Promise<BaseAccount>;
 
         /**
          * Generates Javascript instance from Solidity Contract File.

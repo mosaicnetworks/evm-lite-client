@@ -54,7 +54,8 @@ export interface TXReceipt {
     cumulativeGasUsed: number,
     contractAddress: string,
     logs: [],
-    logsBloom: string
+    logsBloom: string,
+    failed: boolean
 }
 
 export interface SolidityCompilerOutput {

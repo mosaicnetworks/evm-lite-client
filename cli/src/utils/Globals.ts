@@ -8,6 +8,31 @@ export interface BaseAccount {
     balance: any
 }
 
+export interface SentTx {
+    from: string,
+    to: string,
+    value: number,
+    gas: number,
+    nonce: number,
+    gasPrice: number,
+    date: any,
+    txHash: string
+}
+
+export interface TXReceipt {
+    root: string,
+    transactionHash: string,
+    from: string,
+    to?: string,
+    gasUsed: number,
+    cumulativeGasUsed: number,
+    contractAddress: string,
+    logs: [],
+    logsBloom: string,
+    failed: boolean
+}
+
+
 export default class Globals {
 
     static evmlcDir: string = path.join(require('os').homedir(), '.evmlc');
@@ -36,7 +61,7 @@ export default class Globals {
         let aProps = Object.getOwnPropertyNames(objectA);
         let bProps = Object.getOwnPropertyNames(objectB);
 
-        if (aProps.length != bProps.length) {
+        if (aProps.length !== bProps.length) {
             return false;
         }
 

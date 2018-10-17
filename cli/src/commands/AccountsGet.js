@@ -25,38 +25,37 @@ function commandAccountsGet(evmlc, session) {
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                let accountTable = new ASCIITable().setHeading('#', 'Address', 'Balance', 'Nonce');
-                let interactive = args.options.interactive || session.interactive;
-                let formatted = args.options.formatted || false;
-                let connection = yield session.connect(args.options.host, args.options.port);
-                let questions = [
-                    {
-                        name: 'address',
-                        type: 'input',
-                        required: true,
-                        message: 'Address: '
-                    }
-                ];
-                if (interactive) {
-                    let { address } = yield inquirer.prompt(questions);
-                    args.address = address;
+            let connection = yield session.connect(args.options.host, args.options.port);
+            if (!connection)
+                resolve();
+            let interactive = args.options.interactive || session.interactive;
+            let formatted = args.options.formatted || false;
+            let questions = [
+                {
+                    name: 'address',
+                    type: 'input',
+                    required: true,
+                    message: 'Address: '
                 }
-                if (!args.address && !interactive) {
-                    Globals_1.default.error('Provide an address. Usage: accounts get <address>');
-                    resolve();
-                }
-                let account = yield connection.getRemoteAccount(args.address);
+            ];
+            if (interactive) {
+                let { address } = yield inquirer.prompt(questions);
+                args.address = address;
+            }
+            if (!args.address) {
+                Globals_1.default.error('Provide an address. Usage: accounts get <address>');
+                resolve();
+            }
+            let account = yield connection.api.getAccount(args.address);
+            if (account) {
                 if (formatted) {
-                    accountTable.addRow('1', account.address, account.balance, account.nonce);
-                    Globals_1.default.success(accountTable.toString());
+                    let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
+                    table.addRow(account.address, account.balance, account.nonce);
+                    Globals_1.default.success(table.toString());
                 }
                 else {
                     Globals_1.default.success(JSONBig.stringify(account));
                 }
-            }
-            catch (err) {
-                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
             }
             resolve();
         }));

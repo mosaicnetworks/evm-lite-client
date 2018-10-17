@@ -22,12 +22,13 @@ function commandInfo(evmlc, session) {
     })
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                let formatted = args.options.formatted || false;
-                let connection = yield session.connect(args.options.host, args.options.port);
-                let response = yield connection.api.getInfo();
-                let information = JSONBig.parse(response);
-                let table = new ASCIITable().setHeading('Name', 'Value');
+            let connection = yield session.connect(args.options.host, args.options.port);
+            if (!connection)
+                resolve();
+            let formatted = args.options.formatted || false;
+            let table = new ASCIITable().setHeading('Name', 'Value');
+            let information = yield connection.api.getInfo();
+            if (information) {
                 if (formatted) {
                     for (let key in information) {
                         if (information.hasOwnProperty(key)) {
@@ -37,16 +38,12 @@ function commandInfo(evmlc, session) {
                     Globals_1.default.success(table.toString());
                 }
                 else {
-                    Globals_1.default.success(response);
+                    Globals_1.default.success(JSONBig.stringify(information));
                 }
-            }
-            catch (err) {
-                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
             }
             resolve();
         }));
-    })
-        .description('Testing purposes.');
+    });
 }
 exports.default = commandInfo;
 ;

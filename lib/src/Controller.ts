@@ -8,7 +8,7 @@ import * as JSONBig from 'json-bigint'
 import * as fs from "fs";
 import * as solidityCompiler from 'solc'
 
-import {ABI, BaseAccount, BaseTX, SolidityCompilerOutput} from "./evm/utils/Interfaces";
+import {ABI, BaseAccount, BaseTX, SolidityCompilerOutput, TXReceipt} from "./evm/utils/Interfaces";
 
 import SolidityContract from "./evm/SolidityContract";
 import Client from "./evm/Client";
@@ -103,49 +103,6 @@ export default class Controller {
      */
     set defaultGasPrice(gasPrice: number) {
         this._defaultTXOptions.gasPrice = gasPrice;
-    }
-
-    testConnection(): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
-            this.getRemoteAccounts()
-                .then(() => resolve(true))
-                .catch(() => reject('Could not connect to node.'))
-        });
-    }
-
-    getRemoteAccounts(): Promise<BaseAccount[]> {
-        return new Promise<BaseAccount[]>((resolve, reject) => {
-            this.api.getAccounts()
-                .then((response: string) => {
-                    let json: { accounts: BaseAccount[] } = JSONBig.parse(response);
-                    if (json.accounts) {
-                        let accounts: BaseAccount[] = [];
-                        json.accounts.forEach((account) => {
-                            if (typeof account.balance === 'object') {
-                                account.balance = account.balance.toFormat(0);
-                            }
-                            accounts.push(account);
-                        });
-                        resolve(accounts);
-                    } else {
-                        resolve([]);
-                    }
-                }).catch(() => reject('Could not get remote accounts.'));
-        });
-    }
-
-    getRemoteAccount(address: string): Promise<BaseAccount> {
-        return new Promise<BaseAccount>((resolve, reject) => {
-            this.api.getAccount(address)
-                .then((response: string) => {
-                    let account: BaseAccount = JSONBig.parse(response);
-                    if (typeof account.balance === 'object') {
-                        account.balance = account.balance.toFormat(0);
-                    }
-                    resolve(account);
-                })
-                .catch(() => reject(`Could not get account: ${address}`));
-        });
     }
 
     /**

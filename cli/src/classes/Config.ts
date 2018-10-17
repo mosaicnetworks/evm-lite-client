@@ -8,7 +8,6 @@ import * as path from "path";
 import Keystore from "./Keystore";
 import DataDirectory from "./DataDirectory";
 
-
 export default class Config {
 
     public data: any;
@@ -43,7 +42,7 @@ export default class Config {
             },
             defaults: {
                 from: '',
-                gas: 10000,
+                gas: 100000,
                 gasPrice: 0
             },
             storage: {
