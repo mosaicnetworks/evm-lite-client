@@ -9,6 +9,7 @@ import Session from "./classes/Session";
 
 import TransactionsList from "./commands/TransactionsList";
 import TransactionsGet from "./commands/TransactionsGet";
+import AccountsUpdate from './commands/AccountsUpdate';
 import AccountCreate from './commands/AccountsCreate';
 import AccountsList from './commands/AccountsList';
 import AccountsGet from './commands/AccountsGet';
@@ -63,6 +64,7 @@ init()
         const evmlc = new Vorpal().version("0.1.0");
 
         [
+            AccountsUpdate,
             ConfigView,
             ConfigSet,
             AccountCreate,

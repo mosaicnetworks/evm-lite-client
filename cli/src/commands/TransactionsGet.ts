@@ -24,10 +24,12 @@ export default function commandTransactionsGet(evmlc: Vorpal, session: Session) 
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
                 let connection = await session.connect(args.options.host, args.options.port);
+                if (!connection) {
+                    resolve();
+                    return;
+                }
 
-                if (!connection) resolve();
-
-                let table = new ASCIITable().setHeading('Key', 'Value');
+                let table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
                 let interactive = args.options.interactive || session.interactive;
                 let formatted = args.options.formatted || false;
                 let questions = [
@@ -47,28 +49,46 @@ export default function commandTransactionsGet(evmlc: Vorpal, session: Session) 
 
                 if (!args.hash) {
                     Globals.error('Provide a transaction hash. Usage: transactions get <hash>');
-                } else {
-                    let receipt: TXReceipt = await connection.api.getReceipt(args.hash);
-
-                    if (!receipt) resolve();
-
-                    delete receipt.logsBloom;
-                    delete receipt.logs;
-                    delete receipt.contractAddress;
-                    delete receipt.root;
-
-                    if (formatted) {
-                        for (let key in receipt) {
-                            if (receipt.hasOwnProperty(key)) {
-                                table.addRow(key, receipt[key]);
-                            }
-                        }
-
-                    }
-
-                    Globals.success((formatted) ? table.toString() : JSONBig.stringify(receipt));
+                    resolve();
+                    return;
                 }
 
+                let receipt: TXReceipt = await connection.api.getReceipt(args.hash);
+
+                if (!receipt) {
+                    resolve();
+                    return;
+                }
+
+                delete receipt.logsBloom;
+                delete receipt.contractAddress;
+
+                if (!formatted) {
+                    Globals.success(JSONBig.stringify(receipt));
+                    resolve();
+                    return;
+                }
+
+                for (let key in receipt) {
+                    if (receipt.hasOwnProperty(key)) {
+                        table.addRow(key, receipt[key]);
+                    }
+                }
+
+                let tx = session.database.transactions.get(args.hash);
+
+                if (!tx) {
+                    Globals.error('Could not find transaction in list.');
+                    resolve();
+                    return;
+                }
+
+                let txTable = new ASCIITable('Transaction')
+                    .setHeading('From', 'To', 'Value', 'Gas', 'Gas Price');
+                txTable.addRow(tx.from, tx.to, tx.value, tx.gas, tx.gasPrice);
+
+                Globals.success(txTable.toString());
+                Globals.success(table.toString());
                 resolve();
             });
         });

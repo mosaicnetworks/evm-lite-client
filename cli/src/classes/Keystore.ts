@@ -2,81 +2,93 @@ import * as fs from "fs";
 import * as path from "path";
 import * as JSONBig from 'json-bigint';
 
-import Globals from "../utils/Globals";
+import {BaseAccount, v3JSONKeyStore} from "../utils/Globals";
 
 import {Account, Controller} from "../../../lib";
 
 
 export default class Keystore {
 
-    constructor(readonly path: string, readonly password: string) {
+    constructor(readonly path: string) {
     }
 
-    decrypt(connection: Controller): Promise<Account[]> {
-        let accounts = [];
-        let promises = [];
-
-        fs.readdirSync(this.path).forEach((file) => {
-            if (!file.startsWith('.')) {
-                let keystoreFile = path.join(this.path, file);
-                let v3JSONKeyStore = JSONBig.parse(fs.readFileSync(keystoreFile, 'utf8'));
-                let decryptedAccount: Account = Account.decrypt(v3JSONKeyStore, this.password);
-
-                promises.push(
-                    connection.api.getAccount(decryptedAccount.address)
-                        .then(({balance, nonce}) => {
-                            decryptedAccount.nonce = nonce;
-                            decryptedAccount.balance = balance;
-                            accounts.push(decryptedAccount);
-                        })
-                );
-            }
-        });
-
-        return Promise.all(promises)
-            .then(() => {
-                return new Promise<Account[]>(resolve => {
-                    resolve(accounts);
-                });
-            })
-            .catch(() => {
-                return new Promise<Account[]>(resolve => {
-                    resolve([])
-                })
-            })
-    }
-
-    create(outputPath: string, pass: string): string {
+    static create(output: string, password: string): string {
         let account: Account = Account.create();
-
-        let output = this.path;
-        let password = this.password;
-
-        if (outputPath) {
-            if (fs.existsSync(outputPath)) {
-                output = outputPath;
-            } else {
-                Globals.warning(`Output path provided does not exists: ${outputPath}. Using default...`);
-            }
-        }
-
-        if (pass) {
-            if (fs.existsSync(pass)) {
-                password = fs.readFileSync(pass, 'utf8');
-            } else {
-                Globals.warning(`Password file provided does not exists: ${pass}. Using default...`);
-            }
-        }
-
-        let encryptedAccount = account.encrypt(password);
-        let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-        let fileName = `UTC--${JSONBig.stringify(new Date())}--${account.address}`
+        let eAccount = account.encrypt(password);
+        let sEAccount = JSONBig.stringify(eAccount);
+        let filename = `UTC--${JSONBig.stringify(new Date())}--${account.address}`
             .replace(/"/g, '')
             .replace(/:/g, '-');
 
-        fs.writeFileSync(path.join(output, fileName), stringEncryptedAccount);
+        fs.writeFileSync(path.join(output, filename), sEAccount);
+        return sEAccount;
+    }
 
-        return stringEncryptedAccount;
+    files() {
+        let jsons = [];
+        let files = fs.readdirSync(this.path).filter((file) => {
+            return !(file.startsWith('.'));
+        });
+
+        for (let file of files) {
+            let filepath = path.join(this.path, file);
+            let data = fs.readFileSync(filepath, 'utf8');
+
+            jsons.push(JSONBig.parse(data));
+        }
+
+        return jsons
+    }
+
+    all(fetch: boolean = false, connection: Controller = null): Promise<any[]> {
+        return new Promise<any[]>(async (resolve) => {
+            let accounts = [];
+            let files = this.files();
+            if (files.length) {
+                for (let file of files) {
+                    let address = file.address;
+                    if (fetch && connection)
+                        accounts.push(await connection.api.getAccount(address));
+                    else {
+                        accounts.push({
+                            address: address,
+                            balance: 0,
+                            nonce: 0
+                        })
+                    }
+                }
+                resolve(accounts);
+            } else {
+                resolve(accounts);
+            }
+        })
+    }
+
+    get(address: string): v3JSONKeyStore {
+        return this.files().filter((file) => file.address === address)[0] || null;
+    }
+
+    find(address: string) {
+        let dir = fs.readdirSync(this.path).filter((file) => {
+            return !(file.startsWith('.'));
+        });
+        // console.log(dir);
+        for (let filename of dir) {
+            let filepath = path.join(this.path, filename);
+            if (JSONBig.parse(fs.readFileSync(filepath, 'utf8')).address === address) {
+                return filepath;
+            }
+        }
+    }
+
+    async fetch(address: string, connection: Controller): Promise<BaseAccount> {
+        return new Promise<BaseAccount>(async (resolve) => {
+            let account = await connection.api.getAccount(address);
+
+            if (account) {
+                resolve(account);
+            }
+        });
     }
 
 }

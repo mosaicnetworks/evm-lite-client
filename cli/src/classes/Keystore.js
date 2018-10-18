@@ -1,70 +1,91 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const path = require("path");
 const JSONBig = require("json-bigint");
-const Globals_1 = require("../utils/Globals");
 const lib_1 = require("../../../lib");
 class Keystore {
-    constructor(path, password) {
+    constructor(path) {
         this.path = path;
-        this.password = password;
     }
-    decrypt(connection) {
-        let accounts = [];
-        let promises = [];
-        fs.readdirSync(this.path).forEach((file) => {
-            if (!file.startsWith('.')) {
-                let keystoreFile = path.join(this.path, file);
-                let v3JSONKeyStore = JSONBig.parse(fs.readFileSync(keystoreFile, 'utf8'));
-                let decryptedAccount = lib_1.Account.decrypt(v3JSONKeyStore, this.password);
-                promises.push(connection.api.getAccount(decryptedAccount.address)
-                    .then(({ balance, nonce }) => {
-                    decryptedAccount.nonce = nonce;
-                    decryptedAccount.balance = balance;
-                    accounts.push(decryptedAccount);
-                }));
-            }
-        });
-        return Promise.all(promises)
-            .then(() => {
-            return new Promise(resolve => {
-                resolve(accounts);
-            });
-        })
-            .catch(() => {
-            return new Promise(resolve => {
-                resolve([]);
-            });
-        });
-    }
-    create(outputPath, pass) {
+    static create(output, password) {
         let account = lib_1.Account.create();
-        let output = this.path;
-        let password = this.password;
-        if (outputPath) {
-            if (fs.existsSync(outputPath)) {
-                output = outputPath;
-            }
-            else {
-                Globals_1.default.warning(`Output path provided does not exists: ${outputPath}. Using default...`);
-            }
-        }
-        if (pass) {
-            if (fs.existsSync(pass)) {
-                password = fs.readFileSync(pass, 'utf8');
-            }
-            else {
-                Globals_1.default.warning(`Password file provided does not exists: ${pass}. Using default...`);
-            }
-        }
-        let encryptedAccount = account.encrypt(password);
-        let stringEncryptedAccount = JSONBig.stringify(encryptedAccount);
-        let fileName = `UTC--${JSONBig.stringify(new Date())}--${account.address}`
+        let eAccount = account.encrypt(password);
+        let sEAccount = JSONBig.stringify(eAccount);
+        let filename = `UTC--${JSONBig.stringify(new Date())}--${account.address}`
             .replace(/"/g, '')
             .replace(/:/g, '-');
-        fs.writeFileSync(path.join(output, fileName), stringEncryptedAccount);
-        return stringEncryptedAccount;
+        fs.writeFileSync(path.join(output, filename), sEAccount);
+        return sEAccount;
+    }
+    files() {
+        let jsons = [];
+        let files = fs.readdirSync(this.path).filter((file) => {
+            return !(file.startsWith('.'));
+        });
+        for (let file of files) {
+            let filepath = path.join(this.path, file);
+            let data = fs.readFileSync(filepath, 'utf8');
+            jsons.push(JSONBig.parse(data));
+        }
+        return jsons;
+    }
+    all(fetch = false, connection = null) {
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            let accounts = [];
+            let files = this.files();
+            if (files.length) {
+                for (let file of files) {
+                    let address = file.address;
+                    if (fetch && connection)
+                        accounts.push(yield connection.api.getAccount(address));
+                    else {
+                        accounts.push({
+                            address: address,
+                            balance: 0,
+                            nonce: 0
+                        });
+                    }
+                }
+                resolve(accounts);
+            }
+            else {
+                resolve(accounts);
+            }
+        }));
+    }
+    get(address) {
+        return this.files().filter((file) => file.address === address)[0] || null;
+    }
+    find(address) {
+        let dir = fs.readdirSync(this.path).filter((file) => {
+            return !(file.startsWith('.'));
+        });
+        // console.log(dir);
+        for (let filename of dir) {
+            let filepath = path.join(this.path, filename);
+            if (JSONBig.parse(fs.readFileSync(filepath, 'utf8')).address === address) {
+                return filepath;
+            }
+        }
+    }
+    fetch(address, connection) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                let account = yield connection.api.getAccount(address);
+                if (account) {
+                    resolve(account);
+                }
+            }));
+        });
     }
 }
 exports.default = Keystore;

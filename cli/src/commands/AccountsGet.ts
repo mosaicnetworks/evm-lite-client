@@ -3,7 +3,7 @@ import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 import * as ASCIITable from 'ascii-table';
 
-import Globals, {BaseAccount} from "../utils/Globals";
+import Globals from "../utils/Globals";
 import Session from "../classes/Session";
 
 
@@ -25,7 +25,10 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
             return new Promise<void>(async (resolve) => {
                 let connection = await session.connect(args.options.host, args.options.port);
 
-                if (!connection) resolve();
+                if (!connection) {
+                    resolve();
+                    return;
+                }
 
                 let interactive = args.options.interactive || session.interactive;
                 let formatted = args.options.formatted || false;
@@ -38,14 +41,15 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
                     }
                 ];
 
-                if (interactive) {
+                if (interactive && !args.address) {
                     let {address} = await inquirer.prompt(questions);
                     args.address = address;
                 }
 
                 if (!args.address) {
-                    Globals.error('Provide an address. Usage: accounts get <address>');
+                    Globals.error('Provide a non-empty address. Usage: accounts get <address>');
                     resolve();
+                    return;
                 }
 
                 let account = await connection.api.getAccount(args.address);

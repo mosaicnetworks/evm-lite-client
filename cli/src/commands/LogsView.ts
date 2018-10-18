@@ -12,23 +12,19 @@ export default function commandLogsShow(evmlc: Vorpal, session: Session) {
         .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>((resolve) => {
-                try {
-                    let interactive = session.interactive || false;
-                    let current = args.options.session || false;
+                let interactive = session.interactive || false;
+                let current = args.options.session || false;
 
-                    if (current) {
-                        if (interactive) {
-                            for (let log of session.logs) {
-                                log.show();
-                            }
-                        } else {
-                            Globals.warning('Cannot print session log when not in interactive mode.');
+                if (current) {
+                    if (interactive) {
+                        for (let log of session.logs) {
+                            log.show();
                         }
                     } else {
-                        Globals.info(fs.readFileSync(session.logpath, 'utf8'));
+                        Globals.warning('Cannot print session log when not in interactive mode.');
                     }
-                } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
+                } else {
+                    Globals.info(fs.readFileSync(session.logpath, 'utf8'));
                 }
                 resolve();
             });

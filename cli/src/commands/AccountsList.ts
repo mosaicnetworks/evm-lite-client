@@ -1,7 +1,8 @@
 import * as Vorpal from "vorpal";
-import * as JSONBig from 'json-bigint';
 import * as ASCIITable from 'ascii-table';
+import * as JSONBig from 'json-bigint';
 
+import {Controller} from "../../../lib"
 import Globals, {BaseAccount} from "../utils/Globals";
 
 import Session from "../classes/Session";
@@ -16,6 +17,7 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
     return evmlc.command('accounts list').alias('a l')
         .description(description)
         .option('-f, --formatted', 'format output')
+        .option('-v, --verbose', 'verbose output (fetches balance & nonce from node)')
         .option('-r, --remote', 'list remote accounts')
         .option('-h, --host <ip>', 'override config parameter host')
         .option('-p, --port <port>', 'override config parameter port')
@@ -24,35 +26,53 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
         })
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
-                let connection = await session.connect(args.options.host, args.options.port);
-
-                if (!connection) resolve();
-
-                let formatted: boolean = args.options.formatted || false;
                 let remote = args.options.remote || false;
-                let accounts: BaseAccount[] = [];
-                let accountsTable = new ASCIITable().setHeading('#', 'Address', 'Balance', 'Nonce');
+                let verbose: boolean = args.options.verbose || false;
+                let formatted: boolean = args.options.formatted || false;
+                let accounts: BaseAccount[] | void = [];
+                let accountsTable = new ASCIITable();
+                let connection: Controller = null;
 
-                if (!remote) {
-                    accounts = (await session.keystore.decrypt(connection)).map(account => account.toBaseAccount());
-                } else {
+                if (verbose || remote) {
+                    connection = await session.connect(args.options.host, args.options.port);
+
+                    if (!connection) {
+                        resolve();
+                        return;
+                    }
+                }
+
+                if (remote) {
                     accounts = await connection.api.getAccounts();
+                } else {
+                    accounts = await session.keystore.all(verbose, connection);
                 }
 
                 if (!accounts || !accounts.length) {
                     Globals.warning('No accounts.');
-                } else {
-                    if (formatted) {
-                        let counter = 1;
-                        for (let account of accounts) {
-                            accountsTable.addRow(counter, account.address, account.balance, account.nonce);
-                            counter++;
-                        }
-                    }
-
-                    Globals.success((formatted) ? accountsTable.toString() : JSONBig.stringify(accounts));
+                    resolve();
+                    return;
                 }
 
+                if (!formatted) {
+                    Globals.success(JSONBig.stringify(accounts));
+                    resolve();
+                    return;
+                }
+
+                if (verbose) {
+                    accountsTable.setHeading('Address', 'Balance', 'Nonce');
+                    for (let account of accounts) {
+                        accountsTable.addRow(account.address, account.balance, account.nonce);
+                    }
+                } else {
+                    accountsTable.setHeading('Addresses');
+                    for (let account of accounts) {
+                        accountsTable.addRow(account.address);
+                    }
+                }
+
+                Globals.success((accountsTable.toString()));
                 resolve();
             });
         });

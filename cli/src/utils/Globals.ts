@@ -32,6 +32,29 @@ export interface TXReceipt {
     failed: boolean
 }
 
+interface KDFEncryption {
+    ciphertext: string,
+    ciperparams: {
+        iv: string
+    }
+    cipher: string,
+    kdf: string,
+    kdfparams: {
+        dklen: number,
+        salt: string,
+        n: number,
+        r: number,
+        p: number
+    }
+    mac: string
+}
+
+export interface v3JSONKeyStore {
+    version: number,
+    id: string,
+    address: string,
+    crypto: KDFEncryption,
+}
 
 export default class Globals {
 

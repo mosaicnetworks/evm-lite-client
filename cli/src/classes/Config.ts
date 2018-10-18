@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as toml from "toml";
 import * as tomlify from 'tomlify-j0.4';
 import * as mkdir from 'mkdirp';
+import * as path from "path";
 
 import Globals from "../utils/Globals";
-import * as path from "path";
 import Keystore from "./Keystore";
 import DataDirectory from "./DataDirectory";
 
@@ -47,7 +47,6 @@ export default class Config {
             },
             storage: {
                 keystore: path.join(datadir, 'keystore'),
-                password: path.join(datadir, 'pwd.txt'),
             }
         }
     }
@@ -83,15 +82,9 @@ export default class Config {
         }
     }
 
-    getOrCreateKeystore(password: string): Keystore {
+    getOrCreateKeystore(): Keystore {
         DataDirectory.createDirectoryIfNotExists(this.data.storage.keystore);
-        return new Keystore(this.data.storage.keystore, password);
-    }
-
-    getOrCreatePasswordFile(): string {
-        let password: string = 'supersecurepassword';
-        DataDirectory.createOrReadFile(this.data.storage.password, password);
-        return this.data.storage.password;
+        return new Keystore(this.data.storage.keystore);
     }
 
 }

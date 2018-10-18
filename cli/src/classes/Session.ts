@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import * as path from "path";
 
 import {Controller} from "../../../lib";
 
@@ -6,9 +6,7 @@ import Config from "./Config";
 import DataDirectory from "./DataDirectory";
 import Keystore from "./Keystore";
 import Database from "./Database";
-import * as path from "path";
 import Log from "./Log";
-import Globals from "../utils/Globals";
 
 
 export default class Session {
@@ -35,12 +33,7 @@ export default class Session {
         this.database = new Database(path.join(dataDirPath, 'db.json'));
 
         this.config = this.directory.createAndGetConfig();
-        this.passwordPath = this.config.getOrCreatePasswordFile();
-        this.keystore = this.config.getOrCreateKeystore(this.password);
-    }
-
-    get password(): string {
-        return fs.readFileSync(this.passwordPath, 'utf8');
+        this.keystore = this.config.getOrCreateKeystore();
     }
 
     connect(forcedHost: string, forcedPort: number): Promise<Controller> {

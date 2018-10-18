@@ -26,9 +26,11 @@ function commandTransactionsGet(evmlc, session) {
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             let connection = yield session.connect(args.options.host, args.options.port);
-            if (!connection)
+            if (!connection) {
                 resolve();
-            let table = new ASCIITable().setHeading('Key', 'Value');
+                return;
+            }
+            let table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
             let interactive = args.options.interactive || session.interactive;
             let formatted = args.options.formatted || false;
             let questions = [
@@ -45,24 +47,37 @@ function commandTransactionsGet(evmlc, session) {
             }
             if (!args.hash) {
                 Globals_1.default.error('Provide a transaction hash. Usage: transactions get <hash>');
+                resolve();
+                return;
             }
-            else {
-                let receipt = yield connection.api.getReceipt(args.hash);
-                if (!receipt)
-                    resolve();
-                delete receipt.logsBloom;
-                delete receipt.logs;
-                delete receipt.contractAddress;
-                delete receipt.root;
-                if (formatted) {
-                    for (let key in receipt) {
-                        if (receipt.hasOwnProperty(key)) {
-                            table.addRow(key, receipt[key]);
-                        }
-                    }
+            let receipt = yield connection.api.getReceipt(args.hash);
+            if (!receipt) {
+                resolve();
+                return;
+            }
+            delete receipt.logsBloom;
+            delete receipt.contractAddress;
+            if (!formatted) {
+                Globals_1.default.success(JSONBig.stringify(receipt));
+                resolve();
+                return;
+            }
+            for (let key in receipt) {
+                if (receipt.hasOwnProperty(key)) {
+                    table.addRow(key, receipt[key]);
                 }
-                Globals_1.default.success((formatted) ? table.toString() : JSONBig.stringify(receipt));
             }
+            let tx = session.database.transactions.get(args.hash);
+            if (!tx) {
+                Globals_1.default.error('Could not find transaction in list.');
+                resolve();
+                return;
+            }
+            let txTable = new ASCIITable('Transaction')
+                .setHeading('From', 'To', 'Value', 'Gas', 'Gas Price');
+            txTable.addRow(tx.from, tx.to, tx.value, tx.gas, tx.gasPrice);
+            Globals_1.default.success(txTable.toString());
+            Globals_1.default.success(table.toString());
             resolve();
         }));
     });

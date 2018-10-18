@@ -13,12 +13,8 @@ export default function commandConfigUser(evmlc: Vorpal, session: Session) {
         .description(description)
         .action((): Promise<void> => {
             return new Promise<void>(resolve => {
-                try {
-                    Globals.info(`Config file location: ${session.config.path}`);
-                    Globals.success(session.config.toTOML());
-                } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
-                }
+                Globals.info(`Config file location: ${session.config.path}`);
+                Globals.success(session.config.toTOML());
                 resolve();
             });
         });

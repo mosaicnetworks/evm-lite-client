@@ -4,8 +4,8 @@ const fs = require("fs");
 const toml = require("toml");
 const tomlify = require("tomlify-j0.4");
 const mkdir = require("mkdirp");
-const Globals_1 = require("../utils/Globals");
 const path = require("path");
+const Globals_1 = require("../utils/Globals");
 const Keystore_1 = require("./Keystore");
 const DataDirectory_1 = require("./DataDirectory");
 class Config {
@@ -39,7 +39,6 @@ class Config {
             },
             storage: {
                 keystore: path.join(datadir, 'keystore'),
-                password: path.join(datadir, 'pwd.txt'),
             }
         };
     }
@@ -68,14 +67,9 @@ class Config {
             return true;
         }
     }
-    getOrCreateKeystore(password) {
+    getOrCreateKeystore() {
         DataDirectory_1.default.createDirectoryIfNotExists(this.data.storage.keystore);
-        return new Keystore_1.default(this.data.storage.keystore, password);
-    }
-    getOrCreatePasswordFile() {
-        let password = 'supersecurepassword';
-        DataDirectory_1.default.createOrReadFile(this.data.storage.password, password);
-        return this.data.storage.password;
+        return new Keystore_1.default(this.data.storage.keystore);
     }
 }
 exports.default = Config;

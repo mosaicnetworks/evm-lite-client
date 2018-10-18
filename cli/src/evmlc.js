@@ -8,6 +8,7 @@ const Globals_1 = require("./utils/Globals");
 const Session_1 = require("./classes/Session");
 const TransactionsList_1 = require("./commands/TransactionsList");
 const TransactionsGet_1 = require("./commands/TransactionsGet");
+const AccountsUpdate_1 = require("./commands/AccountsUpdate");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
 const AccountsGet_1 = require("./commands/AccountsGet");
@@ -51,6 +52,7 @@ init()
     .then((session) => {
     const evmlc = new Vorpal().version("0.1.0");
     [
+        AccountsUpdate_1.default,
         ConfigView_1.default,
         ConfigSet_1.default,
         AccountsCreate_1.default,

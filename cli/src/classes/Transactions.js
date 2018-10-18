@@ -20,6 +20,14 @@ class Transactions {
         this._transactions.push(tx);
         this.sort();
     }
+    get(hash) {
+        if (!hash.startsWith('0x')) {
+            hash = `0x${hash}`;
+        }
+        return this._transactions.filter(tx => {
+            return hash === tx.txHash;
+        })[0] || null;
+    }
     sort() {
         this._transactions.sort(function (a, b) {
             // @ts-ignore

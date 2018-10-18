@@ -23,13 +23,8 @@ let request = (tx, options): Promise<string> => {
             response.on('end', () => resolve(data));
             response.on('error', (err) => reject(err));
         });
-
-        req.on('error', (err) => {
-            reject(err);
-        });
-
+        req.on('error', (err) =>  reject(err));
         if (tx) req.write(tx);
-
         req.end();
     });
 };

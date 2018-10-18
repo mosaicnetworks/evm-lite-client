@@ -18,27 +18,32 @@ export default function commandInfo(evmlc: Vorpal, session: Session) {
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async (resolve) => {
                 let connection = await session.connect(args.options.host, args.options.port);
-
-                if (!connection) resolve();
-
-                let formatted = args.options.formatted || false;
-                let table = new ASCIITable().setHeading('Name', 'Value');
+                if (!connection) {
+                    resolve();
+                    return;
+                }
 
                 let information = await connection.api.getInfo();
+                if (!information) {
+                    resolve();
+                    return;
+                }
 
-                if (information) {
-                    if (formatted) {
-                        for (let key in information) {
-                            if (information.hasOwnProperty(key)) {
-                                table.addRow(key, information[key]);
-                            }
-                        }
-                        Globals.success(table.toString());
-                    } else {
-                        Globals.success(JSONBig.stringify(information));
+                let formatted = args.options.formatted || false;
+                if (!formatted) {
+                    Globals.success(JSONBig.stringify(information));
+                    resolve();
+                    return;
+                }
+
+                let table = new ASCIITable().setHeading('Name', 'Value');
+                for (let key in information) {
+                    if (information.hasOwnProperty(key)) {
+                        table.addRow(key, information[key]);
                     }
                 }
 
+                Globals.success(table.toString());
                 resolve();
             });
         });

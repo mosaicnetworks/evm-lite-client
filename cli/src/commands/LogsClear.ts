@@ -11,12 +11,8 @@ export default function commandLogsClear(evmlc: Vorpal, session: Session) {
         .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>((resolve) => {
-                try {
-                    fs.writeFileSync(session.logpath, '');
-                    Globals.success('Logs cleared.');
-                } catch (err) {
-                    (typeof err === 'object') ? console.log(err) : Globals.error(err);
-                }
+                fs.writeFileSync(session.logpath, '');
+                Globals.success('Logs cleared.');
                 resolve();
             });
         });
