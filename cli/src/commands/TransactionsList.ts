@@ -49,7 +49,7 @@ export default function commandTransactionsList(evmlc: Vorpal, session: Session)
                             let receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
 
                             table.addRow(`${d} ${t}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice,
-                                (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
+                                (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
                         }
                     } else {
                         table.setHeading('From', 'To', 'Value', 'Status');
@@ -58,7 +58,7 @@ export default function commandTransactionsList(evmlc: Vorpal, session: Session)
                             let receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
 
                             table.addRow(tx.from, tx.to, tx.value,
-                                (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
+                                (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
                         }
                     }
 

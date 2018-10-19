@@ -29,7 +29,7 @@ export interface TXReceipt {
     contractAddress: string,
     logs: [],
     logsBloom: string,
-    failed: boolean
+    status: number
 }
 
 

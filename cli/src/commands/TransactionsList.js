@@ -46,14 +46,14 @@ function commandTransactionsList(evmlc, session) {
                         let d = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
                         let t = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
                         let receipt = yield connection.api.getReceipt(tx.txHash);
-                        table.addRow(`${d} ${t}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
+                        table.addRow(`${d} ${t}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
                     }
                 }
                 else {
                     table.setHeading('From', 'To', 'Value', 'Status');
                     for (let tx of transactions) {
                         let receipt = yield connection.api.getReceipt(tx.txHash);
-                        table.addRow(tx.from, tx.to, tx.value, (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
+                        table.addRow(tx.from, tx.to, tx.value, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
                     }
                 }
                 Globals_1.default.success(table.toString());
