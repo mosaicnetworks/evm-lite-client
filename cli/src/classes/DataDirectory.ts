@@ -3,7 +3,6 @@ import * as mkdir from "mkdirp";
 import * as path from 'path';
 
 import Config from "./Config";
-import Keystore from "./Keystore";
 
 
 export default class DataDirectory {
@@ -34,6 +33,5 @@ export default class DataDirectory {
         DataDirectory.createOrReadFile(configFilePath, Config.defaultTOML(this.path));
         return new Config(this.path, 'config.toml');
     }
-
 
 }
