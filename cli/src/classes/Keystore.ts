@@ -25,7 +25,7 @@ export default class Keystore {
     }
 
     files() {
-        let jsons = [];
+        let json = [];
         let files = fs.readdirSync(this.path).filter((file) => {
             return !(file.startsWith('.'));
         });
@@ -34,10 +34,10 @@ export default class Keystore {
             let filepath = path.join(this.path, file);
             let data = fs.readFileSync(filepath, 'utf8');
 
-            jsons.push(JSONBig.parse(data));
+            json.push(JSONBig.parse(data));
         }
 
-        return jsons
+        return json
     }
 
     all(fetch: boolean = false, connection: Controller = null): Promise<any[]> {
@@ -65,6 +65,8 @@ export default class Keystore {
     }
 
     get(address: string): v3JSONKeyStore {
+        if (address.startsWith('0x')) address = address.substr(2);
+        address = address.toLowerCase();
         return this.files().filter((file) => file.address === address)[0] || null;
     }
 
@@ -72,7 +74,10 @@ export default class Keystore {
         let dir = fs.readdirSync(this.path).filter((file) => {
             return !(file.startsWith('.'));
         });
-        // console.log(dir);
+
+        if (address.startsWith('0x')) address = address.substr(2);
+        address = address.toLowerCase();
+
         for (let filename of dir) {
             let filepath = path.join(this.path, filename);
             if (JSONBig.parse(fs.readFileSync(filepath, 'utf8')).address === address) {

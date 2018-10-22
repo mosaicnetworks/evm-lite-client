@@ -1,5 +1,7 @@
 import * as path from "path";
 import * as Chalk from "chalk";
+import * as Vorpal from "vorpal";
+import Session from "../classes/Session";
 
 
 export interface BaseAccount {

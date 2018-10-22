@@ -4,10 +4,173 @@ import * as fs from "fs";
 import * as JSONBig from 'json-bigint';
 
 import {Account} from "../../../lib"
+import Staging, {execute, Message, StagedOutput, StagingFunction} from "../utils/Staging";
 
-import Globals from "../utils/Globals";
 import Session from "../classes/Session";
 
+export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
+    return new Promise<StagedOutput<Message>>(async (resolve) => {
+        let o = Staging.construct.bind(null, args);
+
+        let interactive = args.options.interactive || session.interactive;
+        let accounts = await session.keystore.all();
+        let addressQ = [
+            {
+                name: 'address',
+                type: 'list',
+                message: 'Address: ',
+                choices: accounts.map((account) => account.address)
+            }
+        ];
+        let passwordQ = [
+            {
+                name: 'password',
+                type: 'password',
+                message: 'Enter password: ',
+            }
+        ];
+        let newPasswordQ = [
+            {
+                name: 'password',
+                type: 'password',
+                message: 'Enter a new password: ',
+            },
+            {
+                name: 'verifyPassword',
+                type: 'password',
+                message: 'Re-enter new password: ',
+            }
+        ];
+
+        if (interactive && !args.address) {
+            let {address} = await inquirer.prompt(addressQ);
+            args.address = address;
+        }
+
+        if (!args.address) {
+            resolve(o(
+                Staging.ERROR,
+                Staging.SUBTYPES.errors.BLANK_FIELD,
+                'Provide a non-empty address. Usage: accounts update <address>'
+            ));
+            return;
+        }
+
+        let keystore = session.keystore.get(args.address);
+
+        if (!keystore) {
+            resolve(o(
+                Staging.ERROR,
+                Staging.SUBTYPES.errors.FILE_NOT_FOUND,
+                `Cannot find keystore file of address: ${args.address}.`
+            ));
+            return;
+        }
+
+        if (args.options.old) {
+            if (!fs.existsSync(args.options.old)) {
+                resolve(o(
+                    Staging.ERROR,
+                    Staging.SUBTYPES.errors.FILE_NOT_FOUND,
+                    'Old password file path provided does not exist.'
+                ));
+                return;
+            }
+
+            if (fs.lstatSync(args.options.old).isDirectory()) {
+                resolve(o(
+                    Staging.ERROR,
+                    Staging.SUBTYPES.errors.IS_DIRECTORY,
+                    'Old password file path provided is not a file.'
+                ));
+                return;
+            }
+
+            args.options.old = fs.readFileSync(args.options.old, 'utf8');
+        } else {
+            let {password} = await inquirer.prompt(passwordQ);
+            args.options.old = password;
+        }
+
+        let decrypted: Account = null;
+
+        try {
+            decrypted = Account.decrypt(keystore, args.options.old);
+        } catch (err) {
+            resolve(o(
+                Staging.ERROR,
+                Staging.SUBTYPES.errors.OTHER,
+                'Failed decryption of account with the password provided.'
+            ));
+            return;
+        }
+
+        if (!decrypted) {
+            resolve(o(
+                Staging.ERROR,
+                Staging.SUBTYPES.errors.OTHER,
+                'Oops! Something went wrong.'
+            ));
+            return;
+        }
+
+        if (args.options.new) {
+            if (!fs.existsSync(args.options.new)) {
+                resolve(o(
+                    Staging.ERROR,
+                    Staging.SUBTYPES.errors.FILE_NOT_FOUND,
+                    'New password file path provided does not exist.'
+                ));
+                return;
+            }
+
+            if (fs.lstatSync(args.options.new).isDirectory()) {
+                resolve(o(
+                    Staging.ERROR,
+                    Staging.SUBTYPES.errors.IS_DIRECTORY,
+                    'New password file path provided is not a file.'
+                ));
+                return;
+            }
+
+            args.options.new = fs.readFileSync(args.options.new, 'utf8');
+        } else {
+            let {password, verifyPassword} = await inquirer.prompt(newPasswordQ);
+
+            if (!(password && verifyPassword && (password === verifyPassword))) {
+                resolve(o(
+                    Staging.ERROR,
+                    Staging.SUBTYPES.errors.BLANK_FIELD,
+                    'Error: Passwords either blank or do not match.'
+                ));
+                return;
+            }
+
+            args.options.new = password;
+        }
+
+        if (args.options.old === args.options.new) {
+            resolve(o(
+                Staging.ERROR,
+                Staging.SUBTYPES.errors.OTHER,
+                'New password is the same as old.'
+            ));
+            return;
+        }
+
+        let filePath: string = session.keystore.find(args.address);
+        let nKeystore = decrypted.encrypt(args.options.new);
+        let sNKeystore = JSONBig.stringify(nKeystore);
+
+        fs.writeFileSync(filePath, sNKeystore);
+
+        resolve(o(
+            Staging.SUCCESS,
+            Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
+            nKeystore
+        ));
+    })
+};
 
 export default function commandAccountsUpdate(evmlc: Vorpal, session: Session) {
 
@@ -20,132 +183,8 @@ export default function commandAccountsUpdate(evmlc: Vorpal, session: Session) {
         .option('-o, --old <path>', 'old password file path')
         .option('-n, --new <path>', 'new password file path')
         .types({
-            string: ['_', 'p', 'password']
+            string: ['_', 'old', 'o', 'n', 'new']
         })
-        .action((args: Vorpal.Args): Promise<void> => {
-            return new Promise<void>(async (resolve) => {
-                let interactive = args.options.interactive || session.interactive;
-                let accounts = await session.keystore.all();
-                let addressQ = [
-                    {
-                        name: 'address',
-                        type: 'list',
-                        message: 'Address: ',
-                        choices: accounts.map((account) => account.address)
-                    }
-                ];
-                let passwordQ = [
-                    {
-                        name: 'password',
-                        type: 'password',
-                        message: 'Enter password: ',
-                    }
-                ];
-                let newPasswordQ = [
-                    {
-                        name: 'password',
-                        type: 'password',
-                        message: 'Enter a new password: ',
-                    },
-                    {
-                        name: 'verifyPassword',
-                        type: 'password',
-                        message: 'Re-enter new password: ',
-                    }
-                ];
-
-                if (interactive && !args.address) {
-                    let {address} = await inquirer.prompt(addressQ);
-                    args.address = address;
-                }
-
-                if (!args.address) {
-                    Globals.error('Provide a non-empty address. Usage: accounts update <address>');
-                    resolve();
-                    return;
-                }
-
-                let keystore = session.keystore.get(args.address);
-
-                if (!keystore) {
-                    Globals.error(`Cannot find keystore file of address: ${args.address}.`);
-                }
-
-                if (args.options.old) {
-                    if (!fs.existsSync(args.options.old)) {
-                        Globals.error('Old password file path provided does not exist.');
-                        resolve();
-                        return;
-                    }
-
-                    if (fs.lstatSync(args.options.old).isDirectory()) {
-                        Globals.error('Old password file path provided is not a file.');
-                        resolve();
-                        return;
-                    }
-
-                    args.options.password = fs.readFileSync(args.options.password, 'utf8');
-                } else {
-                    let {password} = await inquirer.prompt(passwordQ);
-                    args.options.old = password;
-                }
-
-                let decrypted: Account = null;
-
-                try {
-                    decrypted = Account.decrypt(keystore, args.options.old);
-                } catch (err) {
-                    Globals.error('Failed decryption of account with the password provided.');
-                    resolve();
-                    return;
-                }
-
-                if (!decrypted) {
-                    Globals.error('Oops! Something went wrong.');
-                    resolve();
-                    return;
-                }
-
-                if (args.options.new) {
-                    if (!fs.existsSync(args.options.new)) {
-                        Globals.error('New password file path provided does not exist.');
-                        resolve();
-                        return;
-                    }
-
-                    if (fs.lstatSync(args.options.old).isDirectory()) {
-                        Globals.error('New password file path provided is not a file.');
-                        resolve();
-                        return;
-                    }
-
-                    args.options.new = fs.readFileSync(args.options.password, 'utf8');
-                } else {
-                    let {password, verifyPassword} = await inquirer.prompt(newPasswordQ);
-
-                    if (!(password && verifyPassword && (password === verifyPassword))) {
-                        Globals.error('Error: Passwords either blank or do not match.');
-                        resolve();
-                        return;
-                    }
-
-                    args.options.new = password;
-                }
-
-                if (args.options.old === args.options.new) {
-                    Globals.error('New password is the same as old.');
-                    resolve();
-                    return;
-                }
-
-                let filePath: string = session.keystore.find(args.address);
-                let nKeystore = decrypted.encrypt(args.options.new);
-                let sNKeystore = JSONBig.stringify(nKeystore);
-
-                fs.writeFileSync(filePath, sNKeystore);
-                Globals.success(sNKeystore);
-                resolve();
-            });
-        });
+        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 
 };

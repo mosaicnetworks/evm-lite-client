@@ -1,12 +1,80 @@
 import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
-import * as JSONBig from 'json-bigint';
 
 import {Controller} from "../../../lib"
-import Globals, {BaseAccount} from "../utils/Globals";
+import {BaseAccount} from "../utils/Globals";
+
+import Staging, {execute, Message, StagedOutput, StagingFunction} from "../utils/Staging";
 
 import Session from "../classes/Session";
 
+
+export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
+    return new Promise<StagedOutput<Message>>(async (resolve) => {
+        let o = Staging.construct.bind(null, args);
+
+        let remote = args.options.remote || false;
+        let verbose: boolean = args.options.verbose || false;
+        let formatted: boolean = args.options.formatted || false;
+        let accounts: BaseAccount[] | void = [];
+        let accountsTable = new ASCIITable();
+        let connection: Controller = null;
+
+        if (verbose || remote) {
+            connection = await session.connect(args.options.host, args.options.port);
+
+            if (!connection) {
+                resolve(o(
+                    Staging.ERROR,
+                    Staging.SUBTYPES.errors.INVALID_CONNECTION,
+                ));
+                return;
+            }
+        }
+
+        if (remote) {
+            accounts = await connection.api.getAccounts();
+        } else {
+            accounts = await session.keystore.all(verbose, connection);
+        }
+
+        if (!accounts || !accounts.length) {
+            resolve(o(
+                Staging.SUCCESS,
+                Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
+                'No accounts.'
+            ));
+            return;
+        }
+
+        if (!formatted) {
+            resolve(o(
+                Staging.SUCCESS,
+                Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
+                accounts
+            ));
+            return;
+        }
+
+        if (verbose) {
+            accountsTable.setHeading('Address', 'Balance', 'Nonce');
+            for (let account of accounts) {
+                accountsTable.addRow(account.address, account.balance, account.nonce);
+            }
+        } else {
+            accountsTable.setHeading('Addresses');
+            for (let account of accounts) {
+                accountsTable.addRow(account.address);
+            }
+        }
+
+        resolve(o(
+            Staging.SUCCESS,
+            Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
+            accountsTable
+        ));
+    });
+};
 
 export default function commandAccountsList(evmlc: Vorpal, session: Session) {
 
@@ -24,57 +92,6 @@ export default function commandAccountsList(evmlc: Vorpal, session: Session) {
         .types({
             string: ['h', 'host']
         })
-        .action((args: Vorpal.Args): Promise<void> => {
-            return new Promise<void>(async (resolve) => {
-                let remote = args.options.remote || false;
-                let verbose: boolean = args.options.verbose || false;
-                let formatted: boolean = args.options.formatted || false;
-                let accounts: BaseAccount[] | void = [];
-                let accountsTable = new ASCIITable();
-                let connection: Controller = null;
-
-                if (verbose || remote) {
-                    connection = await session.connect(args.options.host, args.options.port);
-
-                    if (!connection) {
-                        resolve();
-                        return;
-                    }
-                }
-
-                if (remote) {
-                    accounts = await connection.api.getAccounts();
-                } else {
-                    accounts = await session.keystore.all(verbose, connection);
-                }
-
-                if (!accounts || !accounts.length) {
-                    Globals.warning('No accounts.');
-                    resolve();
-                    return;
-                }
-
-                if (!formatted) {
-                    Globals.success(JSONBig.stringify(accounts));
-                    resolve();
-                    return;
-                }
-
-                if (verbose) {
-                    accountsTable.setHeading('Address', 'Balance', 'Nonce');
-                    for (let account of accounts) {
-                        accountsTable.addRow(account.address, account.balance, account.nonce);
-                    }
-                } else {
-                    accountsTable.setHeading('Addresses');
-                    for (let account of accounts) {
-                        accountsTable.addRow(account.address);
-                    }
-                }
-
-                Globals.success((accountsTable.toString()));
-                resolve();
-            });
-        });
+        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 
 };

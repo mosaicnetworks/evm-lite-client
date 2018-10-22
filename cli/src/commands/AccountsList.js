@@ -9,8 +9,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
-const JSONBig = require("json-bigint");
-const Globals_1 = require("../utils/Globals");
+const Staging_1 = require("../utils/Staging");
+exports.stage = (args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        let o = Staging_1.default.construct.bind(null, args);
+        let remote = args.options.remote || false;
+        let verbose = args.options.verbose || false;
+        let formatted = args.options.formatted || false;
+        let accounts = [];
+        let accountsTable = new ASCIITable();
+        let connection = null;
+        if (verbose || remote) {
+            connection = yield session.connect(args.options.host, args.options.port);
+            if (!connection) {
+                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.INVALID_CONNECTION));
+                return;
+            }
+        }
+        if (remote) {
+            accounts = yield connection.api.getAccounts();
+        }
+        else {
+            accounts = yield session.keystore.all(verbose, connection);
+        }
+        if (!accounts || !accounts.length) {
+            resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, 'No accounts.'));
+            return;
+        }
+        if (!formatted) {
+            resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, accounts));
+            return;
+        }
+        if (verbose) {
+            accountsTable.setHeading('Address', 'Balance', 'Nonce');
+            for (let account of accounts) {
+                accountsTable.addRow(account.address, account.balance, account.nonce);
+            }
+        }
+        else {
+            accountsTable.setHeading('Addresses');
+            for (let account of accounts) {
+                accountsTable.addRow(account.address);
+            }
+        }
+        resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, accountsTable));
+    }));
+};
 function commandAccountsList(evmlc, session) {
     let description = 'List all accounts in the local keystore directory provided by the configuration file. This command will ' +
         'also get a balance and nonce for all the accounts from the node if a valid connection is established.';
@@ -24,53 +68,7 @@ function commandAccountsList(evmlc, session) {
         .types({
         string: ['h', 'host']
     })
-        .action((args) => {
-        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let remote = args.options.remote || false;
-            let verbose = args.options.verbose || false;
-            let formatted = args.options.formatted || false;
-            let accounts = [];
-            let accountsTable = new ASCIITable();
-            let connection = null;
-            if (verbose || remote) {
-                connection = yield session.connect(args.options.host, args.options.port);
-                if (!connection) {
-                    resolve();
-                    return;
-                }
-            }
-            if (remote) {
-                accounts = yield connection.api.getAccounts();
-            }
-            else {
-                accounts = yield session.keystore.all(verbose, connection);
-            }
-            if (!accounts || !accounts.length) {
-                Globals_1.default.warning('No accounts.');
-                resolve();
-                return;
-            }
-            if (!formatted) {
-                Globals_1.default.success(JSONBig.stringify(accounts));
-                resolve();
-                return;
-            }
-            if (verbose) {
-                accountsTable.setHeading('Address', 'Balance', 'Nonce');
-                for (let account of accounts) {
-                    accountsTable.addRow(account.address, account.balance, account.nonce);
-                }
-            }
-            else {
-                accountsTable.setHeading('Addresses');
-                for (let account of accounts) {
-                    accountsTable.addRow(account.address);
-                }
-            }
-            Globals_1.default.success((accountsTable.toString()));
-            resolve();
-        }));
-    });
+        .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandAccountsList;
 ;

@@ -11,7 +11,48 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
 const ASCIITable = require("ascii-table");
-const Globals_1 = require("../utils/Globals");
+const Staging_1 = require("../utils/Staging");
+exports.stage = (args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        let o = Staging_1.default.construct.bind(null, args);
+        let connection = yield session.connect(args.options.host, args.options.port);
+        if (!connection) {
+            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.INVALID_CONNECTION));
+            return;
+        }
+        let interactive = args.options.interactive || session.interactive;
+        let formatted = args.options.formatted || false;
+        let questions = [
+            {
+                name: 'address',
+                type: 'input',
+                required: true,
+                message: 'Address: '
+            }
+        ];
+        if (interactive && !args.address) {
+            let { address } = yield inquirer.prompt(questions);
+            args.address = address;
+        }
+        if (!args.address) {
+            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.BLANK_FIELD, 'Provide a non-empty address. Usage: accounts get <address>'));
+            return;
+        }
+        let account = yield connection.api.getAccount(args.address);
+        let message = '';
+        if (account) {
+            if (formatted) {
+                let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
+                table.addRow(account.address, account.balance, account.nonce);
+                message = table.toString();
+            }
+            else {
+                message = JSONBig.stringify(account);
+            }
+        }
+        resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, message));
+    }));
+};
 function commandAccountsGet(evmlc, session) {
     let description = 'Gets account balance and nonce from a node with a valid connection.';
     return evmlc.command('accounts get [address]').alias('a g')
@@ -23,46 +64,7 @@ function commandAccountsGet(evmlc, session) {
         .types({
         string: ['_', 'h', 'host']
     })
-        .action((args) => {
-        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let connection = yield session.connect(args.options.host, args.options.port);
-            if (!connection) {
-                resolve();
-                return;
-            }
-            let interactive = args.options.interactive || session.interactive;
-            let formatted = args.options.formatted || false;
-            let questions = [
-                {
-                    name: 'address',
-                    type: 'input',
-                    required: true,
-                    message: 'Address: '
-                }
-            ];
-            if (interactive && !args.address) {
-                let { address } = yield inquirer.prompt(questions);
-                args.address = address;
-            }
-            if (!args.address) {
-                Globals_1.default.error('Provide a non-empty address. Usage: accounts get <address>');
-                resolve();
-                return;
-            }
-            let account = yield connection.api.getAccount(args.address);
-            if (account) {
-                if (formatted) {
-                    let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
-                    table.addRow(account.address, account.balance, account.nonce);
-                    Globals_1.default.success(table.toString());
-                }
-                else {
-                    Globals_1.default.success(JSONBig.stringify(account));
-                }
-            }
-            resolve();
-        }));
-    });
+        .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandAccountsGet;
 ;

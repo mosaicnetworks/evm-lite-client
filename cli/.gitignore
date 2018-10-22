@@ -2,4 +2,6 @@ node_modules
 package-lock.json
 PROGRESS.txt
 .idea
-test
+test/assets/keystore
+test/assets/config.toml
+test/assets/db.json

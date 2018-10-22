@@ -3,9 +3,69 @@ import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 import * as ASCIITable from 'ascii-table';
 
-import Globals from "../utils/Globals";
+import Staging, {execute, Message, StagedOutput, StagingFunction} from "../utils/Staging";
+
 import Session from "../classes/Session";
 
+
+export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
+    return new Promise<StagedOutput<Message>>(async (resolve) => {
+        let o = Staging.construct.bind(null, args);
+        let connection = await session.connect(args.options.host, args.options.port);
+
+        if (!connection) {
+            resolve(o(
+                Staging.ERROR,
+                Staging.SUBTYPES.errors.INVALID_CONNECTION,
+            ));
+            return;
+        }
+
+        let interactive = args.options.interactive || session.interactive;
+        let formatted = args.options.formatted || false;
+        let questions = [
+            {
+                name: 'address',
+                type: 'input',
+                required: true,
+                message: 'Address: '
+            }
+        ];
+
+        if (interactive && !args.address) {
+            let {address} = await inquirer.prompt(questions);
+            args.address = address;
+        }
+
+        if (!args.address) {
+            resolve(o(
+                Staging.ERROR,
+                Staging.SUBTYPES.errors.BLANK_FIELD,
+                'Provide a non-empty address. Usage: accounts get <address>'
+            ));
+            return;
+        }
+
+        let account = await connection.api.getAccount(args.address);
+        let message: string = '';
+
+        if (account) {
+            if (formatted) {
+                let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
+                table.addRow(account.address, account.balance, account.nonce);
+                message = table.toString();
+            } else {
+                message = JSONBig.stringify(account);
+            }
+        }
+
+        resolve(o(
+            Staging.SUCCESS,
+            Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
+            message
+        ));
+    });
+};
 
 export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
 
@@ -21,51 +81,6 @@ export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
         .types({
             string: ['_', 'h', 'host']
         })
-        .action((args: Vorpal.Args): Promise<void> => {
-            return new Promise<void>(async (resolve) => {
-                let connection = await session.connect(args.options.host, args.options.port);
-
-                if (!connection) {
-                    resolve();
-                    return;
-                }
-
-                let interactive = args.options.interactive || session.interactive;
-                let formatted = args.options.formatted || false;
-                let questions = [
-                    {
-                        name: 'address',
-                        type: 'input',
-                        required: true,
-                        message: 'Address: '
-                    }
-                ];
-
-                if (interactive && !args.address) {
-                    let {address} = await inquirer.prompt(questions);
-                    args.address = address;
-                }
-
-                if (!args.address) {
-                    Globals.error('Provide a non-empty address. Usage: accounts get <address>');
-                    resolve();
-                    return;
-                }
-
-                let account = await connection.api.getAccount(args.address);
-
-                if (account) {
-                    if (formatted) {
-                        let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
-                        table.addRow(account.address, account.balance, account.nonce);
-                        Globals.success(table.toString());
-                    } else {
-                        Globals.success(JSONBig.stringify(account))
-                    }
-                }
-
-                resolve();
-            });
-        });
+        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 
 };
