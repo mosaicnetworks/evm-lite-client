@@ -110,8 +110,7 @@ By default all commands will output raw JSON unless the `-f, --formatted` flag
 is provided. A connection to the node is not required unless stated in each
 command.
 
-The global flag `-d, --datadir` specifies the directory where `keystore`,
-`pwd.txt` and `config.toml` are stored unless overwritten by specific flags.
+The global flag `-d, --datadir` specifies the directory where `keystore` and `config.toml` are stored unless overwritten by specific flags.
 Note that if this flag is not provided, it will default to `~/.evmlc`.
 
 ## Getting Started
@@ -251,7 +250,7 @@ retrieve the corresponding balance, and displayed it nicely on the screen.
 ### 5) Create another account
 
 ```bash
-evmlc$ accounts create
+evmlc$ accounts create -v
 
 ? Enter keystore output path:  [...]/.evmlc/keystore
 ? Enter a password:  [hidden]
