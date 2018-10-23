@@ -7,6 +7,7 @@ import * as path from "path";
 import Globals from "../utils/Globals";
 import Keystore from "./Keystore";
 import DataDirectory from "./DataDirectory";
+import Staging from "./Staging";
 
 export default class Config {
 
@@ -20,7 +21,7 @@ export default class Config {
 
         this.path = path.join(datadir, filename);
 
-        if (fs.existsSync(this.path)) {
+        if (Staging.exists(this.path)) {
             let tomlData: string = Config.readFile(this.path);
 
             this.data = toml.parse(tomlData);
@@ -29,7 +30,7 @@ export default class Config {
     }
 
     static readFile(path: string): string {
-        if (fs.existsSync(path)) {
+        if (Staging.exists(path)) {
             return fs.readFileSync(path, 'utf8');
         }
     }
@@ -64,7 +65,7 @@ export default class Config {
 
             let configFileDir = list.join('/');
 
-            if (!fs.existsSync(configFileDir)) {
+            if (!Staging.exists(configFileDir)) {
                 mkdir.mkdirp(configFileDir);
             }
 

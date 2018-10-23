@@ -59,11 +59,11 @@ exports.stage = (args, session) => {
             return;
         }
         if (args.options.old) {
-            if (!fs.existsSync(args.options.old)) {
+            if (!Staging_1.default.exists(args.options.old)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
                 return;
             }
-            if (fs.lstatSync(args.options.old).isDirectory()) {
+            if (Staging_1.default.isDirectory(args.options.old)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
                 return;
             }
@@ -86,11 +86,11 @@ exports.stage = (args, session) => {
             return;
         }
         if (args.options.new) {
-            if (!fs.existsSync(args.options.new)) {
+            if (!Staging_1.default.exists(args.options.new)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
                 return;
             }
-            if (fs.lstatSync(args.options.new).isDirectory()) {
+            if (Staging_1.default.isDirectory(args.options.new)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
                 return;
             }

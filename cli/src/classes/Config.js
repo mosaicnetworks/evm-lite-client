@@ -8,6 +8,7 @@ const path = require("path");
 const Globals_1 = require("../utils/Globals");
 const Keystore_1 = require("./Keystore");
 const DataDirectory_1 = require("./DataDirectory");
+const Staging_1 = require("./Staging");
 class Config {
     constructor(datadir, filename) {
         this.datadir = datadir;
@@ -15,14 +16,14 @@ class Config {
         this.data = Config.default(this.datadir);
         this._initialData = Config.default(this.datadir);
         this.path = path.join(datadir, filename);
-        if (fs.existsSync(this.path)) {
+        if (Staging_1.default.exists(this.path)) {
             let tomlData = Config.readFile(this.path);
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
         }
     }
     static readFile(path) {
-        if (fs.existsSync(path)) {
+        if (Staging_1.default.exists(path)) {
             return fs.readFileSync(path, 'utf8');
         }
     }
@@ -52,7 +53,7 @@ class Config {
             let list = this.path.split('/');
             list.pop();
             let configFileDir = list.join('/');
-            if (!fs.existsSync(configFileDir)) {
+            if (!Staging_1.default.exists(configFileDir)) {
                 mkdir.mkdirp(configFileDir);
             }
             fs.writeFileSync(this.path, this.toTOML());

@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
 const Globals_1 = require("../utils/Globals");
+const fs = require("fs");
 exports.execute = (fn, args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
         let output = yield fn(args, session);
@@ -34,6 +35,12 @@ exports.execute = (fn, args, session) => {
 };
 class Staging {
     constructor() {
+    }
+    static exists(path) {
+        return fs.existsSync(path);
+    }
+    static isDirectory(path) {
+        return fs.lstatSync(path).isDirectory();
     }
     static success(args, message) {
         return {

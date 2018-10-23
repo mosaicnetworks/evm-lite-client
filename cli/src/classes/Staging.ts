@@ -4,6 +4,7 @@ import * as JSONBig from 'json-bigint';
 import Globals, {BaseAccount, SentTx, TXReceipt, v3JSONKeyStore} from "../utils/Globals";
 
 import Session from "./Session";
+import * as fs from "fs";
 
 
 type Args = {
@@ -64,6 +65,14 @@ export default class Staging {
     static SUCCESS = 'success';
 
     constructor() {
+    }
+
+    static exists(path: string): boolean {
+        return fs.existsSync(path);
+    }
+
+    static isDirectory(path: string): boolean {
+        return fs.lstatSync(path).isDirectory();
     }
 
     static success(args: Args, message: Message) {

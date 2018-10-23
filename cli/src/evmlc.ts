@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 import * as Vorpal from "vorpal";
-import * as fs from "fs";
 import * as mkdir from 'mkdirp';
 import * as figlet from 'figlet';
 
 import Globals from "./utils/Globals";
 import Session from "./classes/Session";
+import Staging from "./classes/Staging";
 
 import TransactionsList from "./commands/TransactionsList";
 import TransactionsGet from "./commands/TransactionsGet";
@@ -27,7 +27,7 @@ import LogsClear from "./commands/LogsClear";
 
 const init = (): Promise<void> => {
     return new Promise<void>(resolve => {
-        if (!fs.existsSync(Globals.evmlcDir)) {
+        if (!Staging.exists(Globals.evmlcDir)) {
             mkdir.mkdirp(Globals.evmlcDir);
         }
         resolve();
@@ -45,7 +45,7 @@ init()
         if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
             dataDirPath = process.argv[3];
 
-            if (!fs.existsSync(process.argv[3])) {
+            if (!Staging.exists(process.argv[3])) {
                 Globals.warning('Data directory file path provided does not exist and hence will created...');
             }
 

@@ -4,18 +4,19 @@ const fs = require("fs");
 const mkdir = require("mkdirp");
 const path = require("path");
 const Config_1 = require("./Config");
+const Staging_1 = require("./Staging");
 class DataDirectory {
     constructor(path) {
         this.path = path;
         DataDirectory.createDirectoryIfNotExists(path);
     }
     static createDirectoryIfNotExists(path) {
-        if (!fs.existsSync(path)) {
+        if (!Staging_1.default.exists(path)) {
             mkdir.sync(path);
         }
     }
     static createOrReadFile(path, data) {
-        if (!fs.existsSync(path)) {
+        if (!Staging_1.default.exists(path)) {
             fs.writeFileSync(path, data);
             return data;
         }

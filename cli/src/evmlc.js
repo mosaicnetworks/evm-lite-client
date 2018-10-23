@@ -10,11 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Vorpal = require("vorpal");
-const fs = require("fs");
 const mkdir = require("mkdirp");
 const figlet = require("figlet");
 const Globals_1 = require("./utils/Globals");
 const Session_1 = require("./classes/Session");
+const Staging_1 = require("./classes/Staging");
 const TransactionsList_1 = require("./commands/TransactionsList");
 const TransactionsGet_1 = require("./commands/TransactionsGet");
 const AccountsUpdate_1 = require("./commands/AccountsUpdate");
@@ -32,7 +32,7 @@ const LogsView_1 = require("./commands/LogsView");
 const LogsClear_1 = require("./commands/LogsClear");
 const init = () => {
     return new Promise(resolve => {
-        if (!fs.existsSync(Globals_1.default.evmlcDir)) {
+        if (!Staging_1.default.exists(Globals_1.default.evmlcDir)) {
             mkdir.mkdirp(Globals_1.default.evmlcDir);
         }
         resolve();
@@ -46,7 +46,7 @@ init()
     let dataDirPath = Globals_1.default.evmlcDir;
     if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
         dataDirPath = process.argv[3];
-        if (!fs.existsSync(process.argv[3])) {
+        if (!Staging_1.default.exists(process.argv[3])) {
             Globals_1.default.warning('Data directory file path provided does not exist and hence will created...');
         }
         process.argv.splice(2, 2);

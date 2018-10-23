@@ -46,7 +46,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            if (!fs.existsSync(output)) {
+            if (!Staging.exists(output)) {
                 resolve(error(
                     Staging.ERRORS.DIRECTORY_NOT_EXIST,
                     'Output directory does not exist.'
@@ -54,7 +54,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            if (!fs.lstatSync(output).isDirectory()) {
+            if (!Staging.isDirectory(output)) {
                 resolve(error(
                     Staging.ERRORS.IS_FILE,
                     'Output path is not a directory.'
@@ -67,7 +67,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         } else {
             args.options.output = args.options.output || session.config.data.defaults.keystore;
 
-            if (!fs.existsSync(args.options.password)) {
+            if (!Staging.exists(args.options.password)) {
                 resolve(error(
                     Staging.ERRORS.PATH_NOT_EXIST,
                     'Password file provided does not exist.'
@@ -75,7 +75,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            if (!fs.existsSync(args.options.output)) {
+            if (!Staging.exists(args.options.output)) {
                 resolve(error(
                     Staging.ERRORS.DIRECTORY_NOT_EXIST,
                     'Output directory provided does not exist.'
@@ -83,7 +83,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            if (fs.lstatSync(args.options.password).isDirectory()) {
+            if (Staging.isDirectory(args.options.password)) {
                 resolve(error(
                     Staging.ERRORS.IS_DIRECTORY,
                     'Password file path provided is a directory.'
@@ -91,7 +91,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            if (!fs.lstatSync(args.options.output).isDirectory()) {
+            if (!Staging.isDirectory(args.options.output)) {
                 resolve(error(
                     Staging.ERRORS.IS_FILE,
                     'Output path is not a directory.'

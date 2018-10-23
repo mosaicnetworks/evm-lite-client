@@ -80,11 +80,11 @@ exports.stage = (args, session) => {
             resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
         }
         if (args.options.password) {
-            if (!fs.existsSync(args.options.password)) {
+            if (!Staging_1.default.exists(args.options.password)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
                 return;
             }
-            if (fs.lstatSync(args.options.password).isDirectory()) {
+            if (Staging_1.default.isDirectory(args.options.password)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
                 return;
             }

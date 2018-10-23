@@ -3,6 +3,7 @@ import * as mkdir from "mkdirp";
 import * as path from 'path';
 
 import Config from "./Config";
+import Staging from "./Staging";
 
 
 export default class DataDirectory {
@@ -12,13 +13,13 @@ export default class DataDirectory {
     }
 
     static createDirectoryIfNotExists(path: string): void {
-        if (!fs.existsSync(path)) {
+        if (!Staging.exists(path)) {
             mkdir.sync(path);
         }
     }
 
     static createOrReadFile(path: string, data: string): string {
-        if (!fs.existsSync(path)) {
+        if (!Staging.exists(path)) {
             fs.writeFileSync(path, data);
 
             return data;

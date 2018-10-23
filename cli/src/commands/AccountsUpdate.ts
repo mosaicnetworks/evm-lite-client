@@ -67,7 +67,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (args.options.old) {
-            if (!fs.existsSync(args.options.old)) {
+            if (!Staging.exists(args.options.old)) {
                 resolve(error(
                     Staging.ERRORS.FILE_NOT_FOUND,
                     'Old password file path provided does not exist.'
@@ -75,7 +75,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            if (fs.lstatSync(args.options.old).isDirectory()) {
+            if (Staging.isDirectory(args.options.old)) {
                 resolve(error(
                     Staging.ERRORS.IS_DIRECTORY,
                     'Old password file path provided is not a file.'
@@ -110,7 +110,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (args.options.new) {
-            if (!fs.existsSync(args.options.new)) {
+            if (!Staging.exists(args.options.new)) {
                 resolve(error(
                     Staging.ERRORS.FILE_NOT_FOUND,
                     'New password file path provided does not exist.'
@@ -118,7 +118,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            if (fs.lstatSync(args.options.new).isDirectory()) {
+            if (Staging.isDirectory(args.options.new)) {
                 resolve(error(
                     Staging.ERRORS.IS_DIRECTORY,
                     'New password file path provided is not a file.'

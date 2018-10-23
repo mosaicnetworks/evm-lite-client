@@ -88,7 +88,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (args.options.password) {
-            if (!fs.existsSync(args.options.password)) {
+            if (!Staging.exists(args.options.password)) {
                 resolve(error(
                     Staging.ERRORS.FILE_NOT_FOUND,
                     'Password file path provided does not exist.'
@@ -96,7 +96,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            if (fs.lstatSync(args.options.password).isDirectory()) {
+            if (Staging.isDirectory(args.options.password)) {
                 resolve(error(
                     Staging.ERRORS.IS_DIRECTORY,
                     'Password file path provided is not a file.'

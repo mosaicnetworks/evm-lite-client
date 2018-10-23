@@ -42,11 +42,11 @@ exports.stage = (args, session) => {
                 resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
             }
-            if (!fs.existsSync(output)) {
+            if (!Staging_1.default.exists(output)) {
                 resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
                 return;
             }
-            if (!fs.lstatSync(output).isDirectory()) {
+            if (!Staging_1.default.isDirectory(output)) {
                 resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
                 return;
             }
@@ -55,19 +55,19 @@ exports.stage = (args, session) => {
         }
         else {
             args.options.output = args.options.output || session.config.data.defaults.keystore;
-            if (!fs.existsSync(args.options.password)) {
+            if (!Staging_1.default.exists(args.options.password)) {
                 resolve(error(Staging_1.default.ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
                 return;
             }
-            if (!fs.existsSync(args.options.output)) {
+            if (!Staging_1.default.exists(args.options.output)) {
                 resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory provided does not exist.'));
                 return;
             }
-            if (fs.lstatSync(args.options.password).isDirectory()) {
+            if (Staging_1.default.isDirectory(args.options.password)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
                 return;
             }
-            if (!fs.lstatSync(args.options.output).isDirectory()) {
+            if (!Staging_1.default.isDirectory(args.options.output)) {
                 resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
                 return;
             }
