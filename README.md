@@ -28,7 +28,7 @@ This removes all dependencies for Client and CLI and also removes the symlink.
 
 If the `make` was successful you should now be able to run `evmlc`:
 
-```console
+```bash
 $ evmlc
 
   A Command Line Interface to interact with EVM-Lite.
@@ -76,7 +76,7 @@ interactive = true
 The easiest way to manage configuration is through the `config` command in
 interactive mode.
 
-```console
+```bash
 $ evmlc i
   _______     ____  __       _     _ _          ____ _     ___
  | ____\ \   / /  \/  |     | |   (_) |_ ___   / ___| |   |_ _|
@@ -90,19 +90,19 @@ $ evmlc i
  Keystore:    [...]/.evmlc/keystore
 
 evmlc$
-
 ```
 To change default configuration values run `config set` or `c s`. You will be
 taken to an interactive prompt to change connection and default values.
 
-```console
+```bash
 evmlc$ config set
 
 ? Host:  127.0.0.1
 ? Port:  8080
-? Default From Address:
-? Default Gas:  0
-? Default Gas Price:  0
+? From:  none
+? Gas:  100000
+? Gasprice:  0
+? Keystore:  [...]/.evmlc/keystore
 ```
 
 ## Commands
@@ -211,6 +211,7 @@ account:
 
 ```bash
 user:~$ evml solo --genesis 477f22b53038b745bb039653b91bdaa88c8bf94d
+
 DEBU[0000] Config                                        Base="{/home/user/.evm-lite debug}" Eth="&{/home/user/.evm-lite/eth/genesis.json /home/user/.evm-lite/eth/keystore /home/user/.evm-lite/eth/pwd.txt /home/user/.evm-lite/eth/chaindata :8080 128}"
 DEBU[0000] Config                                        Eth="&{/home/user/.evm-lite/eth/genesis.json /home/user/.evm-lite/eth/keystore /home/user/.evm-lite/eth/pwd.txt /home/user/.evm-lite/eth/chaindata :8080 128}" genesis=477f22b53038b745bb039653b91bdaa88c8bf94d
 DEBU[0000] Writing genesis file
@@ -220,7 +221,6 @@ DEBU[0000] Committed                                     root=0x1aa38473e2f6fc5a
 DEBU[0000] Reset WAS
 DEBU[0000] Reset TxPool
 INFO[0000] serving api...
-
 ```
 
 This booted the node and assigned a lot of coins to our account. By default,
@@ -236,12 +236,12 @@ Back in the interactive `evmlc` session, type `accounts list -f -v` (formatted, 
 
 ```bash
 evmlc$ accounts list -f -v
+
 .----------------------------------------------------------------------------------------.
 | # |                  Address                   |            Balance            | Nonce |
 |---|--------------------------------------------|-------------------------------|-------|
 | 1 | 0x477F22b53038b745BB039653b91bdaA88c8bF94d | 1,337,000,000,000,000,000,000 |     0 |
 '----------------------------------------------------------------------------------------'
-evmlc$
 ```
 
 The command went through the accounts in the keystore, connected to the node to
@@ -258,7 +258,6 @@ evmlc$ accounts create
 ? Re-enter password:  [hidden]
 
 {"version":3,"id":"1cd4f6fc-5d66-49b9-b3b2-f0ba0798450c","address":"988456018729c15a6914a2c5ba1a753f76ec36dc","crypto":{"ciphertext":"XXX","cipherparams":{"iv":"421d86663e8cd0915ab0bbedb0e14d96"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"XXX","n":8192,"r":8,"p":1},"mac":"XXX"}}
-evmlc$
 ```
 
 This one has the address `988456018729c15a6914a2c5ba1a753f76ec36dc`
@@ -280,7 +279,6 @@ evmlc$ transfer
 
 {"txHash":"0xa64b35b2228f00d9b5ba01fcd4c8bcd1c89b33d8b5fd917ea2c4d4de2a7d43ea"}
 Transaction submitted.
-evmlc$
 ```
 
 #### What happened?
