@@ -52,7 +52,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         for (let key in args.options) {
             if (args.options.hasOwnProperty(key)) {
-                if (session.config.data.defaults[key] !== args.options[key]) {
+                if (session.config.data.defaults[key] !== args.options[key] && key !== 'interactive') {
                     session.config.data.defaults[key] = args.options[key]
                 }
             }

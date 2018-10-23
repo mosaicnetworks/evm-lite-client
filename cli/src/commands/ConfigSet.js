@@ -47,7 +47,7 @@ exports.stage = (args, session) => {
         }
         for (let key in args.options) {
             if (args.options.hasOwnProperty(key)) {
-                if (session.config.data.defaults[key] !== args.options[key]) {
+                if (session.config.data.defaults[key] !== args.options[key] && key !== 'interactive') {
                     session.config.data.defaults[key] = args.options[key];
                 }
             }
