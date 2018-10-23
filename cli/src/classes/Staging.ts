@@ -1,9 +1,9 @@
 import * as ASCIITable from 'ascii-table';
 import * as JSONBig from 'json-bigint';
 
-import Globals, {BaseAccount, TXReceipt, v3JSONKeyStore} from "./Globals";
+import Globals, {BaseAccount, SentTx, TXReceipt, v3JSONKeyStore} from "../utils/Globals";
 
-import Session from "../classes/Session";
+import Session from "./Session";
 
 
 type Args = {
@@ -13,11 +13,11 @@ type Args = {
     };
 }
 
-export type Message = BaseAccount[] | TXReceipt | v3JSONKeyStore | ASCIITable | string;
+export type Message = SentTx[] | BaseAccount[] | TXReceipt | v3JSONKeyStore | ASCIITable | Object | string;
 
 export type StagedOutput<Message> = {
     type: string;
-    subtype: string;
+    subtype?: string;
     args: Args,
     message?: Message;
 }
@@ -50,33 +50,40 @@ export const execute = (fn: StagingFunction, args: Args, session: Session): Prom
 
 export default class Staging {
     static ERROR = 'error';
-    static SUCCESS = 'success';
-    static SUBTYPES = {
-        errors: {
-            BLANK_FIELD: 'Field(s) should not be blank',
-            DIRECTORY_NOT_EXIST: 'Directory should exist',
-            PATH_NOT_EXIST: 'Path(s) should exist',
-            IS_FILE: 'Should be a directory',
-            IS_DIRECTORY: 'Should not be a directory',
-            FILE_NOT_FOUND: 'Cannot find file',
-            INVALID_CONNECTION: 'Invalid connection',
-            OTHER: 'Something went wrong'
-        },
-        success: {
-            COMMAND_EXECUTION_COMPLETED: 'Command was executed successfully'
-        },
+    static ERRORS = {
+        BLANK_FIELD: 'Field(s) should not be blank',
+        DIRECTORY_NOT_EXIST: 'Directory should exist',
+        PATH_NOT_EXIST: 'Path(s) should exist',
+        IS_FILE: 'Should be a directory',
+        IS_DIRECTORY: 'Should not be a directory',
+        FILE_NOT_FOUND: 'Cannot find file',
+        INVALID_CONNECTION: 'Invalid connection',
+        FETCH_FAILED: 'Could not fetch data',
+        OTHER: 'Something went wrong'
     };
+    static SUCCESS = 'success';
 
     constructor() {
     }
 
-    static construct(args: Args, type: string, subtype: string, message: Message = null): StagedOutput<Message> {
+    static success(args: Args, message: Message) {
         return {
-            type: type,
+            type: Staging.SUCCESS,
+            args: args,
+            message: message
+        }
+    }
+
+    static error(args: Args, subtype: string, message: Message = null) {
+        return {
+            type: Staging.ERROR,
             subtype: subtype,
             args: args,
             message: message
         }
-    };
+    }
 
+    static getStagingFunctions(args: Args) {
+        return {error: Staging.error.bind(null, args), success: Staging.success.bind(null, args)}
+    }
 }

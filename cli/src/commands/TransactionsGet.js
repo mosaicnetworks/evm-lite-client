@@ -10,8 +10,62 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const inquirer = require("inquirer");
-const JSONBig = require("json-bigint");
-const Globals_1 = require("../utils/Globals");
+const Staging_1 = require("../classes/Staging");
+exports.stage = (args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        let { error, success } = Staging_1.default.getStagingFunctions(args);
+        let connection = yield session.connect(args.options.host, args.options.port);
+        if (!connection) {
+            resolve(error(Staging_1.default.ERRORS.INVALID_CONNECTION));
+            return;
+        }
+        let table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
+        let interactive = args.options.interactive || session.interactive;
+        let formatted = args.options.formatted || false;
+        let questions = [
+            {
+                name: 'hash',
+                type: 'input',
+                required: true,
+                message: 'Transaction Hash: '
+            }
+        ];
+        if (interactive) {
+            let { hash } = yield inquirer.prompt(questions);
+            args.hash = hash;
+        }
+        if (!args.hash) {
+            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a transaction hash. Usage: transactions get <hash>'));
+            return;
+        }
+        let receipt = yield connection.api.getReceipt(args.hash);
+        if (!receipt) {
+            resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
+            return;
+        }
+        delete receipt.logsBloom;
+        delete receipt.contractAddress;
+        if (!formatted) {
+            resolve(success(receipt));
+            return;
+        }
+        for (let key in receipt) {
+            if (receipt.hasOwnProperty(key)) {
+                table.addRow(key, receipt[key]);
+            }
+        }
+        let tx = session.database.transactions.get(args.hash);
+        if (!tx) {
+            resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
+            return;
+        }
+        table
+            .addRow('Value', tx.value)
+            .addRow('Gas', tx.gas)
+            .addRow('Gas Price', tx.gasPrice);
+        resolve(success(table));
+    }));
+};
 function commandTransactionsGet(evmlc, session) {
     let description = 'Gets a transaction using its hash.';
     return evmlc.command('transactions get [hash]').alias('t g')
@@ -23,64 +77,7 @@ function commandTransactionsGet(evmlc, session) {
         .types({
         string: ['_', 'h', 'host']
     })
-        .action((args) => {
-        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let connection = yield session.connect(args.options.host, args.options.port);
-            if (!connection) {
-                resolve();
-                return;
-            }
-            let table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
-            let interactive = args.options.interactive || session.interactive;
-            let formatted = args.options.formatted || false;
-            let questions = [
-                {
-                    name: 'hash',
-                    type: 'input',
-                    required: true,
-                    message: 'Transaction Hash: '
-                }
-            ];
-            if (interactive) {
-                let { hash } = yield inquirer.prompt(questions);
-                args.hash = hash;
-            }
-            if (!args.hash) {
-                Globals_1.default.error('Provide a transaction hash. Usage: transactions get <hash>');
-                resolve();
-                return;
-            }
-            let receipt = yield connection.api.getReceipt(args.hash);
-            if (!receipt) {
-                resolve();
-                return;
-            }
-            delete receipt.logsBloom;
-            delete receipt.contractAddress;
-            if (!formatted) {
-                Globals_1.default.success(JSONBig.stringify(receipt));
-                resolve();
-                return;
-            }
-            for (let key in receipt) {
-                if (receipt.hasOwnProperty(key)) {
-                    table.addRow(key, receipt[key]);
-                }
-            }
-            let tx = session.database.transactions.get(args.hash);
-            if (!tx) {
-                Globals_1.default.error('Could not find transaction in list.');
-                resolve();
-                return;
-            }
-            let txTable = new ASCIITable('Transaction')
-                .setHeading('From', 'To', 'Value', 'Gas', 'Gas Price');
-            txTable.addRow(tx.from, tx.to, tx.value, tx.gas, tx.gasPrice);
-            Globals_1.default.success(txTable.toString());
-            Globals_1.default.success(table.toString());
-            resolve();
-        }));
-    });
+        .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandTransactionsGet;
 ;

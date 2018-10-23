@@ -5,7 +5,7 @@ import * as path from "path";
 import {stage} from '../../src/commands/AccountsCreate';
 import {datadir, password, pwdPath, session} from "../constants";
 
-import Staging, {StagedOutput} from "../../src/utils/Staging";
+import Staging, {StagedOutput} from "../../src/classes/Staging";
 
 
 const assert = Chai.assert;
@@ -20,7 +20,6 @@ describe('Command: accounts create', () => {
         let result: StagedOutput<any> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
-        assert.equal(result.subtype, Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
 
         // check output directory and password was what was expected
         assert.equal(result.args.options.password, password);
@@ -39,7 +38,6 @@ describe('Command: accounts create', () => {
         let result: StagedOutput<any> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
-        assert.equal(result.subtype, Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
 
         // check output directory and password was what was expected
         assert.equal(result.args.options.password, password);
@@ -57,7 +55,7 @@ describe('Command: accounts create', () => {
         let result: StagedOutput<any> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.PATH_NOT_EXIST);
+        assert.equal(result.subtype, Staging.ERRORS.PATH_NOT_EXIST);
     });
 
     it('should return error as output directory does not exists', async () => {
@@ -70,7 +68,7 @@ describe('Command: accounts create', () => {
         let result: StagedOutput<any> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.DIRECTORY_NOT_EXIST);
+        assert.equal(result.subtype, Staging.ERRORS.DIRECTORY_NOT_EXIST);
     });
 
     it('should return error as password file is a directory', async () => {
@@ -82,7 +80,7 @@ describe('Command: accounts create', () => {
         let result: StagedOutput<any> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.IS_DIRECTORY);
+        assert.equal(result.subtype, Staging.ERRORS.IS_DIRECTORY);
     });
 
     it('should return error as output directory is a file', async () => {
@@ -95,6 +93,6 @@ describe('Command: accounts create', () => {
         let result: StagedOutput<any> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.IS_FILE);
+        assert.equal(result.subtype, Staging.ERRORS.IS_FILE);
     });
 });

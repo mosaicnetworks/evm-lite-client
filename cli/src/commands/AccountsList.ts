@@ -3,15 +3,14 @@ import * as ASCIITable from 'ascii-table';
 
 import {Controller} from "../../../lib"
 import {BaseAccount} from "../utils/Globals";
-
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../utils/Staging";
+import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
 
 
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let o = Staging.construct.bind(null, args);
+        let {error, success} = Staging.getStagingFunctions(args);
 
         let remote = args.options.remote || false;
         let verbose: boolean = args.options.verbose || false;
@@ -24,10 +23,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             connection = await session.connect(args.options.host, args.options.port);
 
             if (!connection) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.INVALID_CONNECTION,
-                ));
+                resolve(error(Staging.ERRORS.INVALID_CONNECTION));
                 return;
             }
         }
@@ -39,20 +35,12 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!accounts || !accounts.length) {
-            resolve(o(
-                Staging.SUCCESS,
-                Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
-                'No accounts.'
-            ));
+            resolve(success([]));
             return;
         }
 
         if (!formatted) {
-            resolve(o(
-                Staging.SUCCESS,
-                Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
-                accounts
-            ));
+            resolve(success(accounts));
             return;
         }
 
@@ -68,11 +56,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             }
         }
 
-        resolve(o(
-            Staging.SUCCESS,
-            Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
-            accountsTable
-        ));
+        resolve(success(accountsTable));
     });
 };
 

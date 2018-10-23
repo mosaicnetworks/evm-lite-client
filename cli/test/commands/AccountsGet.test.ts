@@ -4,7 +4,7 @@ import * as Vorpal from "vorpal";
 import {stage} from '../../src/commands/AccountsGet';
 import {session} from "../constants";
 
-import Staging, {Message, StagedOutput} from "../../src/utils/Staging";
+import Staging, {Message, StagedOutput} from "../../src/classes/Staging";
 
 
 const assert = Chai.assert;
@@ -20,7 +20,7 @@ describe('Command: accounts get', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.INVALID_CONNECTION);
+        assert.equal(result.subtype, Staging.ERRORS.INVALID_CONNECTION);
     });
 
     it('should return error no address was provided', async () => {
@@ -33,7 +33,7 @@ describe('Command: accounts get', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.BLANK_FIELD);
+        assert.equal(result.subtype, Staging.ERRORS.BLANK_FIELD);
     });
 
     it('should return unformatted output for provided address', async () => {
@@ -47,7 +47,6 @@ describe('Command: accounts get', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
-        assert.equal(result.subtype, Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
 
         assert.equal(result.args.address, '0x3d906545a6f4e20062fe1e08760cfdbead0d1d96');
         assert.equal(result.args.options.formatted, undefined);
@@ -65,7 +64,6 @@ describe('Command: accounts get', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
-        assert.equal(result.subtype, Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
 
         assert.equal(result.args.address, '0x3d906545a6f4e20062fe1e08760cfdbead0d1d96');
         assert.equal(result.args.options.formatted, true);

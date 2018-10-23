@@ -12,10 +12,10 @@ const inquirer = require("inquirer");
 const fs = require("fs");
 const JSONBig = require("json-bigint");
 const lib_1 = require("../../../lib");
-const Staging_1 = require("../utils/Staging");
+const Staging_1 = require("../classes/Staging");
 exports.stage = (args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-        let o = Staging_1.default.construct.bind(null, args);
+        let { error, success } = Staging_1.default.getStagingFunctions(args);
         let interactive = args.options.interactive || session.interactive;
         let accounts = yield session.keystore.all();
         let addressQ = [
@@ -50,21 +50,21 @@ exports.stage = (args, session) => {
             args.address = address;
         }
         if (!args.address) {
-            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.BLANK_FIELD, 'Provide a non-empty address. Usage: accounts update <address>'));
+            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address. Usage: accounts update <address>'));
             return;
         }
         let keystore = session.keystore.get(args.address);
         if (!keystore) {
-            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.FILE_NOT_FOUND, `Cannot find keystore file of address: ${args.address}.`));
+            resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${args.address}.`));
             return;
         }
         if (args.options.old) {
             if (!fs.existsSync(args.options.old)) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
+                resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
                 return;
             }
             if (fs.lstatSync(args.options.old).isDirectory()) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.IS_DIRECTORY, 'Old password file path provided is not a file.'));
+                resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
                 return;
             }
             args.options.old = fs.readFileSync(args.options.old, 'utf8');
@@ -78,20 +78,20 @@ exports.stage = (args, session) => {
             decrypted = lib_1.Account.decrypt(keystore, args.options.old);
         }
         catch (err) {
-            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.OTHER, 'Failed decryption of account with the password provided.'));
+            resolve(error(Staging_1.default.ERRORS.OTHER, 'Failed decryption of account with the password provided.'));
             return;
         }
         if (!decrypted) {
-            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.OTHER, 'Oops! Something went wrong.'));
+            resolve(error(Staging_1.default.ERRORS.OTHER, 'Oops! Something went wrong.'));
             return;
         }
         if (args.options.new) {
             if (!fs.existsSync(args.options.new)) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
+                resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
                 return;
             }
             if (fs.lstatSync(args.options.new).isDirectory()) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.IS_DIRECTORY, 'New password file path provided is not a file.'));
+                resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
                 return;
             }
             args.options.new = fs.readFileSync(args.options.new, 'utf8');
@@ -99,20 +99,20 @@ exports.stage = (args, session) => {
         else {
             let { password, verifyPassword } = yield inquirer.prompt(newPasswordQ);
             if (!(password && verifyPassword && (password === verifyPassword))) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.BLANK_FIELD, 'Error: Passwords either blank or do not match.'));
+                resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Error: Passwords either blank or do not match.'));
                 return;
             }
             args.options.new = password;
         }
         if (args.options.old === args.options.new) {
-            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.OTHER, 'New password is the same as old.'));
+            resolve(error(Staging_1.default.ERRORS.OTHER, 'New password is the same as old.'));
             return;
         }
         let filePath = session.keystore.find(args.address);
         let nKeystore = decrypted.encrypt(args.options.new);
         let sNKeystore = JSONBig.stringify(nKeystore);
         fs.writeFileSync(filePath, sNKeystore);
-        resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, nKeystore));
+        resolve(success(nKeystore));
     }));
 };
 function commandAccountsUpdate(evmlc, session) {

@@ -17,8 +17,8 @@ class Session {
         this.keystore = this.config.getOrCreateKeystore();
     }
     connect(forcedHost, forcedPort) {
-        let host = forcedHost || this.config.data.connection.host || '127.0.0.1';
-        let port = forcedPort || this.config.data.connection.port || 8080;
+        let host = forcedHost || this.config.data.defaults.host || '127.0.0.1';
+        let port = forcedPort || this.config.data.defaults.port || 8080;
         let node = new lib_1.Controller(host, port);
         return node.api.testConnection()
             .then((success) => {

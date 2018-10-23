@@ -12,7 +12,7 @@ const Chai = require("chai");
 const AccountsCreate = require("../../src/commands/AccountsCreate");
 const AccountsUpdate_1 = require("../../src/commands/AccountsUpdate");
 const constants_1 = require("../constants");
-const Staging_1 = require("../../src/utils/Staging");
+const Staging_1 = require("../../src/classes/Staging");
 const assert = Chai.assert;
 let account;
 describe('command: accounts update', () => {
@@ -22,7 +22,7 @@ describe('command: accounts update', () => {
         };
         let result = yield AccountsUpdate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.BLANK_FIELD);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.BLANK_FIELD);
     }));
     it('should return error as address provided does not exist locally', () => __awaiter(this, void 0, void 0, function* () {
         let args = {
@@ -31,7 +31,7 @@ describe('command: accounts update', () => {
         };
         let result = yield AccountsUpdate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.FILE_NOT_FOUND);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.FILE_NOT_FOUND);
     }));
     // create account and decrypt
     it('should error as trying to decrypt with wrong password', () => __awaiter(this, void 0, void 0, function* () {
@@ -44,7 +44,6 @@ describe('command: accounts update', () => {
         // create account
         let createResult = yield AccountsCreate.stage(createArgs, constants_1.session);
         assert.equal(createResult.type, Staging_1.default.SUCCESS);
-        assert.equal(createResult.subtype, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
         account = createResult.message;
         let args = {
             address: account.address,
@@ -56,7 +55,7 @@ describe('command: accounts update', () => {
         // decrypt
         let result = yield AccountsUpdate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.OTHER);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.OTHER);
     }));
     it('should return error as old password file does not exist', () => __awaiter(this, void 0, void 0, function* () {
         let args = {
@@ -67,7 +66,7 @@ describe('command: accounts update', () => {
         };
         let result = yield AccountsUpdate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.FILE_NOT_FOUND);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.FILE_NOT_FOUND);
     }));
     it('should return error as new password file does not exist', () => __awaiter(this, void 0, void 0, function* () {
         let args = {
@@ -79,7 +78,7 @@ describe('command: accounts update', () => {
         };
         let result = yield AccountsUpdate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.FILE_NOT_FOUND);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.FILE_NOT_FOUND);
     }));
     it('should return newly encrypted account', () => __awaiter(this, void 0, void 0, function* () {
         let args = {
@@ -91,7 +90,6 @@ describe('command: accounts update', () => {
         };
         let result = yield AccountsUpdate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.SUCCESS);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
         assert.notEqual(result.message.address, undefined);
     }));
 });

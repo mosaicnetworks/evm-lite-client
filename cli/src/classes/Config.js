@@ -28,16 +28,12 @@ class Config {
     }
     static default(datadir) {
         return {
-            connection: {
-                host: '127.0.0.1',
-                port: '8080'
-            },
             defaults: {
+                host: '127.0.0.1',
+                port: '8080',
                 from: '',
                 gas: 100000,
-                gasPrice: 0
-            },
-            storage: {
+                gasprice: 0,
                 keystore: path.join(datadir, 'keystore'),
             }
         };
@@ -49,9 +45,7 @@ class Config {
         return tomlify.toToml(this.data, { spaces: 2 });
     }
     save() {
-        Globals_1.default.info(`Config is being read from and updated at ${this.path}`);
         if (Globals_1.default.isEquivalentObjects(this.data, this._initialData)) {
-            Globals_1.default.warning('No changes in configuration detected.');
             return false;
         }
         else {
@@ -63,13 +57,12 @@ class Config {
             }
             fs.writeFileSync(this.path, this.toTOML());
             this._initialData = toml.parse(this.toTOML());
-            Globals_1.default.success('Configuration file updated.');
             return true;
         }
     }
     getOrCreateKeystore() {
-        DataDirectory_1.default.createDirectoryIfNotExists(this.data.storage.keystore);
-        return new Keystore_1.default(this.data.storage.keystore);
+        DataDirectory_1.default.createDirectoryIfNotExists(this.data.defaults.keystore);
+        return new Keystore_1.default(this.data.defaults.keystore);
     }
 }
 exports.default = Config;

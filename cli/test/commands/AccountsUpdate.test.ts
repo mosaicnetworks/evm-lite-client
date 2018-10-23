@@ -6,7 +6,7 @@ import * as AccountsCreate from '../../src/commands/AccountsCreate';
 import {stage} from '../../src/commands/AccountsUpdate';
 import {otherPwdPath, pwdPath, session} from "../constants";
 
-import Staging, {Message, StagedOutput} from "../../src/utils/Staging";
+import Staging, {Message, StagedOutput} from "../../src/classes/Staging";
 import {v3JSONKeyStore} from "../../src/utils/Globals";
 
 
@@ -21,7 +21,7 @@ describe('command: accounts update', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.BLANK_FIELD);
+        assert.equal(result.subtype, Staging.ERRORS.BLANK_FIELD);
     });
 
     it('should return error as address provided does not exist locally', async () => {
@@ -32,7 +32,7 @@ describe('command: accounts update', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.FILE_NOT_FOUND);
+        assert.equal(result.subtype, Staging.ERRORS.FILE_NOT_FOUND);
     });
 
     // create account and decrypt
@@ -47,7 +47,6 @@ describe('command: accounts update', () => {
         // create account
         let createResult: StagedOutput<Message> = await AccountsCreate.stage(createArgs, session);
         assert.equal(createResult.type, Staging.SUCCESS);
-        assert.equal(createResult.subtype, Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
         account = createResult.message;
 
         let args: Vorpal.Args = {
@@ -61,7 +60,7 @@ describe('command: accounts update', () => {
         // decrypt
         let result: StagedOutput<Message> = await stage(args, session);
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.OTHER);
+        assert.equal(result.subtype, Staging.ERRORS.OTHER);
     });
 
     it('should return error as old password file does not exist', async () => {
@@ -74,7 +73,7 @@ describe('command: accounts update', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.FILE_NOT_FOUND);
+        assert.equal(result.subtype, Staging.ERRORS.FILE_NOT_FOUND);
     });
 
     it('should return error as new password file does not exist', async () => {
@@ -88,7 +87,7 @@ describe('command: accounts update', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.SUBTYPES.errors.FILE_NOT_FOUND);
+        assert.equal(result.subtype, Staging.ERRORS.FILE_NOT_FOUND);
     });
 
     it('should return newly encrypted account', async () => {
@@ -102,7 +101,6 @@ describe('command: accounts update', () => {
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
-        assert.equal(result.subtype, Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
         assert.notEqual(result.message.address, undefined);
     });
 

@@ -11,11 +11,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
 const fs = require("fs");
 const JSONBig = require("json-bigint");
-const Staging_1 = require("../utils/Staging");
+const Staging_1 = require("../classes/Staging");
 const Keystore_1 = require("../classes/Keystore");
 exports.stage = (args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-        let o = Staging_1.default.construct.bind(null, args);
+        let { error, success } = Staging_1.default.getStagingFunctions(args);
         let interactive = !args.options.password || session.interactive;
         let verbose = args.options.verbose || false;
         let questions = [
@@ -39,36 +39,36 @@ exports.stage = (args, session) => {
         if (interactive) {
             let { output, password, verifyPassword } = yield inquirer.prompt(questions);
             if (!(password && verifyPassword && (password === verifyPassword))) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.BLANK_FIELD, 'Passwords either blank or do not match.'));
+                resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
             }
             if (!fs.existsSync(output)) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
+                resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
                 return;
             }
             if (!fs.lstatSync(output).isDirectory()) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.IS_FILE, 'Output path is not a directory.'));
+                resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
                 return;
             }
             args.options.password = password;
             args.options.output = output;
         }
         else {
-            args.options.output = args.options.output || session.config.data.storage.keystore;
+            args.options.output = args.options.output || session.config.data.defaults.keystore;
             if (!fs.existsSync(args.options.password)) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.PATH_NOT_EXIST, 'Password file provided does not exist.'));
+                resolve(error(Staging_1.default.ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
                 return;
             }
             if (!fs.existsSync(args.options.output)) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.DIRECTORY_NOT_EXIST, 'Output directory provided does not exist.'));
+                resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory provided does not exist.'));
                 return;
             }
             if (fs.lstatSync(args.options.password).isDirectory()) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.IS_DIRECTORY, 'Password file path provided is a directory.'));
+                resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
                 return;
             }
             if (!fs.lstatSync(args.options.output).isDirectory()) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.IS_FILE, 'Output path is not a directory.'));
+                resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
                 return;
             }
             args.options.password = fs.readFileSync(args.options.password, 'utf8');
@@ -84,7 +84,7 @@ exports.stage = (args, session) => {
         else {
             message = account;
         }
-        resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, message));
+        resolve(success(message));
     }));
 };
 function commandAccountsCreate(evmlc, session) {

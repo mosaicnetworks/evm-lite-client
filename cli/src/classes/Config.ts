@@ -36,16 +36,12 @@ export default class Config {
 
     static default(datadir: string) {
         return {
-            connection: {
-                host: '127.0.0.1',
-                port: '8080'
-            },
             defaults: {
+                host: '127.0.0.1',
+                port: '8080',
                 from: '',
                 gas: 100000,
-                gasPrice: 0
-            },
-            storage: {
+                gasprice: 0,
                 keystore: path.join(datadir, 'keystore'),
             }
         }
@@ -60,9 +56,7 @@ export default class Config {
     }
 
     save(): boolean {
-        Globals.info(`Config is being read from and updated at ${this.path}`);
         if (Globals.isEquivalentObjects(this.data, this._initialData)) {
-            Globals.warning('No changes in configuration detected.');
             return false;
         } else {
             let list = this.path.split('/');
@@ -76,15 +70,14 @@ export default class Config {
 
             fs.writeFileSync(this.path, this.toTOML());
             this._initialData = toml.parse(this.toTOML());
-            Globals.success('Configuration file updated.');
 
             return true;
         }
     }
 
     getOrCreateKeystore(): Keystore {
-        DataDirectory.createDirectoryIfNotExists(this.data.storage.keystore);
-        return new Keystore(this.data.storage.keystore);
+        DataDirectory.createDirectoryIfNotExists(this.data.defaults.keystore);
+        return new Keystore(this.data.defaults.keystore);
     }
 
 }

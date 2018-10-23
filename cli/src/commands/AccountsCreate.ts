@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 import * as fs from "fs";
 import * as JSONBig from 'json-bigint';
 
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../utils/Staging";
+import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
 import Keystore from "../classes/Keystore";
@@ -11,7 +11,9 @@ import Keystore from "../classes/Keystore";
 
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let o = Staging.construct.bind(null, args);
+
+        let {error, success} = Staging.getStagingFunctions(args);
+
         let interactive = !args.options.password || session.interactive;
         let verbose = args.options.verbose || false;
         let questions = [
@@ -37,27 +39,24 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             let {output, password, verifyPassword} = await inquirer.prompt(questions);
 
             if (!(password && verifyPassword && (password === verifyPassword))) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.BLANK_FIELD,
+                resolve(error(
+                    Staging.ERRORS.BLANK_FIELD,
                     'Passwords either blank or do not match.'
                 ));
                 return;
             }
 
             if (!fs.existsSync(output)) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.DIRECTORY_NOT_EXIST,
+                resolve(error(
+                    Staging.ERRORS.DIRECTORY_NOT_EXIST,
                     'Output directory does not exist.'
                 ));
                 return;
             }
 
             if (!fs.lstatSync(output).isDirectory()) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.IS_FILE,
+                resolve(error(
+                    Staging.ERRORS.IS_FILE,
                     'Output path is not a directory.'
                 ));
                 return;
@@ -66,39 +65,35 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             args.options.password = password;
             args.options.output = output;
         } else {
-            args.options.output = args.options.output || session.config.data.storage.keystore;
+            args.options.output = args.options.output || session.config.data.defaults.keystore;
 
             if (!fs.existsSync(args.options.password)) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.PATH_NOT_EXIST,
+                resolve(error(
+                    Staging.ERRORS.PATH_NOT_EXIST,
                     'Password file provided does not exist.'
                 ));
                 return;
             }
 
             if (!fs.existsSync(args.options.output)) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.DIRECTORY_NOT_EXIST,
+                resolve(error(
+                    Staging.ERRORS.DIRECTORY_NOT_EXIST,
                     'Output directory provided does not exist.'
                 ));
                 return;
             }
 
             if (fs.lstatSync(args.options.password).isDirectory()) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.IS_DIRECTORY,
+                resolve(error(
+                    Staging.ERRORS.IS_DIRECTORY,
                     'Password file path provided is a directory.'
                 ));
                 return;
             }
 
             if (!fs.lstatSync(args.options.output).isDirectory()) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.IS_FILE,
+                resolve(error(
+                    Staging.ERRORS.IS_FILE,
                     'Output path is not a directory.'
                 ));
                 return;
@@ -119,11 +114,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             message = account;
         }
 
-        resolve(o(
-            Staging.SUCCESS,
-            Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
-            message
-        ));
+        resolve(success(message));
     })
 };
 

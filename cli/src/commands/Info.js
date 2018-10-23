@@ -8,9 +8,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const JSONBig = require("json-bigint");
 const ASCIITable = require("ascii-table");
-const Globals_1 = require("../utils/Globals");
+const Staging_1 = require("../classes/Staging");
+exports.stage = (args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        let { error, success } = Staging_1.default.getStagingFunctions(args);
+        let connection = yield session.connect(args.options.host, args.options.port);
+        if (!connection) {
+            resolve(error(Staging_1.default.ERRORS.INVALID_CONNECTION));
+            return;
+        }
+        let information = yield connection.api.getInfo();
+        if (!information) {
+            resolve(success(Staging_1.default.ERRORS.FETCH_FAILED, 'Cannot fetch information.'));
+            return;
+        }
+        let formatted = args.options.formatted || false;
+        if (!formatted) {
+            resolve(success(information));
+            return;
+        }
+        let table = new ASCIITable().setHeading('Name', 'Value');
+        for (let key in information) {
+            if (information.hasOwnProperty(key)) {
+                table.addRow(key, information[key]);
+            }
+        }
+        resolve(success(table));
+    }));
+};
 function commandInfo(evmlc, session) {
     return evmlc.command('info')
         .description('Prints information about node as JSON or --formatted.')
@@ -20,34 +46,7 @@ function commandInfo(evmlc, session) {
         .types({
         string: ['h', 'host']
     })
-        .action((args) => {
-        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let connection = yield session.connect(args.options.host, args.options.port);
-            if (!connection) {
-                resolve();
-                return;
-            }
-            let information = yield connection.api.getInfo();
-            if (!information) {
-                resolve();
-                return;
-            }
-            let formatted = args.options.formatted || false;
-            if (!formatted) {
-                Globals_1.default.success(JSONBig.stringify(information));
-                resolve();
-                return;
-            }
-            let table = new ASCIITable().setHeading('Name', 'Value');
-            for (let key in information) {
-                if (information.hasOwnProperty(key)) {
-                    table.addRow(key, information[key]);
-                }
-            }
-            Globals_1.default.success(table.toString());
-            resolve();
-        }));
-    });
+        .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandInfo;
 ;

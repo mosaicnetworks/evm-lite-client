@@ -12,7 +12,7 @@ const Chai = require("chai");
 const path = require("path");
 const AccountsCreate_1 = require("../../src/commands/AccountsCreate");
 const constants_1 = require("../constants");
-const Staging_1 = require("../../src/utils/Staging");
+const Staging_1 = require("../../src/classes/Staging");
 const assert = Chai.assert;
 describe('Command: accounts create', () => {
     it('should return non-verbose output of newly created account with password file', () => __awaiter(this, void 0, void 0, function* () {
@@ -23,7 +23,6 @@ describe('Command: accounts create', () => {
         };
         let result = yield AccountsCreate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.SUCCESS);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
         // check output directory and password was what was expected
         assert.equal(result.args.options.password, constants_1.password);
         assert.equal(result.args.options.output, path.join(constants_1.datadir, 'keystore'));
@@ -38,7 +37,6 @@ describe('Command: accounts create', () => {
         };
         let result = yield AccountsCreate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.SUCCESS);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED);
         // check output directory and password was what was expected
         assert.equal(result.args.options.password, constants_1.password);
         assert.equal(result.args.options.output, path.join(constants_1.datadir, 'keystore'));
@@ -52,7 +50,7 @@ describe('Command: accounts create', () => {
         };
         let result = yield AccountsCreate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.PATH_NOT_EXIST);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.PATH_NOT_EXIST);
     }));
     it('should return error as output directory does not exists', () => __awaiter(this, void 0, void 0, function* () {
         let args = {
@@ -63,7 +61,7 @@ describe('Command: accounts create', () => {
         };
         let result = yield AccountsCreate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.DIRECTORY_NOT_EXIST);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST);
     }));
     it('should return error as password file is a directory', () => __awaiter(this, void 0, void 0, function* () {
         let args = {
@@ -73,7 +71,7 @@ describe('Command: accounts create', () => {
         };
         let result = yield AccountsCreate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.IS_DIRECTORY);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.IS_DIRECTORY);
     }));
     it('should return error as output directory is a file', () => __awaiter(this, void 0, void 0, function* () {
         let args = {
@@ -84,6 +82,6 @@ describe('Command: accounts create', () => {
         };
         let result = yield AccountsCreate_1.stage(args, constants_1.session);
         assert.equal(result.type, Staging_1.default.ERROR);
-        assert.equal(result.subtype, Staging_1.default.SUBTYPES.errors.IS_FILE);
+        assert.equal(result.subtype, Staging_1.default.ERRORS.IS_FILE);
     }));
 });

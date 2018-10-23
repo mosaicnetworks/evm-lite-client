@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
-const Globals_1 = require("./Globals");
+const Globals_1 = require("../utils/Globals");
 exports.execute = (fn, args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
         let output = yield fn(args, session);
@@ -35,31 +35,36 @@ exports.execute = (fn, args, session) => {
 class Staging {
     constructor() {
     }
-    static construct(args, type, subtype, message = null) {
+    static success(args, message) {
         return {
-            type: type,
+            type: Staging.SUCCESS,
+            args: args,
+            message: message
+        };
+    }
+    static error(args, subtype, message = null) {
+        return {
+            type: Staging.ERROR,
             subtype: subtype,
             args: args,
             message: message
         };
     }
-    ;
+    static getStagingFunctions(args) {
+        return { error: Staging.error.bind(null, args), success: Staging.success.bind(null, args) };
+    }
 }
 Staging.ERROR = 'error';
-Staging.SUCCESS = 'success';
-Staging.SUBTYPES = {
-    errors: {
-        BLANK_FIELD: 'Field(s) should not be blank',
-        DIRECTORY_NOT_EXIST: 'Directory should exist',
-        PATH_NOT_EXIST: 'Path(s) should exist',
-        IS_FILE: 'Should be a directory',
-        IS_DIRECTORY: 'Should not be a directory',
-        FILE_NOT_FOUND: 'Cannot find file',
-        INVALID_CONNECTION: 'Invalid connection',
-        OTHER: 'Something went wrong'
-    },
-    success: {
-        COMMAND_EXECUTION_COMPLETED: 'Command was executed successfully'
-    },
+Staging.ERRORS = {
+    BLANK_FIELD: 'Field(s) should not be blank',
+    DIRECTORY_NOT_EXIST: 'Directory should exist',
+    PATH_NOT_EXIST: 'Path(s) should exist',
+    IS_FILE: 'Should be a directory',
+    IS_DIRECTORY: 'Should not be a directory',
+    FILE_NOT_FOUND: 'Cannot find file',
+    INVALID_CONNECTION: 'Invalid connection',
+    FETCH_FAILED: 'Could not fetch data',
+    OTHER: 'Something went wrong'
 };
+Staging.SUCCESS = 'success';
 exports.default = Staging;

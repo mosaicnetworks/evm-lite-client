@@ -11,13 +11,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
 const ASCIITable = require("ascii-table");
-const Staging_1 = require("../utils/Staging");
+const Staging_1 = require("../classes/Staging");
 exports.stage = (args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-        let o = Staging_1.default.construct.bind(null, args);
+        let { error, success } = Staging_1.default.getStagingFunctions(args);
         let connection = yield session.connect(args.options.host, args.options.port);
         if (!connection) {
-            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.INVALID_CONNECTION));
+            resolve(error(Staging_1.default.ERRORS.INVALID_CONNECTION));
             return;
         }
         let interactive = args.options.interactive || session.interactive;
@@ -35,22 +35,24 @@ exports.stage = (args, session) => {
             args.address = address;
         }
         if (!args.address) {
-            resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.BLANK_FIELD, 'Provide a non-empty address. Usage: accounts get <address>'));
+            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address. Usage: accounts get <address>'));
             return;
         }
         let account = yield connection.api.getAccount(args.address);
         let message = '';
-        if (account) {
-            if (formatted) {
-                let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
-                table.addRow(account.address, account.balance, account.nonce);
-                message = table.toString();
-            }
-            else {
-                message = JSONBig.stringify(account);
-            }
+        if (!account) {
+            resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not fetch account: ' + args.address));
+            return;
         }
-        resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, message));
+        if (formatted) {
+            let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
+            table.addRow(account.address, account.balance, account.nonce);
+            message = table.toString();
+        }
+        else {
+            message = JSONBig.stringify(account);
+        }
+        resolve(success(message));
     }));
 };
 function commandAccountsGet(evmlc, session) {

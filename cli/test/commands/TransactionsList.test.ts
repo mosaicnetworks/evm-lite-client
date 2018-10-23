@@ -2,7 +2,7 @@ import * as Chai from 'chai';
 import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
 
-import {stage} from '../../src/commands/AccountsList';
+import {stage} from '../../src/commands/TransactionsList';
 import {session} from "../constants";
 
 import Staging, {Message, StagedOutput} from "../../src/classes/Staging";
@@ -10,8 +10,8 @@ import Staging, {Message, StagedOutput} from "../../src/classes/Staging";
 
 const assert = Chai.assert;
 
-describe('command: accounts list', () => {
-    it('should return error as verbose requires a valid connection to a node', async () => {
+describe('command: transactions list', () => {
+    it('should return error a valid connection to a node is required', async () => {
         let args: Vorpal.Args = {
             options: {
                 verbose: true,
@@ -25,27 +25,11 @@ describe('command: accounts list', () => {
         assert.equal(result.subtype, Staging.ERRORS.INVALID_CONNECTION);
     });
 
-    it('should return ASCIITable with verbose and formatted with valid connection', async () => {
+    it('should return list of Transactions even with a valid connection', async () => {
         let args: Vorpal.Args = {
             options: {
-                verbose: true,
-                formatted: true,
                 host: '127.0.0.1',
                 port: '8080',
-            }
-        };
-        let result: StagedOutput<Message> = await stage(args, session);
-
-        assert.equal(result.type, Staging.SUCCESS);
-
-        assert.equal(result.message instanceof ASCIITable, true)
-    });
-
-    it('should return list of BaseAccounts even without a valid connection', async () => {
-        let args: Vorpal.Args = {
-            options: {
-                host: '127.0.0.1',
-                port: '1234',
             }
         };
         let result: StagedOutput<Message> = await stage(args, session);
@@ -55,18 +39,18 @@ describe('command: accounts list', () => {
         assert.equal(result.message instanceof Array, true)
     });
 
-    it('should return ASCIITable even without a valid connection', async () => {
+    it('should return ASCIITable with a valid connection', async () => {
         let args: Vorpal.Args = {
             options: {
                 formatted: true,
                 host: '127.0.0.1',
-                port: '1234',
+                port: '8080',
             }
         };
         let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
 
-        assert.equal(result.message instanceof ASCIITable, true)
+        assert.equal(result.message instanceof ASCIITable || result.message instanceof Array, true)
     });
 });

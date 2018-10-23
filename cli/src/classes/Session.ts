@@ -12,7 +12,6 @@ import Log from "./Log";
 export default class Session {
 
     public interactive: boolean;
-    public passwordPath: string;
     public logpath: string;
 
     public directory: DataDirectory;
@@ -37,8 +36,8 @@ export default class Session {
     }
 
     connect(forcedHost: string, forcedPort: number): Promise<Controller> {
-        let host: string = forcedHost || this.config.data.connection.host || '127.0.0.1';
-        let port: number = forcedPort || this.config.data.connection.port || 8080;
+        let host: string = forcedHost || this.config.data.defaults.host || '127.0.0.1';
+        let port: number = forcedPort || this.config.data.defaults.port || 8080;
         let node = new Controller(host, port);
 
         return node.api.testConnection()

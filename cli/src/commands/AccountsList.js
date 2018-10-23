@@ -9,10 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
-const Staging_1 = require("../utils/Staging");
+const Staging_1 = require("../classes/Staging");
 exports.stage = (args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-        let o = Staging_1.default.construct.bind(null, args);
+        let { error, success } = Staging_1.default.getStagingFunctions(args);
         let remote = args.options.remote || false;
         let verbose = args.options.verbose || false;
         let formatted = args.options.formatted || false;
@@ -22,7 +22,7 @@ exports.stage = (args, session) => {
         if (verbose || remote) {
             connection = yield session.connect(args.options.host, args.options.port);
             if (!connection) {
-                resolve(o(Staging_1.default.ERROR, Staging_1.default.SUBTYPES.errors.INVALID_CONNECTION));
+                resolve(error(Staging_1.default.ERRORS.INVALID_CONNECTION));
                 return;
             }
         }
@@ -33,11 +33,11 @@ exports.stage = (args, session) => {
             accounts = yield session.keystore.all(verbose, connection);
         }
         if (!accounts || !accounts.length) {
-            resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, 'No accounts.'));
+            resolve(success([]));
             return;
         }
         if (!formatted) {
-            resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, accounts));
+            resolve(success(accounts));
             return;
         }
         if (verbose) {
@@ -52,7 +52,7 @@ exports.stage = (args, session) => {
                 accountsTable.addRow(account.address);
             }
         }
-        resolve(o(Staging_1.default.SUCCESS, Staging_1.default.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED, accountsTable));
+        resolve(success(accountsTable));
     }));
 };
 function commandAccountsList(evmlc, session) {

@@ -8,9 +8,48 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const JSONBig = require("json-bigint");
 const ASCIITable = require("ascii-table");
-const Globals_1 = require("../utils/Globals");
+const Staging_1 = require("../classes/Staging");
+exports.stage = (args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        let { error, success } = Staging_1.default.getStagingFunctions(args);
+        let connection = yield session.connect(args.options.host, args.options.port);
+        if (!connection) {
+            resolve(error(Staging_1.default.ERRORS.INVALID_CONNECTION));
+            return;
+        }
+        let formatted = args.options.formatted || false;
+        let verbose = args.options.verbose || false;
+        let table = new ASCIITable();
+        let transactions = session.database.transactions.all();
+        if (!transactions.length) {
+            resolve(success([]));
+            return;
+        }
+        if (!formatted) {
+            resolve(success(session.database.transactions.all()));
+            return;
+        }
+        if (verbose) {
+            table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
+            for (let tx of transactions) {
+                let date = new Date(tx.date);
+                let d = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+                let t = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                let receipt = yield connection.api.getReceipt(tx.txHash);
+                table.addRow(`${d} ${t}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+            }
+        }
+        else {
+            table.setHeading('From', 'To', 'Value', 'Status');
+            for (let tx of transactions) {
+                let receipt = yield connection.api.getReceipt(tx.txHash);
+                table.addRow(tx.from, tx.to, tx.value, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+            }
+        }
+        resolve(success(table));
+    }));
+};
 function commandTransactionsList(evmlc, session) {
     let description = 'Lists all submitted transactions with the status.';
     return evmlc.command('transactions list').alias('t l')
@@ -22,48 +61,7 @@ function commandTransactionsList(evmlc, session) {
         .types({
         string: ['h', 'host']
     })
-        .action((args) => {
-        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let connection = yield session.connect(args.options.host, args.options.port);
-            if (!connection) {
-                resolve();
-                return;
-            }
-            let formatted = args.options.formatted || false;
-            let verbose = args.options.verbose || false;
-            let table = new ASCIITable();
-            let transactions = session.database.transactions.all();
-            if (!transactions.length) {
-                Globals_1.default.warning('No transactions submitted.');
-                resolve();
-                return;
-            }
-            if (!formatted) {
-                Globals_1.default.success(JSONBig.stringify(session.database.transactions.all()));
-                resolve();
-                return;
-            }
-            if (verbose) {
-                table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
-                for (let tx of transactions) {
-                    let date = new Date(tx.date);
-                    let d = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-                    let t = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                    let receipt = yield connection.api.getReceipt(tx.txHash);
-                    table.addRow(`${d} ${t}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
-                }
-            }
-            else {
-                table.setHeading('From', 'To', 'Value', 'Status');
-                for (let tx of transactions) {
-                    let receipt = yield connection.api.getReceipt(tx.txHash);
-                    table.addRow(tx.from, tx.to, tx.value, (receipt) ? ((!receipt.failed) ? 'Success' : 'Failed') : 'Failed');
-                }
-            }
-            Globals_1.default.success(table.toString());
-            resolve();
-        }));
-    });
+        .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandTransactionsList;
 ;

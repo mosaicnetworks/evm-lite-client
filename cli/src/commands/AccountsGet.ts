@@ -3,21 +3,19 @@ import * as JSONBig from 'json-bigint';
 import * as inquirer from 'inquirer';
 import * as ASCIITable from 'ascii-table';
 
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../utils/Staging";
+import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
 
 
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let o = Staging.construct.bind(null, args);
+        let {error, success} = Staging.getStagingFunctions(args);
+
         let connection = await session.connect(args.options.host, args.options.port);
 
         if (!connection) {
-            resolve(o(
-                Staging.ERROR,
-                Staging.SUBTYPES.errors.INVALID_CONNECTION,
-            ));
+            resolve(error(Staging.ERRORS.INVALID_CONNECTION));
             return;
         }
 
@@ -38,9 +36,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!args.address) {
-            resolve(o(
-                Staging.ERROR,
-                Staging.SUBTYPES.errors.BLANK_FIELD,
+            resolve(error(
+                Staging.ERRORS.BLANK_FIELD,
                 'Provide a non-empty address. Usage: accounts get <address>'
             ));
             return;
@@ -49,21 +46,24 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         let account = await connection.api.getAccount(args.address);
         let message: string = '';
 
-        if (account) {
-            if (formatted) {
-                let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
-                table.addRow(account.address, account.balance, account.nonce);
-                message = table.toString();
-            } else {
-                message = JSONBig.stringify(account);
-            }
+        if (!account) {
+            resolve(error(
+                Staging.ERRORS.FETCH_FAILED,
+                'Could not fetch account: ' + args.address
+            ));
+            return;
         }
 
-        resolve(o(
-            Staging.SUCCESS,
-            Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
-            message
-        ));
+
+        if (formatted) {
+            let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
+            table.addRow(account.address, account.balance, account.nonce);
+            message = table.toString();
+        } else {
+            message = JSONBig.stringify(account);
+        }
+
+        resolve(success(message));
     });
 };
 

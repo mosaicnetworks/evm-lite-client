@@ -4,13 +4,14 @@ import * as fs from "fs";
 import * as JSONBig from 'json-bigint';
 
 import {Account} from "../../../lib"
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../utils/Staging";
+import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
 
+
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let o = Staging.construct.bind(null, args);
+        let {error, success} = Staging.getStagingFunctions(args);
 
         let interactive = args.options.interactive || session.interactive;
         let accounts = await session.keystore.all();
@@ -48,9 +49,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!args.address) {
-            resolve(o(
-                Staging.ERROR,
-                Staging.SUBTYPES.errors.BLANK_FIELD,
+            resolve(error(
+                Staging.ERRORS.BLANK_FIELD,
                 'Provide a non-empty address. Usage: accounts update <address>'
             ));
             return;
@@ -59,9 +59,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         let keystore = session.keystore.get(args.address);
 
         if (!keystore) {
-            resolve(o(
-                Staging.ERROR,
-                Staging.SUBTYPES.errors.FILE_NOT_FOUND,
+            resolve(error(
+                Staging.ERRORS.FILE_NOT_FOUND,
                 `Cannot find keystore file of address: ${args.address}.`
             ));
             return;
@@ -69,18 +68,16 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         if (args.options.old) {
             if (!fs.existsSync(args.options.old)) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.FILE_NOT_FOUND,
+                resolve(error(
+                    Staging.ERRORS.FILE_NOT_FOUND,
                     'Old password file path provided does not exist.'
                 ));
                 return;
             }
 
             if (fs.lstatSync(args.options.old).isDirectory()) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.IS_DIRECTORY,
+                resolve(error(
+                    Staging.ERRORS.IS_DIRECTORY,
                     'Old password file path provided is not a file.'
                 ));
                 return;
@@ -97,18 +94,16 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         try {
             decrypted = Account.decrypt(keystore, args.options.old);
         } catch (err) {
-            resolve(o(
-                Staging.ERROR,
-                Staging.SUBTYPES.errors.OTHER,
+            resolve(error(
+                Staging.ERRORS.OTHER,
                 'Failed decryption of account with the password provided.'
             ));
             return;
         }
 
         if (!decrypted) {
-            resolve(o(
-                Staging.ERROR,
-                Staging.SUBTYPES.errors.OTHER,
+            resolve(error(
+                Staging.ERRORS.OTHER,
                 'Oops! Something went wrong.'
             ));
             return;
@@ -116,18 +111,16 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         if (args.options.new) {
             if (!fs.existsSync(args.options.new)) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.FILE_NOT_FOUND,
+                resolve(error(
+                    Staging.ERRORS.FILE_NOT_FOUND,
                     'New password file path provided does not exist.'
                 ));
                 return;
             }
 
             if (fs.lstatSync(args.options.new).isDirectory()) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.IS_DIRECTORY,
+                resolve(error(
+                    Staging.ERRORS.IS_DIRECTORY,
                     'New password file path provided is not a file.'
                 ));
                 return;
@@ -138,9 +131,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             let {password, verifyPassword} = await inquirer.prompt(newPasswordQ);
 
             if (!(password && verifyPassword && (password === verifyPassword))) {
-                resolve(o(
-                    Staging.ERROR,
-                    Staging.SUBTYPES.errors.BLANK_FIELD,
+                resolve(error(
+                    Staging.ERRORS.BLANK_FIELD,
                     'Error: Passwords either blank or do not match.'
                 ));
                 return;
@@ -150,9 +142,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (args.options.old === args.options.new) {
-            resolve(o(
-                Staging.ERROR,
-                Staging.SUBTYPES.errors.OTHER,
+            resolve(error(
+                Staging.ERRORS.OTHER,
                 'New password is the same as old.'
             ));
             return;
@@ -164,11 +155,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         fs.writeFileSync(filePath, sNKeystore);
 
-        resolve(o(
-            Staging.SUCCESS,
-            Staging.SUBTYPES.success.COMMAND_EXECUTION_COMPLETED,
-            nKeystore
-        ));
+        resolve(success(nKeystore));
     })
 };
 

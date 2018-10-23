@@ -54,7 +54,7 @@ declare namespace EVMLClient {
         contractAddress: string;
         logs: [];
         logsBloom: string;
-        failed: boolean;
+        status: number;
     }
 
     interface SolidityCompilerOutput {
