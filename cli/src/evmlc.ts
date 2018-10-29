@@ -4,7 +4,8 @@ import * as Vorpal from "vorpal";
 import * as mkdir from 'mkdirp';
 import * as figlet from 'figlet';
 
-import Globals from "./utils/Globals";
+import Globals, {CommandFunction} from "./utils/Globals";
+
 import Session from "./classes/Session";
 import Staging from "./classes/Staging";
 
@@ -17,14 +18,14 @@ import AccountsGet from './commands/AccountsGet';
 import Interactive from "./commands/Interactive";
 import ConfigView from "./commands/ConfigView";
 import ConfigSet from "./commands/ConfigSet";
+import LogsClear from "./commands/LogsClear";
+import LogsView from "./commands/LogsView";
 import Transfer from "./commands/Transfer";
+import Clear from "./commands/Clear";
 import Test from "./commands/Test";
 import Info from "./commands/Info";
-import Clear from "./commands/Clear";
-import LogsView from "./commands/LogsView";
-import LogsClear from "./commands/LogsClear";
 
-
+const __VERSION__ = '0.1.1';
 const init = (): Promise<void> => {
     return new Promise<void>(resolve => {
         if (!Staging.exists(Globals.evmlcDir)) {
@@ -55,8 +56,8 @@ init()
         let session = new Session(dataDirPath);
 
         if (!process.argv[2]) {
-            console.log(`\n  A Command Line Interface to interact with EVM-Lite.`);
-            console.log(`\n  Current Data Directory: ${session.directory.path}`);
+            console.log('\n  A Command Line Interface to interact with EVM-Lite.');
+            console.log(`\n  Current Data Directory: ` + session.directory.path);
 
             process.argv[2] = 'help';
         }
@@ -64,7 +65,7 @@ init()
         return session;
     })
     .then((session: Session) => {
-        const evmlc = new Vorpal().version("0.1.0");
+        const evmlc = new Vorpal().version(__VERSION__);
 
         [
             AccountsUpdate,
@@ -82,7 +83,7 @@ init()
             LogsView,
             LogsClear,
             Clear,
-        ].forEach(command => {
+        ].forEach((command: CommandFunction) => {
             command(evmlc, session);
         });
 
@@ -100,7 +101,6 @@ init()
             Globals.info(` Keystore:    ${cli.session.keystore.path}`);
 
             let cmdInteractive = cli.instance.find('interactive');
-
             if (cmdInteractive) {
                 cmdInteractive.hidden();
             }
@@ -111,7 +111,6 @@ init()
             cli.instance.delimiter('evmlc$').show();
         } else {
             let cmdClear = cli.instance.find('clear');
-
             if (cmdClear) {
                 cmdClear.hidden();
             }
@@ -119,4 +118,4 @@ init()
             cli.instance.parse(process.argv);
         }
     })
-    .catch(err => Globals.error(err));
+    .catch(err => console.log(err));

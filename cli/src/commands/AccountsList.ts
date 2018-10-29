@@ -2,7 +2,6 @@ import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
 
 import {Controller} from "../../../lib"
-import {BaseAccount} from "../utils/Globals";
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
@@ -10,30 +9,24 @@ import Session from "../classes/Session";
 
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
+
         let {error, success} = Staging.getStagingFunctions(args);
 
         let remote = args.options.remote || false;
-        let verbose: boolean = args.options.verbose || false;
-        let formatted: boolean = args.options.formatted || false;
-        let accounts: BaseAccount[] | void = [];
-        let accountsTable = new ASCIITable();
-        let connection: Controller = null;
+        let verbose = args.options.verbose || false;
+        let formatted = args.options.formatted || false;
+        let table = new ASCIITable();
 
+        let connection: Controller = null;
         if (verbose || remote) {
             connection = await session.connect(args.options.host, args.options.port);
-
             if (!connection) {
                 resolve(error(Staging.ERRORS.INVALID_CONNECTION));
                 return;
             }
         }
 
-        if (remote) {
-            accounts = await connection.api.getAccounts();
-        } else {
-            accounts = await session.keystore.all(verbose, connection);
-        }
-
+        let accounts = remote ? await connection.api.getAccounts() : await session.keystore.all(verbose, connection);
         if (!accounts || !accounts.length) {
             resolve(success([]));
             return;
@@ -44,19 +37,12 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        if (verbose) {
-            accountsTable.setHeading('Address', 'Balance', 'Nonce');
-            for (let account of accounts) {
-                accountsTable.addRow(account.address, account.balance, account.nonce);
-            }
-        } else {
-            accountsTable.setHeading('Addresses');
-            for (let account of accounts) {
-                accountsTable.addRow(account.address);
-            }
+        (verbose) ? table.setHeading('Address', 'Balance', 'Nonce') : table.setHeading('Address');
+        for (let account of accounts) {
+            (verbose) ? table.addRow(account.address, account.balance, account.nonce) : table.addRow(account.address);
         }
 
-        resolve(success(accountsTable));
+        resolve(success(table));
     });
 };
 

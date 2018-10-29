@@ -10,7 +10,9 @@ import Session from "../classes/Session";
 
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
+
         let {error, success} = Staging.getStagingFunctions(args);
+
         let connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION,));
@@ -29,27 +31,19 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             }
         ];
 
-        if (interactive) {
+        if (interactive && !args.hash) {
             let {hash} = await inquirer.prompt(questions);
-
             args.hash = hash;
         }
 
         if (!args.hash) {
-            resolve(error(
-                Staging.ERRORS.BLANK_FIELD,
-                'Provide a transaction hash. Usage: transactions get <hash>'
-            ));
+            resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide a transaction hash.'));
             return;
         }
 
         let receipt: TXReceipt = await connection.api.getReceipt(args.hash);
-
         if (!receipt) {
-            resolve(error(
-                Staging.ERRORS.FETCH_FAILED,
-                'Could not fetch receipt for hash: ' + args.hash
-            ));
+            resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
             return;
         }
 
@@ -68,12 +62,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         let tx = session.database.transactions.get(args.hash);
-
         if (!tx) {
-            resolve(error(
-                Staging.ERRORS.FETCH_FAILED,
-                'Could not find transaction in list.'
-            ));
+            resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
             return;
         }
 

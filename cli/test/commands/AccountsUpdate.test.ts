@@ -40,7 +40,7 @@ describe('command: accounts update', () => {
         let createArgs: Vorpal.Args = {
             options: {
                 verbose: true,
-                password: pwdPath
+                pwd: pwdPath
             }
         };
 

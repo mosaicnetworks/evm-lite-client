@@ -11,9 +11,10 @@ import Session from "../classes/Session";
 
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let {error, success} = Staging.getStagingFunctions(args);
-        let connection = await session.connect(args.options.host, args.options.port);
 
+        let {error, success} = Staging.getStagingFunctions(args);
+
+        let connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION));
             return;
@@ -65,89 +66,61 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         if (interactive) {
             let {from} = await inquirer.prompt(fromQ);
-            tx.from = from;
-        } else {
-            tx.from = args.options.from || undefined;
+            args.options.from = from;
         }
 
-        if (!tx.from) {
-            resolve(error(
-                Staging.ERRORS.BLANK_FIELD,
-                '`From` address cannot be blank.'
-            ));
+        if (!args.options.from) {
+            resolve(error(Staging.ERRORS.BLANK_FIELD, '`From` address cannot be blank.'));
             return;
         }
 
-        let keystore = session.keystore.get(tx.from);
-
+        let keystore = session.keystore.get(args.options.from);
         if (!keystore) {
-            resolve(error(
-                Staging.ERRORS.FILE_NOT_FOUND,
-                `Cannot find keystore file of address: ${tx.from}.`
-            ))
+            resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`))
         }
 
-        if (args.options.password) {
-            if (!Staging.exists(args.options.password)) {
-                resolve(error(
-                    Staging.ERRORS.FILE_NOT_FOUND,
-                    'Password file path provided does not exist.'
-                ));
-                return;
-            }
-
-            if (Staging.isDirectory(args.options.password)) {
-                resolve(error(
-                    Staging.ERRORS.IS_DIRECTORY,
-                    'Password file path provided is not a file.'
-                ));
-                return;
-            }
-
-            args.options.password = fs.readFileSync(args.options.password, 'utf8');
-        } else {
+        if (!args.options.pwd) {
             let {password} = await inquirer.prompt(passwordQ);
-            args.options.password = password;
+            args.options.pwd = password;
+        } else {
+            if (!Staging.exists(args.options.pwd)) {
+                resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
+                return;
+            }
+
+            if (Staging.isDirectory(args.options.pwd)) {
+                resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
+                return;
+            }
+
+            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
         }
 
         let decrypted: Account = null;
-
         try {
-            decrypted = Account.decrypt(keystore, args.options.password);
+            decrypted = Account.decrypt(keystore, args.options.pwd);
         } catch (err) {
-            resolve(error(
-                Staging.ERRORS.OTHER,
-                'Failed decryption of account with the password provided.'
-            ));
-            return;
-        }
-
-        if (!decrypted) {
-            resolve(error(
-                Staging.ERRORS.OTHER,
-                'Oops! Something went wrong.'
-            ));
+            resolve(error(Staging.ERRORS.OTHER, 'Failed decryption of account with the password provided.'));
             return;
         }
 
         if (interactive) {
             let answers = await inquirer.prompt(restOfQs);
+
             args.options.to = answers.to;
             args.options.value = answers.value;
             args.options.gas = answers.gas;
             args.options.gasPrice = answers.gasPrice;
         }
 
+        tx.from = args.options.from;
         tx.to = args.options.to || undefined;
         tx.value = args.options.value || undefined;
         tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
         tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
 
         if ((!tx.to) || !tx.value) {
-            resolve(error(
-                Staging.ERRORS.BLANK_FIELD,
-                'Provide an address to send to and a value.'
-            ));
+            resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
             return;
         }
 
@@ -156,26 +129,18 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         try {
             let signed = await decrypted.signTransaction(tx);
+            let response = JSONBig.parse(await connection.api.sendRawTx(signed.rawTransaction));
 
-            connection.api.sendRawTx(signed.rawTransaction)
-                .then((resp) => {
-                    let response: any = JSONBig.parse(resp);
-                    tx.txHash = response.txHash;
+            tx.txHash = response.txHash;
 
-                    session.database.transactions.add(tx);
-                    session.database.save();
+            session.database.transactions.add(tx);
+            session.database.save();
 
-                    resolve(success(`Transaction submitted.`));
-                })
-                .catch(() => {
-                    resolve(success('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16)));
-                })
+            resolve(success(`Transaction submitted with hash: ${tx.txHash}`));
         } catch (e) {
-            resolve(error(
-                Staging.ERRORS.OTHER,
-                e.message
-            ));
+            resolve(error(Staging.ERRORS.OTHER, e.message));
         }
+
     });
 };
 
@@ -194,10 +159,10 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
         .option('-t, --to <address>', 'address to send to')
         .option('-f, --from <address>', 'address to send from')
         .option('-h, --host <ip>', 'override config parameter host')
-        .option('--password <password>', 'password file path')
+        .option('--pwd <password>', 'password file path')
         .option('-p, --port <port>', 'override config parameter port')
         .types({
-            string: ['t', 'to', 'f', 'from', 'h', 'host', 'password'],
+            string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd'],
         })
         .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 

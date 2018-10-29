@@ -42,7 +42,7 @@ exports.stage = (args, session) => {
             }
         }
         if (!Object.keys(args.options).length) {
-            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'No options provided. To enter interactive mode use: -i, --interactive.'));
+            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'No options provided.'));
             return;
         }
         for (let key in args.options) {

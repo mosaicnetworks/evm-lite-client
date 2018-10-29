@@ -30,12 +30,12 @@ exports.stage = (args, session) => {
                 message: 'Transaction Hash: '
             }
         ];
-        if (interactive) {
+        if (interactive && !args.hash) {
             let { hash } = yield inquirer.prompt(questions);
             args.hash = hash;
         }
         if (!args.hash) {
-            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a transaction hash. Usage: transactions get <hash>'));
+            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a transaction hash.'));
             return;
         }
         let receipt = yield connection.api.getReceipt(args.hash);

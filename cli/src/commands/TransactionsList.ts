@@ -10,8 +10,8 @@ import Session from "../classes/Session";
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
         let {error, success} = Staging.getStagingFunctions(args);
-        let connection = await session.connect(args.options.host, args.options.port);
 
+        let connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION));
             return;
@@ -20,8 +20,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         let formatted = args.options.formatted || false;
         let verbose = args.options.verbose || false;
         let table = new ASCIITable();
-        let transactions = session.database.transactions.all();
 
+        let transactions = session.database.transactions.all();
         if (!transactions.length) {
             resolve(success([]));
             return;
@@ -32,24 +32,24 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
+
         if (verbose) {
             table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
-
-            for (let tx of transactions) {
-                let date = new Date(tx.date);
-                let d = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-                let t = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                let receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
-
-                table.addRow(`${d} ${t}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice,
-                    (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
-            }
         } else {
             table.setHeading('From', 'To', 'Value', 'Status');
+        }
 
-            for (let tx of transactions) {
-                let receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
+        for (let tx of transactions) {
+            let txDate = new Date(tx.date);
+            let receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
 
+            let date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
+            let time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
+
+            if (verbose) {
+                table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice,
+                    (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+            } else {
                 table.addRow(tx.from, tx.to, tx.value,
                     (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
             }

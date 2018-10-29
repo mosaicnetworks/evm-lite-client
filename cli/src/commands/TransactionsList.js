@@ -32,18 +32,19 @@ exports.stage = (args, session) => {
         }
         if (verbose) {
             table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
-            for (let tx of transactions) {
-                let date = new Date(tx.date);
-                let d = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-                let t = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                let receipt = yield connection.api.getReceipt(tx.txHash);
-                table.addRow(`${d} ${t}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
-            }
         }
         else {
             table.setHeading('From', 'To', 'Value', 'Status');
-            for (let tx of transactions) {
-                let receipt = yield connection.api.getReceipt(tx.txHash);
+        }
+        for (let tx of transactions) {
+            let txDate = new Date(tx.date);
+            let receipt = yield connection.api.getReceipt(tx.txHash);
+            let date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
+            let time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
+            if (verbose) {
+                table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+            }
+            else {
                 table.addRow(tx.from, tx.to, tx.value, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
             }
         }

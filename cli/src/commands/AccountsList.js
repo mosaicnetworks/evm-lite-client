@@ -16,8 +16,7 @@ exports.stage = (args, session) => {
         let remote = args.options.remote || false;
         let verbose = args.options.verbose || false;
         let formatted = args.options.formatted || false;
-        let accounts = [];
-        let accountsTable = new ASCIITable();
+        let table = new ASCIITable();
         let connection = null;
         if (verbose || remote) {
             connection = yield session.connect(args.options.host, args.options.port);
@@ -26,12 +25,7 @@ exports.stage = (args, session) => {
                 return;
             }
         }
-        if (remote) {
-            accounts = yield connection.api.getAccounts();
-        }
-        else {
-            accounts = yield session.keystore.all(verbose, connection);
-        }
+        let accounts = remote ? yield connection.api.getAccounts() : yield session.keystore.all(verbose, connection);
         if (!accounts || !accounts.length) {
             resolve(success([]));
             return;
@@ -40,19 +34,11 @@ exports.stage = (args, session) => {
             resolve(success(accounts));
             return;
         }
-        if (verbose) {
-            accountsTable.setHeading('Address', 'Balance', 'Nonce');
-            for (let account of accounts) {
-                accountsTable.addRow(account.address, account.balance, account.nonce);
-            }
+        (verbose) ? table.setHeading('Address', 'Balance', 'Nonce') : table.setHeading('Address');
+        for (let account of accounts) {
+            (verbose) ? table.addRow(account.address, account.balance, account.nonce) : table.addRow(account.address);
         }
-        else {
-            accountsTable.setHeading('Addresses');
-            for (let account of accounts) {
-                accountsTable.addRow(account.address);
-            }
-        }
-        resolve(success(accountsTable));
+        resolve(success(table));
     }));
 };
 function commandAccountsList(evmlc, session) {

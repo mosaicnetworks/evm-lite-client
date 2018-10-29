@@ -1,13 +1,13 @@
 import * as ASCIITable from 'ascii-table';
 import * as JSONBig from 'json-bigint';
+import * as fs from "fs";
 
 import Globals, {BaseAccount, SentTx, TXReceipt, v3JSONKeyStore} from "../utils/Globals";
 
 import Session from "./Session";
-import * as fs from "fs";
 
 
-type Args = {
+export type Args = {
     [key: string]: any;
     options: {
         [key: string]: any;
@@ -26,31 +26,10 @@ export type StagedOutput<Message> = {
 
 export type StagingFunction = (args: Args, session: Session) => Promise<StagedOutput<Message>>;
 
-export const execute = (fn: StagingFunction, args: Args, session: Session): Promise<void> => {
-    return new Promise<void>(async (resolve) => {
-        let output: StagedOutput<Message> = await fn(args, session);
-        let message: string;
-
-        if (output.message) {
-            switch (typeof output.message) {
-                case 'string':
-                    message = output.message;
-                    break;
-                case 'object':
-                    message = (output.message instanceof ASCIITable) ? output.message.toString() : JSONBig.stringify(output.message);
-                    break;
-            }
-        } else {
-            message = output.subtype + '.';
-        }
-
-        Globals[output.type](`${message.charAt(0).toUpperCase() + message.slice(1)}`);
-        resolve();
-    });
-};
 
 export default class Staging {
     static ERROR = 'error';
+    static SUCCESS = 'success';
     static ERRORS = {
         BLANK_FIELD: 'Field(s) should not be blank',
         DIRECTORY_NOT_EXIST: 'Directory should exist',
@@ -60,9 +39,8 @@ export default class Staging {
         FILE_NOT_FOUND: 'Cannot find file',
         INVALID_CONNECTION: 'Invalid connection',
         FETCH_FAILED: 'Could not fetch data',
-        OTHER: 'Something went wrong'
+        OTHER: 'Something went wrong',
     };
-    static SUCCESS = 'success';
 
     constructor() {
     }
@@ -92,7 +70,33 @@ export default class Staging {
         }
     }
 
-    static getStagingFunctions(args: Args) {
-        return {error: Staging.error.bind(null, args), success: Staging.success.bind(null, args)}
+    static getStagingFunctions(args: Args): { error: (subtype: string, message?: Message) => StagedOutput<Message>, success: (message: Message) => StagedOutput<Message> } {
+        return {
+            error: Staging.error.bind(null, args),
+            success: Staging.success.bind(null, args)
+        }
     }
 }
+
+export const execute = (fn: StagingFunction, args: Args, session: Session): Promise<void> => {
+    return new Promise<void>(async (resolve) => {
+        let output: StagedOutput<Message> = await fn(args, session);
+        let message: string;
+
+        if (output.message) {
+            switch (typeof output.message) {
+                case 'string':
+                    message = output.message;
+                    break;
+                case 'object':
+                    message = (output.message instanceof ASCIITable) ? output.message.toString() : JSONBig.stringify(output.message);
+                    break;
+            }
+        } else {
+            message = output.subtype + '.';
+        }
+
+        Globals[output.type](`${message.charAt(0).toUpperCase() + message.slice(1)}`);
+        resolve();
+    });
+};

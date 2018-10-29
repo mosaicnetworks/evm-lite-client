@@ -29,12 +29,10 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 }
             }
         }
-
         populateQuestions(session.config.data);
 
         if (interactive) {
             let answers = await inquirer.prompt(questions);
-
             for (let key in answers) {
                 if (answers.hasOwnProperty(key)) {
                     args.options[key.toLowerCase()] = answers[key];
@@ -43,10 +41,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!Object.keys(args.options).length) {
-            resolve(error(
-                Staging.ERRORS.BLANK_FIELD,
-                'No options provided. To enter interactive mode use: -i, --interactive.'
-            ));
+            resolve(error(Staging.ERRORS.BLANK_FIELD, 'No options provided.'));
             return;
         }
 

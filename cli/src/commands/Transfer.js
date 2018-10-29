@@ -66,44 +66,37 @@ exports.stage = (args, session) => {
         let tx = {};
         if (interactive) {
             let { from } = yield inquirer.prompt(fromQ);
-            tx.from = from;
+            args.options.from = from;
         }
-        else {
-            tx.from = args.options.from || undefined;
-        }
-        if (!tx.from) {
+        if (!args.options.from) {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, '`From` address cannot be blank.'));
             return;
         }
-        let keystore = session.keystore.get(tx.from);
+        let keystore = session.keystore.get(args.options.from);
         if (!keystore) {
             resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
         }
-        if (args.options.password) {
-            if (!Staging_1.default.exists(args.options.password)) {
+        if (!args.options.pwd) {
+            let { password } = yield inquirer.prompt(passwordQ);
+            args.options.pwd = password;
+        }
+        else {
+            if (!Staging_1.default.exists(args.options.pwd)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
                 return;
             }
-            if (Staging_1.default.isDirectory(args.options.password)) {
+            if (Staging_1.default.isDirectory(args.options.pwd)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
                 return;
             }
-            args.options.password = fs.readFileSync(args.options.password, 'utf8');
-        }
-        else {
-            let { password } = yield inquirer.prompt(passwordQ);
-            args.options.password = password;
+            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
         }
         let decrypted = null;
         try {
-            decrypted = lib_1.Account.decrypt(keystore, args.options.password);
+            decrypted = lib_1.Account.decrypt(keystore, args.options.pwd);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.OTHER, 'Failed decryption of account with the password provided.'));
-            return;
-        }
-        if (!decrypted) {
-            resolve(error(Staging_1.default.ERRORS.OTHER, 'Oops! Something went wrong.'));
             return;
         }
         if (interactive) {
@@ -113,6 +106,7 @@ exports.stage = (args, session) => {
             args.options.gas = answers.gas;
             args.options.gasPrice = answers.gasPrice;
         }
+        tx.from = args.options.from;
         tx.to = args.options.to || undefined;
         tx.value = args.options.value || undefined;
         tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
@@ -125,17 +119,11 @@ exports.stage = (args, session) => {
         tx.nonce = (yield session.keystore.fetch(decrypted.address, connection)).nonce;
         try {
             let signed = yield decrypted.signTransaction(tx);
-            connection.api.sendRawTx(signed.rawTransaction)
-                .then((resp) => {
-                let response = JSONBig.parse(resp);
-                tx.txHash = response.txHash;
-                session.database.transactions.add(tx);
-                session.database.save();
-                resolve(success(`Transaction submitted.`));
-            })
-                .catch(() => {
-                resolve(success('Ran out of gas. Current Gas: ' + parseInt(tx.gas, 16)));
-            });
+            let response = JSONBig.parse(yield connection.api.sendRawTx(signed.rawTransaction));
+            tx.txHash = response.txHash;
+            session.database.transactions.add(tx);
+            session.database.save();
+            resolve(success(`Transaction submitted with hash: ${tx.txHash}`));
         }
         catch (e) {
             resolve(error(Staging_1.default.ERRORS.OTHER, e.message));
@@ -154,10 +142,10 @@ function commandTransfer(evmlc, session) {
         .option('-t, --to <address>', 'address to send to')
         .option('-f, --from <address>', 'address to send from')
         .option('-h, --host <ip>', 'override config parameter host')
-        .option('--password <password>', 'password file path')
+        .option('--pwd <password>', 'password file path')
         .option('-p, --port <port>', 'override config parameter port')
         .types({
-        string: ['t', 'to', 'f', 'from', 'h', 'host', 'password'],
+        string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd'],
     })
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }

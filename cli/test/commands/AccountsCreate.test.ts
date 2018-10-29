@@ -5,7 +5,7 @@ import * as path from "path";
 import {stage} from '../../src/commands/AccountsCreate';
 import {datadir, password, pwdPath, session} from "../constants";
 
-import Staging, {StagedOutput} from "../../src/classes/Staging";
+import Staging, {StagedOutput, Message} from "../../src/classes/Staging";
 
 
 const assert = Chai.assert;
@@ -14,15 +14,15 @@ describe('Command: accounts create', () => {
     it('should return non-verbose output of newly created account with password file', async () => {
         let args: Vorpal.Args = {
             options: {
-                password: pwdPath,
+                pwd: pwdPath,
             }
         };
-        let result: StagedOutput<any> = await stage(args, session);
+        let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
 
         // check output directory and password was what was expected
-        assert.equal(result.args.options.password, password);
+        assert.equal(result.args.options.pwd, password);
         assert.equal(result.args.options.output, path.join(datadir, 'keystore'));
 
         assert.equal(result.args.options.verbose, undefined);
@@ -32,15 +32,15 @@ describe('Command: accounts create', () => {
         let args: Vorpal.Args = {
             options: {
                 verbose: true,
-                password: pwdPath,
+                pwd: pwdPath,
             }
         };
-        let result: StagedOutput<any> = await stage(args, session);
+        let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
 
         // check output directory and password was what was expected
-        assert.equal(result.args.options.password, password);
+        assert.equal(result.args.options.pwd, password);
         assert.equal(result.args.options.output, path.join(datadir, 'keystore'));
 
         assert.equal(result.args.options.verbose, true);
@@ -49,7 +49,7 @@ describe('Command: accounts create', () => {
     it('should return error as password file does not exist', async () => {
         let args: Vorpal.Args = {
             options: {
-                password: '/directory_xyz/not_here.txt'
+                pwd: '/directory_xyz/not_here.txt'
             }
         };
         let result: StagedOutput<any> = await stage(args, session);
@@ -61,11 +61,11 @@ describe('Command: accounts create', () => {
     it('should return error as output directory does not exists', async () => {
         let args: Vorpal.Args = {
             options: {
-                password: pwdPath,
+                pwd: pwdPath,
                 output: '/directory_xyz/not_here'
             }
         };
-        let result: StagedOutput<any> = await stage(args, session);
+        let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
         assert.equal(result.subtype, Staging.ERRORS.DIRECTORY_NOT_EXIST);
@@ -74,10 +74,10 @@ describe('Command: accounts create', () => {
     it('should return error as password file is a directory', async () => {
         let args: Vorpal.Args = {
             options: {
-                password: datadir,
+                pwd: datadir,
             }
         };
-        let result: StagedOutput<any> = await stage(args, session);
+        let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
         assert.equal(result.subtype, Staging.ERRORS.IS_DIRECTORY);
@@ -86,11 +86,11 @@ describe('Command: accounts create', () => {
     it('should return error as output directory is a file', async () => {
         let args: Vorpal.Args = {
             options: {
-                password: pwdPath,
+                pwd: pwdPath,
                 output: pwdPath,
             }
         };
-        let result: StagedOutput<any> = await stage(args, session);
+        let result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
         assert.equal(result.subtype, Staging.ERRORS.IS_FILE);

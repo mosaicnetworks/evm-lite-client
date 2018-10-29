@@ -8,9 +8,10 @@ import Session from "../classes/Session";
 
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let {error, success} = Staging.getStagingFunctions(args);
-        let connection = await session.connect(args.options.host, args.options.port);
 
+        let {error, success} = Staging.getStagingFunctions(args);
+
+        let connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION));
             return;
@@ -18,10 +19,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         let information = await connection.api.getInfo();
         if (!information) {
-            resolve(success(
-                Staging.ERRORS.FETCH_FAILED,
-                'Cannot fetch information.'
-            ));
+            resolve(error(Staging.ERRORS.FETCH_FAILED, 'Cannot fetch information.'));
             return;
         }
 

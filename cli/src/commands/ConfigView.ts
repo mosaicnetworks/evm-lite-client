@@ -1,8 +1,17 @@
 import * as Vorpal from "vorpal";
 
-import Globals from "../utils/Globals";
+import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
+
 import Session from "../classes/Session";
 
+export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
+    return new Promise<StagedOutput<Message>>((resolve) => {
+        let {error, success} = Staging.getStagingFunctions(args);
+
+        let message: string = `Config file location: ${session.config.path} \n\n` + session.config.toTOML();
+        resolve(success(message))
+    });
+};
 
 export default function commandConfigUser(evmlc: Vorpal, session: Session) {
 
@@ -11,12 +20,6 @@ export default function commandConfigUser(evmlc: Vorpal, session: Session) {
 
     return evmlc.command('config view').alias('c v')
         .description(description)
-        .action((): Promise<void> => {
-            return new Promise<void>(resolve => {
-                Globals.info(`Config file location: ${session.config.path}`);
-                Globals.success(session.config.toTOML());
-                resolve();
-            });
-        });
+        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 
 };

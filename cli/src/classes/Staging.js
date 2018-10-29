@@ -10,29 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
-const Globals_1 = require("../utils/Globals");
 const fs = require("fs");
-exports.execute = (fn, args, session) => {
-    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-        let output = yield fn(args, session);
-        let message;
-        if (output.message) {
-            switch (typeof output.message) {
-                case 'string':
-                    message = output.message;
-                    break;
-                case 'object':
-                    message = (output.message instanceof ASCIITable) ? output.message.toString() : JSONBig.stringify(output.message);
-                    break;
-            }
-        }
-        else {
-            message = output.subtype + '.';
-        }
-        Globals_1.default[output.type](`${message.charAt(0).toUpperCase() + message.slice(1)}`);
-        resolve();
-    }));
-};
+const Globals_1 = require("../utils/Globals");
 class Staging {
     constructor() {
     }
@@ -58,10 +37,14 @@ class Staging {
         };
     }
     static getStagingFunctions(args) {
-        return { error: Staging.error.bind(null, args), success: Staging.success.bind(null, args) };
+        return {
+            error: Staging.error.bind(null, args),
+            success: Staging.success.bind(null, args)
+        };
     }
 }
 Staging.ERROR = 'error';
+Staging.SUCCESS = 'success';
 Staging.ERRORS = {
     BLANK_FIELD: 'Field(s) should not be blank',
     DIRECTORY_NOT_EXIST: 'Directory should exist',
@@ -71,7 +54,27 @@ Staging.ERRORS = {
     FILE_NOT_FOUND: 'Cannot find file',
     INVALID_CONNECTION: 'Invalid connection',
     FETCH_FAILED: 'Could not fetch data',
-    OTHER: 'Something went wrong'
+    OTHER: 'Something went wrong',
 };
-Staging.SUCCESS = 'success';
 exports.default = Staging;
+exports.execute = (fn, args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        let output = yield fn(args, session);
+        let message;
+        if (output.message) {
+            switch (typeof output.message) {
+                case 'string':
+                    message = output.message;
+                    break;
+                case 'object':
+                    message = (output.message instanceof ASCIITable) ? output.message.toString() : JSONBig.stringify(output.message);
+                    break;
+            }
+        }
+        else {
+            message = output.subtype + '.';
+        }
+        Globals_1.default[output.type](`${message.charAt(0).toUpperCase() + message.slice(1)}`);
+        resolve();
+    }));
+};

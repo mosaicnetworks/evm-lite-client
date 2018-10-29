@@ -58,6 +58,8 @@ export interface v3JSONKeyStore {
     crypto: KDFEncryption,
 }
 
+export type CommandFunction = (evmlc: Vorpal, session: Session) => Vorpal.Command;
+
 export default class Globals {
 
     static evmlcDir: string = path.join(require('os').homedir(), '.evmlc');

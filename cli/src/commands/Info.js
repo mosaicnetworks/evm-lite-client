@@ -20,7 +20,7 @@ exports.stage = (args, session) => {
         }
         let information = yield connection.api.getInfo();
         if (!information) {
-            resolve(success(Staging_1.default.ERRORS.FETCH_FAILED, 'Cannot fetch information.'));
+            resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Cannot fetch information.'));
             return;
         }
         let formatted = args.options.formatted || false;

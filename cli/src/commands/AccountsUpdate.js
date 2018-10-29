@@ -50,15 +50,19 @@ exports.stage = (args, session) => {
             args.address = address;
         }
         if (!args.address) {
-            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address. Usage: accounts update <address>'));
+            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address.'));
             return;
         }
         let keystore = session.keystore.get(args.address);
         if (!keystore) {
-            resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${args.address}.`));
+            resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address.`));
             return;
         }
-        if (args.options.old) {
+        if (!args.options.old) {
+            let { password } = yield inquirer.prompt(passwordQ);
+            args.options.old = password;
+        }
+        else {
             if (!Staging_1.default.exists(args.options.old)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
                 return;
@@ -69,10 +73,6 @@ exports.stage = (args, session) => {
             }
             args.options.old = fs.readFileSync(args.options.old, 'utf8');
         }
-        else {
-            let { password } = yield inquirer.prompt(passwordQ);
-            args.options.old = password;
-        }
         let decrypted = null;
         try {
             decrypted = lib_1.Account.decrypt(keystore, args.options.old);
@@ -81,11 +81,15 @@ exports.stage = (args, session) => {
             resolve(error(Staging_1.default.ERRORS.OTHER, 'Failed decryption of account with the password provided.'));
             return;
         }
-        if (!decrypted) {
-            resolve(error(Staging_1.default.ERRORS.OTHER, 'Oops! Something went wrong.'));
-            return;
+        if (!args.options.new) {
+            let { password, verifyPassword } = yield inquirer.prompt(newPasswordQ);
+            if (!(password && verifyPassword && (password === verifyPassword))) {
+                resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
+                return;
+            }
+            args.options.new = password;
         }
-        if (args.options.new) {
+        else {
             if (!Staging_1.default.exists(args.options.new)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
                 return;
@@ -96,23 +100,13 @@ exports.stage = (args, session) => {
             }
             args.options.new = fs.readFileSync(args.options.new, 'utf8');
         }
-        else {
-            let { password, verifyPassword } = yield inquirer.prompt(newPasswordQ);
-            if (!(password && verifyPassword && (password === verifyPassword))) {
-                resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Error: Passwords either blank or do not match.'));
-                return;
-            }
-            args.options.new = password;
-        }
         if (args.options.old === args.options.new) {
             resolve(error(Staging_1.default.ERRORS.OTHER, 'New password is the same as old.'));
             return;
         }
-        let filePath = session.keystore.find(args.address);
-        let nKeystore = decrypted.encrypt(args.options.new);
-        let sNKeystore = JSONBig.stringify(nKeystore);
-        fs.writeFileSync(filePath, sNKeystore);
-        resolve(success(nKeystore));
+        let newKeystore = decrypted.encrypt(args.options.new);
+        fs.writeFileSync(session.keystore.find(args.address), JSONBig.stringify(newKeystore));
+        resolve(success(newKeystore));
     }));
 };
 function commandAccountsUpdate(evmlc, session) {

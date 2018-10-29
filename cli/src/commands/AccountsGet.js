@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const JSONBig = require("json-bigint");
 const inquirer = require("inquirer");
 const ASCIITable = require("ascii-table");
 const Staging_1 = require("../classes/Staging");
@@ -35,24 +34,19 @@ exports.stage = (args, session) => {
             args.address = address;
         }
         if (!args.address) {
-            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address. Usage: accounts get <address>'));
+            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address.'));
             return;
         }
         let account = yield connection.api.getAccount(args.address);
-        let message = '';
         if (!account) {
             resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not fetch account: ' + args.address));
             return;
         }
+        let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
         if (formatted) {
-            let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
             table.addRow(account.address, account.balance, account.nonce);
-            message = table.toString();
         }
-        else {
-            message = JSONBig.stringify(account);
-        }
-        resolve(success(message));
+        resolve(success((formatted) ? table : account));
     }));
 };
 function commandAccountsGet(evmlc, session) {

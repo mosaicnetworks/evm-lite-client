@@ -16,7 +16,7 @@ const Keystore_1 = require("../classes/Keystore");
 exports.stage = (args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
         let { error, success } = Staging_1.default.getStagingFunctions(args);
-        let interactive = !args.options.password || session.interactive;
+        let interactive = !args.options.pwd || session.interactive;
         let verbose = args.options.verbose || false;
         let questions = [
             {
@@ -42,49 +42,31 @@ exports.stage = (args, session) => {
                 resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
             }
-            if (!Staging_1.default.exists(output)) {
-                resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
-                return;
-            }
-            if (!Staging_1.default.isDirectory(output)) {
-                resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
-                return;
-            }
-            args.options.password = password;
+            args.options.pwd = password;
             args.options.output = output;
         }
         else {
-            args.options.output = args.options.output || session.config.data.defaults.keystore;
-            if (!Staging_1.default.exists(args.options.password)) {
+            if (!Staging_1.default.exists(args.options.pwd)) {
                 resolve(error(Staging_1.default.ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
                 return;
             }
-            if (!Staging_1.default.exists(args.options.output)) {
-                resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory provided does not exist.'));
-                return;
-            }
-            if (Staging_1.default.isDirectory(args.options.password)) {
+            if (Staging_1.default.isDirectory(args.options.pwd)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
                 return;
             }
-            if (!Staging_1.default.isDirectory(args.options.output)) {
-                resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
-                return;
-            }
-            args.options.password = fs.readFileSync(args.options.password, 'utf8');
+            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
         }
-        let password = args.options.password;
-        let output = args.options.output;
-        let sAccount = Keystore_1.default.create(output, password);
-        let account = JSONBig.parse(sAccount);
-        let message = '';
-        if (!verbose) {
-            message = '0x' + account.address;
+        args.options.output = args.options.output || session.config.data.defaults.keystore;
+        if (!Staging_1.default.exists(args.options.output)) {
+            resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
+            return;
         }
-        else {
-            message = account;
+        if (!Staging_1.default.isDirectory(args.options.output)) {
+            resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
+            return;
         }
-        resolve(success(message));
+        let account = JSONBig.parse(Keystore_1.default.create(args.options.output, args.options.pwd));
+        resolve(success(verbose ? account : `0x${account.address}`));
     }));
 };
 function commandAccountsCreate(evmlc, session) {
@@ -95,9 +77,9 @@ function commandAccountsCreate(evmlc, session) {
         .description(description)
         .option('-o, --output <path>', 'keystore file output path')
         .option('-v, --verbose', 'show verbose output')
-        .option('-p, --password <file_path>', 'password file path')
+        .option('--pwd <file_path>', 'password file path')
         .types({
-        string: ['p', 'password', 'o', 'output']
+        string: ['pwd', 'o', 'output']
     })
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }

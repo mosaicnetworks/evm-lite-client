@@ -24,12 +24,13 @@ const AccountsGet_1 = require("./commands/AccountsGet");
 const Interactive_1 = require("./commands/Interactive");
 const ConfigView_1 = require("./commands/ConfigView");
 const ConfigSet_1 = require("./commands/ConfigSet");
+const LogsClear_1 = require("./commands/LogsClear");
+const LogsView_1 = require("./commands/LogsView");
 const Transfer_1 = require("./commands/Transfer");
+const Clear_1 = require("./commands/Clear");
 const Test_1 = require("./commands/Test");
 const Info_1 = require("./commands/Info");
-const Clear_1 = require("./commands/Clear");
-const LogsView_1 = require("./commands/LogsView");
-const LogsClear_1 = require("./commands/LogsClear");
+const __VERSION__ = '0.1.1';
 const init = () => {
     return new Promise(resolve => {
         if (!Staging_1.default.exists(Globals_1.default.evmlcDir)) {
@@ -53,14 +54,14 @@ init()
     }
     let session = new Session_1.default(dataDirPath);
     if (!process.argv[2]) {
-        console.log(`\n  A Command Line Interface to interact with EVM-Lite.`);
-        console.log(`\n  Current Data Directory: ${session.directory.path}`);
+        console.log('\n  A Command Line Interface to interact with EVM-Lite.');
+        console.log(`\n  Current Data Directory: ` + session.directory.path);
         process.argv[2] = 'help';
     }
     return session;
 })
     .then((session) => {
-    const evmlc = new Vorpal().version("0.1.0");
+    const evmlc = new Vorpal().version(__VERSION__);
     [
         AccountsUpdate_1.default,
         ConfigView_1.default,
@@ -77,7 +78,7 @@ init()
         LogsView_1.default,
         LogsClear_1.default,
         Clear_1.default,
-    ].forEach(command => {
+    ].forEach((command) => {
         command(evmlc, session);
     });
     return {
@@ -108,4 +109,4 @@ init()
         cli.instance.parse(process.argv);
     }
 }))
-    .catch(err => Globals_1.default.error(err));
+    .catch(err => console.log(err));

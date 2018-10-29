@@ -49,48 +49,34 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!args.address) {
-            resolve(error(
-                Staging.ERRORS.BLANK_FIELD,
-                'Provide a non-empty address. Usage: accounts update <address>'
-            ));
+            resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide a non-empty address.'));
             return;
         }
 
         let keystore = session.keystore.get(args.address);
-
         if (!keystore) {
-            resolve(error(
-                Staging.ERRORS.FILE_NOT_FOUND,
-                `Cannot find keystore file of address: ${args.address}.`
-            ));
+            resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address.`));
             return;
         }
 
-        if (args.options.old) {
+        if (!args.options.old) {
+            let {password} = await inquirer.prompt(passwordQ);
+            args.options.old = password;
+        } else {
             if (!Staging.exists(args.options.old)) {
-                resolve(error(
-                    Staging.ERRORS.FILE_NOT_FOUND,
-                    'Old password file path provided does not exist.'
-                ));
+                resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
                 return;
             }
 
             if (Staging.isDirectory(args.options.old)) {
-                resolve(error(
-                    Staging.ERRORS.IS_DIRECTORY,
-                    'Old password file path provided is not a file.'
-                ));
+                resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
                 return;
             }
 
             args.options.old = fs.readFileSync(args.options.old, 'utf8');
-        } else {
-            let {password} = await inquirer.prompt(passwordQ);
-            args.options.old = password;
         }
 
         let decrypted: Account = null;
-
         try {
             decrypted = Account.decrypt(keystore, args.options.old);
         } catch (err) {
@@ -101,61 +87,36 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        if (!decrypted) {
-            resolve(error(
-                Staging.ERRORS.OTHER,
-                'Oops! Something went wrong.'
-            ));
-            return;
-        }
-
-        if (args.options.new) {
+        if (!args.options.new) {
+            let {password, verifyPassword} = await inquirer.prompt(newPasswordQ);
+            if (!(password && verifyPassword && (password === verifyPassword))) {
+                resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
+                return;
+            }
+            args.options.new = password;
+        } else {
             if (!Staging.exists(args.options.new)) {
-                resolve(error(
-                    Staging.ERRORS.FILE_NOT_FOUND,
-                    'New password file path provided does not exist.'
-                ));
+                resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
                 return;
             }
 
             if (Staging.isDirectory(args.options.new)) {
-                resolve(error(
-                    Staging.ERRORS.IS_DIRECTORY,
-                    'New password file path provided is not a file.'
-                ));
+                resolve(error(Staging.ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
                 return;
             }
 
             args.options.new = fs.readFileSync(args.options.new, 'utf8');
-        } else {
-            let {password, verifyPassword} = await inquirer.prompt(newPasswordQ);
-
-            if (!(password && verifyPassword && (password === verifyPassword))) {
-                resolve(error(
-                    Staging.ERRORS.BLANK_FIELD,
-                    'Error: Passwords either blank or do not match.'
-                ));
-                return;
-            }
-
-            args.options.new = password;
         }
 
         if (args.options.old === args.options.new) {
-            resolve(error(
-                Staging.ERRORS.OTHER,
-                'New password is the same as old.'
-            ));
+            resolve(error(Staging.ERRORS.OTHER, 'New password is the same as old.'));
             return;
         }
 
-        let filePath: string = session.keystore.find(args.address);
-        let nKeystore = decrypted.encrypt(args.options.new);
-        let sNKeystore = JSONBig.stringify(nKeystore);
+        let newKeystore = decrypted.encrypt(args.options.new);
 
-        fs.writeFileSync(filePath, sNKeystore);
-
-        resolve(success(nKeystore));
+        fs.writeFileSync(session.keystore.find(args.address), JSONBig.stringify(newKeystore));
+        resolve(success(newKeystore));
     })
 };
 

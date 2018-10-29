@@ -26,6 +26,7 @@ export default class Session {
         this.interactive = false;
         this.connection = null;
         this.logs = [];
+
         this.logpath = path.join(dataDirPath, 'logs');
 
         this.directory = new DataDirectory(dataDirPath);

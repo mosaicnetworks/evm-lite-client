@@ -8,13 +8,12 @@ import Staging, {execute, Message, StagedOutput, StagingFunction} from "../class
 import Session from "../classes/Session";
 import Keystore from "../classes/Keystore";
 
-
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
         let {error, success} = Staging.getStagingFunctions(args);
 
-        let interactive = !args.options.password || session.interactive;
+        let interactive = !args.options.pwd || session.interactive;
         let verbose = args.options.verbose || false;
         let questions = [
             {
@@ -37,88 +36,43 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         if (interactive) {
             let {output, password, verifyPassword} = await inquirer.prompt(questions);
-
             if (!(password && verifyPassword && (password === verifyPassword))) {
-                resolve(error(
-                    Staging.ERRORS.BLANK_FIELD,
-                    'Passwords either blank or do not match.'
-                ));
+                resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
             }
 
-            if (!Staging.exists(output)) {
-                resolve(error(
-                    Staging.ERRORS.DIRECTORY_NOT_EXIST,
-                    'Output directory does not exist.'
-                ));
-                return;
-            }
-
-            if (!Staging.isDirectory(output)) {
-                resolve(error(
-                    Staging.ERRORS.IS_FILE,
-                    'Output path is not a directory.'
-                ));
-                return;
-            }
-
-            args.options.password = password;
+            args.options.pwd = password;
             args.options.output = output;
         } else {
-            args.options.output = args.options.output || session.config.data.defaults.keystore;
-
-            if (!Staging.exists(args.options.password)) {
-                resolve(error(
-                    Staging.ERRORS.PATH_NOT_EXIST,
-                    'Password file provided does not exist.'
-                ));
+            if (!Staging.exists(args.options.pwd)) {
+                resolve(error(Staging.ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
                 return;
             }
 
-            if (!Staging.exists(args.options.output)) {
-                resolve(error(
-                    Staging.ERRORS.DIRECTORY_NOT_EXIST,
-                    'Output directory provided does not exist.'
-                ));
+            if (Staging.isDirectory(args.options.pwd)) {
+                resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
                 return;
             }
 
-            if (Staging.isDirectory(args.options.password)) {
-                resolve(error(
-                    Staging.ERRORS.IS_DIRECTORY,
-                    'Password file path provided is a directory.'
-                ));
-                return;
-            }
-
-            if (!Staging.isDirectory(args.options.output)) {
-                resolve(error(
-                    Staging.ERRORS.IS_FILE,
-                    'Output path is not a directory.'
-                ));
-                return;
-            }
-
-            args.options.password = fs.readFileSync(args.options.password, 'utf8');
+            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
         }
 
-        let password = args.options.password;
-        let output = args.options.output;
-        let sAccount = Keystore.create(output, password);
-        let account = JSONBig.parse(sAccount);
-        let message: string = '';
-
-        if (!verbose) {
-            message = '0x' + account.address;
-        } else {
-            message = account;
+        args.options.output = args.options.output || session.config.data.defaults.keystore;
+        if (!Staging.exists(args.options.output)) {
+            resolve(error(Staging.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
+            return;
+        }
+        if (!Staging.isDirectory(args.options.output)) {
+            resolve(error(Staging.ERRORS.IS_FILE, 'Output path is not a directory.'));
+            return;
         }
 
-        resolve(success(message));
+        let account = JSONBig.parse(Keystore.create(args.options.output, args.options.pwd));
+        resolve(success(verbose ? account : `0x${account.address}`));
     })
 };
 
-export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
+export default function commandAccountsCreate(evmlc: Vorpal, session: Session): Vorpal.Command {
 
     let description =
         'Allows you to create and encrypt accounts locally. Created accounts will either be placed in the' +
@@ -129,9 +83,9 @@ export default function commandAccountsCreate(evmlc: Vorpal, session: Session) {
         .description(description)
         .option('-o, --output <path>', 'keystore file output path')
         .option('-v, --verbose', 'show verbose output')
-        .option('-p, --password <file_path>', 'password file path')
+        .option('--pwd <file_path>', 'password file path')
         .types({
-            string: ['p', 'password', 'o', 'output']
+            string: ['pwd', 'o', 'output']
         })
         .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 };
