@@ -94,7 +94,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
+            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
         }
 
         let decrypted: Account = null;
@@ -128,8 +128,10 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         tx.chainId = 1;
         tx.nonce = (await session.keystore.fetch(decrypted.address, connection)).nonce;
 
+        console.log(tx);
         try {
             let signed = await decrypted.signTransaction(tx);
+
             let response = JSONBig.parse(await connection.api.sendRawTx(signed.rawTransaction));
 
             tx.txHash = response.txHash;
@@ -140,7 +142,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             resolve(success(`Transaction submitted with hash: ${tx.txHash}`));
         } catch (e) {
             console.log(e);
-            resolve(error(Staging.ERRORS.OTHER, e.message));
+            console.log(tx);
+            resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
         }
 
     });

@@ -57,7 +57,11 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         for (let key in receipt) {
             if (receipt.hasOwnProperty(key)) {
-                table.addRow(key, receipt[key]);
+                if (key !== 'status') {
+                    table.addRow(key, receipt[key]);
+                } else {
+                    table.addRow(key, (!receipt[key]) ? 'Successful' : 'Failed')
+                }
             }
         }
 
