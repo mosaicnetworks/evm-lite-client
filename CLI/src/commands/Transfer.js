@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
 const fs = require("fs");
 const JSONBig = require("json-bigint");
-const lib_1 = require("../../../lib");
+const Library_1 = require("../../../Library");
 const Staging_1 = require("../classes/Staging");
 exports.stage = (args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
@@ -94,7 +94,7 @@ exports.stage = (args, session) => {
         }
         let decrypted = null;
         try {
-            decrypted = lib_1.Account.decrypt(keystore, args.options.pwd);
+            decrypted = Library_1.Account.decrypt(keystore, args.options.pwd);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));

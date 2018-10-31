@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 import * as fs from "fs";
 import * as JSONBig from 'json-bigint';
 
-import {Account} from "../../../lib"
+import {Account} from "../../../Library"
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";

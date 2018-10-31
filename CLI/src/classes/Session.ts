@@ -1,6 +1,6 @@
 import * as path from "path";
 
-import {Controller} from "../../../lib";
+import {Controller} from "../../../Library";
 
 import Config from "./Config";
 import DataDirectory from "./DataDirectory";

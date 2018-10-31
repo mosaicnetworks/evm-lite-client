@@ -4,7 +4,7 @@ import * as JSONBig from 'json-bigint';
 
 import {BaseAccount, v3JSONKeyStore} from "../utils/Globals";
 
-import {Account, Controller} from "../../../lib";
+import {Account, Controller} from "../../../Library";
 
 
 export default class Keystore {

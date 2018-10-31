@@ -1,7 +1,7 @@
 import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
 
-import {Controller} from "../../../lib"
+import {Controller} from "../../../Library"
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
