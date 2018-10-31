@@ -70,7 +70,6 @@ from = ""
 gas = 100000.0
 gasprice = 0.0
 keystore = "[...]/.evmlc/keystore"
-interactive = true
  ```
 
 The easiest way to manage configuration is through the `config` command in
