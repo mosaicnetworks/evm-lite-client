@@ -141,8 +141,6 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
             resolve(success(`Transaction submitted with hash: ${tx.txHash}`));
         } catch (e) {
-            console.log(e);
-            console.log(tx);
             resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
         }
 

@@ -128,8 +128,6 @@ exports.stage = (args, session) => {
             resolve(success(`Transaction submitted with hash: ${tx.txHash}`));
         }
         catch (e) {
-            console.log(e);
-            console.log(tx);
             resolve(error(Staging_1.default.ERRORS.OTHER, (e.text) ? e.text : e.message));
         }
     }));
