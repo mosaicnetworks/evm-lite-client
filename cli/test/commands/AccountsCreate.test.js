@@ -39,7 +39,7 @@ exports.__esModule = true;
 var Chai = require("chai");
 var path = require("path");
 var AccountsCreate_1 = require("../../src/commands/AccountsCreate");
-var constants_1 = require("../constants");
+var stage_1 = require("../stage");
 var Staging_1 = require("../../src/classes/Staging");
 var assert = Chai.assert;
 describe('Command: accounts create', function () {
@@ -50,16 +50,16 @@ describe('Command: accounts create', function () {
                 case 0:
                     args = {
                         options: {
-                            pwd: constants_1.pwdPath
+                            pwd: stage_1.pwdPath
                         }
                     };
-                    return [4 /*yield*/, AccountsCreate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].SUCCESS);
                     // check output directory and password was what was expected
-                    assert.equal(result.args.options.pwd, constants_1.password);
-                    assert.equal(result.args.options.output, path.join(constants_1.datadir, 'keystore'));
+                    assert.equal(result.args.options.pwd, stage_1.password);
+                    assert.equal(result.args.options.output, path.join(stage_1.datadir, 'keystore'));
                     assert.equal(result.args.options.verbose, undefined);
                     return [2 /*return*/];
             }
@@ -73,16 +73,16 @@ describe('Command: accounts create', function () {
                     args = {
                         options: {
                             verbose: true,
-                            pwd: constants_1.pwdPath
+                            pwd: stage_1.pwdPath
                         }
                     };
-                    return [4 /*yield*/, AccountsCreate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].SUCCESS);
                     // check output directory and password was what was expected
-                    assert.equal(result.args.options.pwd, constants_1.password);
-                    assert.equal(result.args.options.output, path.join(constants_1.datadir, 'keystore'));
+                    assert.equal(result.args.options.pwd, stage_1.password);
+                    assert.equal(result.args.options.output, path.join(stage_1.datadir, 'keystore'));
                     assert.equal(result.args.options.verbose, true);
                     return [2 /*return*/];
             }
@@ -98,7 +98,7 @@ describe('Command: accounts create', function () {
                             pwd: '/directory_xyz/not_here.txt'
                         }
                     };
-                    return [4 /*yield*/, AccountsCreate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
@@ -114,11 +114,11 @@ describe('Command: accounts create', function () {
                 case 0:
                     args = {
                         options: {
-                            pwd: constants_1.pwdPath,
+                            pwd: stage_1.pwdPath,
                             output: '/directory_xyz/not_here'
                         }
                     };
-                    return [4 /*yield*/, AccountsCreate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
@@ -134,10 +134,10 @@ describe('Command: accounts create', function () {
                 case 0:
                     args = {
                         options: {
-                            pwd: constants_1.datadir
+                            pwd: stage_1.datadir
                         }
                     };
-                    return [4 /*yield*/, AccountsCreate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
@@ -153,11 +153,11 @@ describe('Command: accounts create', function () {
                 case 0:
                     args = {
                         options: {
-                            pwd: constants_1.pwdPath,
-                            output: constants_1.pwdPath
+                            pwd: stage_1.pwdPath,
+                            output: stage_1.pwdPath
                         }
                     };
-                    return [4 /*yield*/, AccountsCreate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);

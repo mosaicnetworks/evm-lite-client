@@ -39,6 +39,7 @@ export default class Staging {
         FILE_NOT_FOUND: 'Cannot find file',
         INVALID_CONNECTION: 'Invalid connection',
         FETCH_FAILED: 'Could not fetch data',
+        DECRYPTION: 'Failed decryption',
         OTHER: 'Something went wrong',
     };
 

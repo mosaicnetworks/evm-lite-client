@@ -27,7 +27,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             {
                 name: 'password',
                 type: 'password',
-                message: 'Enter password: ',
+                message: 'Enter current password: ',
             }
         ];
         let newPasswordQ = [
@@ -81,7 +81,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             decrypted = Account.decrypt(keystore, args.options.old);
         } catch (err) {
             resolve(error(
-                Staging.ERRORS.OTHER,
+                Staging.ERRORS.DECRYPTION,
                 'Failed decryption of account with the password provided.'
             ));
             return;

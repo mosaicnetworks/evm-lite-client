@@ -30,7 +30,7 @@ exports.stage = (args, session) => {
             {
                 name: 'password',
                 type: 'password',
-                message: 'Enter password: ',
+                message: 'Enter current password: ',
             }
         ];
         let newPasswordQ = [
@@ -78,7 +78,7 @@ exports.stage = (args, session) => {
             decrypted = lib_1.Account.decrypt(keystore, args.options.old);
         }
         catch (err) {
-            resolve(error(Staging_1.default.ERRORS.OTHER, 'Failed decryption of account with the password provided.'));
+            resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));
             return;
         }
         if (!args.options.new) {

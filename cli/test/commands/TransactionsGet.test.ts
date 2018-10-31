@@ -2,7 +2,7 @@ import * as Chai from 'chai';
 import * as Vorpal from "vorpal";
 
 import {stage} from '../../src/commands/TransactionsGet';
-import {session} from "../constants";
+import {session} from "../stage";
 
 import Staging, {Message, StagedOutput} from "../../src/classes/Staging";
 

@@ -37,25 +37,25 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _this = this;
 exports.__esModule = true;
 var Chai = require("chai");
-var ASCIITable = require("ascii-table");
-var AccountsList_1 = require("../../src/commands/AccountsList");
+var AccountsCreate = require("../../src/commands/AccountsCreate");
+var Transfer_1 = require("../../src/commands/Transfer");
 var stage_1 = require("../stage");
 var Staging_1 = require("../../src/classes/Staging");
 var assert = Chai.assert;
-describe('command: accounts list', function () {
-    it('should return error as verbose requires a valid connection to a node', function () { return __awaiter(_this, void 0, void 0, function () {
+var account;
+describe('command: transfer', function () {
+    it('should return error as connection is not valid', function () { return __awaiter(_this, void 0, void 0, function () {
         var args, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     args = {
                         options: {
-                            verbose: true,
                             host: '127.0.0.1',
-                            port: '1234'
+                            port: 1234
                         }
                     };
-                    return [4 /*yield*/, AccountsList_1.stage(args, stage_1.session)];
+                    return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
@@ -64,65 +64,120 @@ describe('command: accounts list', function () {
             }
         });
     }); });
-    it('should return ASCIITable with verbose and formatted with valid connection', function () { return __awaiter(_this, void 0, void 0, function () {
+    it('should return error as no address was provided', function () { return __awaiter(_this, void 0, void 0, function () {
         var args, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     args = {
+                        options: {
+                            host: '127.0.0.1',
+                            port: 8080
+                        }
+                    };
+                    return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
+                case 1:
+                    result = _a.sent();
+                    assert.equal(result.type, Staging_1["default"].ERROR);
+                    assert.equal(result.subtype, Staging_1["default"].ERRORS.BLANK_FIELD);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it('should return error as address provided does not have a keystore file', function () { return __awaiter(_this, void 0, void 0, function () {
+        var args, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    args = {
+                        options: {
+                            from: '2a007a8b0f179f4162f3849564948d39b843b188',
+                            host: '127.0.0.1',
+                            port: 8080
+                        }
+                    };
+                    return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
+                case 1:
+                    result = _a.sent();
+                    assert.equal(result.type, Staging_1["default"].ERROR);
+                    assert.equal(result.subtype, Staging_1["default"].ERRORS.FILE_NOT_FOUND);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it('should return error as password file does not exist', function () { return __awaiter(_this, void 0, void 0, function () {
+        var args, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    args = {
+                        options: {
+                            from: '2a007a8b0f179f4162f3849564948d39b843b188',
+                            host: '127.0.0.1',
+                            port: 8080,
+                            pwd: 'not_here'
+                        }
+                    };
+                    return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
+                case 1:
+                    result = _a.sent();
+                    assert.equal(result.type, Staging_1["default"].ERROR);
+                    assert.equal(result.subtype, Staging_1["default"].ERRORS.FILE_NOT_FOUND);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it('should error as trying to decrypt with wrong password file', function () { return __awaiter(_this, void 0, void 0, function () {
+        var createArgs, createResult, args, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    createArgs = {
                         options: {
                             verbose: true,
-                            formatted: true,
-                            host: '127.0.0.1',
-                            port: '8080'
+                            pwd: stage_1.pwdPath
                         }
                     };
-                    return [4 /*yield*/, AccountsList_1.stage(args, stage_1.session)];
+                    return [4 /*yield*/, AccountsCreate.stage(createArgs, stage_1.session)];
                 case 1:
+                    createResult = _a.sent();
+                    assert.equal(createResult.type, Staging_1["default"].SUCCESS);
+                    account = createResult.message;
+                    args = {
+                        options: {
+                            from: account.address,
+                            host: '127.0.0.1',
+                            port: 8080,
+                            pwd: stage_1.otherPwdPath
+                        }
+                    };
+                    return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
+                case 2:
                     result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].SUCCESS);
-                    assert.equal(result.message instanceof ASCIITable, true);
+                    assert.equal(result.type, Staging_1["default"].ERROR);
+                    assert.equal(result.subtype, Staging_1["default"].ERRORS.DECRYPTION);
                     return [2 /*return*/];
             }
         });
     }); });
-    it('should return list of BaseAccounts even without a valid connection', function () { return __awaiter(_this, void 0, void 0, function () {
+    it('should error as trying to transfer with no to or value field', function () { return __awaiter(_this, void 0, void 0, function () {
         var args, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     args = {
                         options: {
+                            from: account.address,
                             host: '127.0.0.1',
-                            port: '1234'
+                            port: 8080,
+                            pwd: stage_1.pwdPath
                         }
                     };
-                    return [4 /*yield*/, AccountsList_1.stage(args, stage_1.session)];
+                    return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].SUCCESS);
-                    assert.equal(result.message instanceof Array, true);
-                    return [2 /*return*/];
-            }
-        });
-    }); });
-    it('should return ASCIITable even without a valid connection', function () { return __awaiter(_this, void 0, void 0, function () {
-        var args, result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    args = {
-                        options: {
-                            formatted: true,
-                            host: '127.0.0.1',
-                            port: '1234'
-                        }
-                    };
-                    return [4 /*yield*/, AccountsList_1.stage(args, stage_1.session)];
-                case 1:
-                    result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].SUCCESS);
-                    assert.equal(result.message instanceof ASCIITable, true);
+                    assert.equal(result.type, Staging_1["default"].ERROR);
+                    assert.equal(result.subtype, Staging_1["default"].ERRORS.BLANK_FIELD);
                     return [2 /*return*/];
             }
         });

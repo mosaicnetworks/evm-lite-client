@@ -3,7 +3,7 @@ import * as Vorpal from "vorpal";
 import * as path from "path";
 
 import {stage} from '../../src/commands/AccountsCreate';
-import {datadir, password, pwdPath, session} from "../constants";
+import {datadir, password, pwdPath, session} from "../stage";
 
 import Staging, {StagedOutput, Message} from "../../src/classes/Staging";
 

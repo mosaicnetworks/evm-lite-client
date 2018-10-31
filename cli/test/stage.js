@@ -9,3 +9,12 @@ exports.pwdPath = path.join(exports.datadir, 'pwd.txt');
 exports.password = fs.readFileSync(exports.pwdPath, 'utf8');
 exports.otherPwdPath = path.join(exports.datadir, 'other_pwd.txt');
 exports.otherPassword = fs.readFileSync(exports.pwdPath, 'utf8');
+after(function () {
+    var keystore = path.join(exports.datadir, 'keystore');
+    var files = fs.readdirSync(keystore).filter(function (file) {
+        return !(file.startsWith('.'));
+    });
+    files.forEach(function (file) {
+        fs.unlinkSync(path.join(keystore, file));
+    });
+});

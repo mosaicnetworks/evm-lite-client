@@ -3,7 +3,7 @@ import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
 
 import {stage} from '../../src/commands/AccountsList';
-import {session} from "../constants";
+import {session} from "../stage";
 
 import Staging, {Message, StagedOutput} from "../../src/classes/Staging";
 

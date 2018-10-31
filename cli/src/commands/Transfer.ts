@@ -76,7 +76,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         let keystore = session.keystore.get(args.options.from);
         if (!keystore) {
-            resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`))
+            resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
+            return;
         }
 
         if (!args.options.pwd) {
@@ -100,7 +101,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         try {
             decrypted = Account.decrypt(keystore, args.options.pwd);
         } catch (err) {
-            resolve(error(Staging.ERRORS.OTHER, 'Failed decryption of account with the password provided.'));
+            resolve(error(Staging.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));
             return;
         }
 
@@ -138,6 +139,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
             resolve(success(`Transaction submitted with hash: ${tx.txHash}`));
         } catch (e) {
+            console.log(e);
             resolve(error(Staging.ERRORS.OTHER, e.message));
         }
 

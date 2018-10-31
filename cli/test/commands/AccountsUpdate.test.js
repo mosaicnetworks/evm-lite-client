@@ -39,7 +39,7 @@ exports.__esModule = true;
 var Chai = require("chai");
 var AccountsCreate = require("../../src/commands/AccountsCreate");
 var AccountsUpdate_1 = require("../../src/commands/AccountsUpdate");
-var constants_1 = require("../constants");
+var stage_1 = require("../stage");
 var Staging_1 = require("../../src/classes/Staging");
 var assert = Chai.assert;
 var account;
@@ -52,7 +52,7 @@ describe('command: accounts update', function () {
                     args = {
                         options: {}
                     };
-                    return [4 /*yield*/, AccountsUpdate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
@@ -70,7 +70,7 @@ describe('command: accounts update', function () {
                         address: 'does_not_exist',
                         options: {}
                     };
-                    return [4 /*yield*/, AccountsUpdate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
@@ -88,10 +88,10 @@ describe('command: accounts update', function () {
                     createArgs = {
                         options: {
                             verbose: true,
-                            pwd: constants_1.pwdPath
+                            pwd: stage_1.pwdPath
                         }
                     };
-                    return [4 /*yield*/, AccountsCreate.stage(createArgs, constants_1.session)];
+                    return [4 /*yield*/, AccountsCreate.stage(createArgs, stage_1.session)];
                 case 1:
                     createResult = _a.sent();
                     assert.equal(createResult.type, Staging_1["default"].SUCCESS);
@@ -99,15 +99,15 @@ describe('command: accounts update', function () {
                     args = {
                         address: account.address,
                         options: {
-                            old: constants_1.otherPwdPath,
-                            "new": constants_1.pwdPath
+                            old: stage_1.otherPwdPath,
+                            "new": stage_1.pwdPath
                         }
                     };
-                    return [4 /*yield*/, AccountsUpdate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];
                 case 2:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
-                    assert.equal(result.subtype, Staging_1["default"].ERRORS.OTHER);
+                    assert.equal(result.subtype, Staging_1["default"].ERRORS.DECRYPTION);
                     return [2 /*return*/];
             }
         });
@@ -123,7 +123,7 @@ describe('command: accounts update', function () {
                             old: 'does_not_exist'
                         }
                     };
-                    return [4 /*yield*/, AccountsUpdate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
@@ -140,11 +140,11 @@ describe('command: accounts update', function () {
                     args = {
                         address: account.address,
                         options: {
-                            old: constants_1.pwdPath,
+                            old: stage_1.pwdPath,
                             "new": 'does_not_exist'
                         }
                     };
-                    return [4 /*yield*/, AccountsUpdate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].ERROR);
@@ -161,11 +161,11 @@ describe('command: accounts update', function () {
                     args = {
                         address: account.address,
                         options: {
-                            old: constants_1.pwdPath,
-                            "new": constants_1.otherPwdPath
+                            old: stage_1.pwdPath,
+                            "new": stage_1.otherPwdPath
                         }
                     };
-                    return [4 /*yield*/, AccountsUpdate_1.stage(args, constants_1.session)];
+                    return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
                     assert.equal(result.type, Staging_1["default"].SUCCESS);

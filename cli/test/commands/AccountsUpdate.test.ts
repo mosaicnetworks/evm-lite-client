@@ -4,7 +4,7 @@ import * as Vorpal from "vorpal";
 import * as AccountsCreate from '../../src/commands/AccountsCreate';
 
 import {stage} from '../../src/commands/AccountsUpdate';
-import {otherPwdPath, pwdPath, session} from "../constants";
+import {otherPwdPath, pwdPath, session} from "../stage";
 
 import Staging, {Message, StagedOutput} from "../../src/classes/Staging";
 import {v3JSONKeyStore} from "../../src/utils/Globals";
@@ -60,7 +60,7 @@ describe('command: accounts update', () => {
         // decrypt
         let result: StagedOutput<Message> = await stage(args, session);
         assert.equal(result.type, Staging.ERROR);
-        assert.equal(result.subtype, Staging.ERRORS.OTHER);
+        assert.equal(result.subtype, Staging.ERRORS.DECRYPTION);
     });
 
     it('should return error as old password file does not exist', async () => {
