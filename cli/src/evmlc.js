@@ -1,27 +1,39 @@
 #!/usr/bin/env node
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const Vorpal = require("vorpal");
-const fs = require("fs");
 const mkdir = require("mkdirp");
+const figlet = require("figlet");
 const Globals_1 = require("./utils/Globals");
 const Session_1 = require("./classes/Session");
+const Staging_1 = require("./classes/Staging");
 const TransactionsList_1 = require("./commands/TransactionsList");
 const TransactionsGet_1 = require("./commands/TransactionsGet");
+const AccountsUpdate_1 = require("./commands/AccountsUpdate");
 const AccountsCreate_1 = require("./commands/AccountsCreate");
 const AccountsList_1 = require("./commands/AccountsList");
 const AccountsGet_1 = require("./commands/AccountsGet");
 const Interactive_1 = require("./commands/Interactive");
 const ConfigView_1 = require("./commands/ConfigView");
 const ConfigSet_1 = require("./commands/ConfigSet");
+const LogsClear_1 = require("./commands/LogsClear");
+const LogsView_1 = require("./commands/LogsView");
 const Transfer_1 = require("./commands/Transfer");
+const Clear_1 = require("./commands/Clear");
 const Test_1 = require("./commands/Test");
 const Info_1 = require("./commands/Info");
-const LogsView_1 = require("./commands/LogsView");
-const LogsClear_1 = require("./commands/LogsClear");
+const __VERSION__ = '0.1.1';
 const init = () => {
     return new Promise(resolve => {
-        if (!fs.existsSync(Globals_1.default.evmlcDir)) {
+        if (!Staging_1.default.exists(Globals_1.default.evmlcDir)) {
             mkdir.mkdirp(Globals_1.default.evmlcDir);
         }
         resolve();
@@ -35,22 +47,23 @@ init()
     let dataDirPath = Globals_1.default.evmlcDir;
     if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
         dataDirPath = process.argv[3];
-        if (!fs.existsSync(process.argv[3])) {
+        if (!Staging_1.default.exists(process.argv[3])) {
             Globals_1.default.warning('Data directory file path provided does not exist and hence will created...');
         }
         process.argv.splice(2, 2);
     }
     let session = new Session_1.default(dataDirPath);
     if (!process.argv[2]) {
-        console.log(`\n  A Command Line Interface to interact with EVM-Lite.`);
-        console.log(`\n  Current Data Directory: ${session.directory.path}`);
+        console.log('\n  A Command Line Interface to interact with EVM-Lite.');
+        console.log(`\n  Current Data Directory: ` + session.directory.path);
         process.argv[2] = 'help';
     }
     return session;
 })
     .then((session) => {
-    const evmlc = new Vorpal().version("0.1.0");
+    const evmlc = new Vorpal().version(__VERSION__);
     [
+        AccountsUpdate_1.default,
         ConfigView_1.default,
         ConfigSet_1.default,
         AccountsCreate_1.default,
@@ -64,7 +77,8 @@ init()
         TransactionsGet_1.default,
         LogsView_1.default,
         LogsClear_1.default,
-    ].forEach(command => {
+        Clear_1.default,
+    ].forEach((command) => {
         command(evmlc, session);
     });
     return {
@@ -72,14 +86,27 @@ init()
         session: session
     };
 })
-    .then((cli) => {
+    .then((cli) => __awaiter(this, void 0, void 0, function* () {
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-        Globals_1.default.info(`Entered interactive mode with data directory: ${cli.session.directory.path}`);
+        console.log(figlet.textSync('EVM-Lite CLI', {}));
+        Globals_1.default.warning(` Mode:        Interactive`);
+        Globals_1.default.warning(` Data Dir:    ${cli.session.directory.path}`);
+        Globals_1.default.info(` Config File: ${cli.session.config.path}`);
+        Globals_1.default.info(` Keystore:    ${cli.session.keystore.path}`);
+        let cmdInteractive = cli.instance.find('interactive');
+        if (cmdInteractive) {
+            cmdInteractive.hidden();
+        }
+        yield cli.instance.exec('help');
         cli.session.interactive = true;
         cli.instance.delimiter('evmlc$').show();
     }
     else {
+        let cmdClear = cli.instance.find('clear');
+        if (cmdClear) {
+            cmdClear.hidden();
+        }
         cli.instance.parse(process.argv);
     }
-})
-    .catch(err => Globals_1.default.error(err));
+}))
+    .catch(err => console.log(err));

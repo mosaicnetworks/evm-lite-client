@@ -9,7 +9,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
-const Globals_1 = require("../utils/Globals");
+const Staging_1 = require("../classes/Staging");
+exports.stage = (args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        let { error, success } = Staging_1.default.getStagingFunctions(args);
+        let interactive = args.options.interactive || session.interactive;
+        let questions = [];
+        function populateQuestions(object) {
+            for (let key in object) {
+                if (object.hasOwnProperty(key)) {
+                    if (typeof object[key] === 'object') {
+                        populateQuestions(object[key]);
+                    }
+                    else {
+                        questions.push({
+                            name: key,
+                            default: object[key],
+                            type: 'input',
+                            message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `
+                        });
+                    }
+                }
+            }
+        }
+        populateQuestions(session.config.data);
+        if (interactive) {
+            let answers = yield inquirer.prompt(questions);
+            for (let key in answers) {
+                if (answers.hasOwnProperty(key)) {
+                    args.options[key.toLowerCase()] = answers[key];
+                }
+            }
+        }
+        if (!Object.keys(args.options).length) {
+            resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'No options provided.'));
+            return;
+        }
+        for (let key in args.options) {
+            if (args.options.hasOwnProperty(key)) {
+                if (session.config.data.defaults[key] !== args.options[key] && key !== 'interactive') {
+                    session.config.data.defaults[key] = args.options[key];
+                }
+            }
+        }
+        resolve(success(session.config.save() ? 'Configuration saved.' : 'No changes detected.'));
+    }));
+};
 function commandConfigSet(evmlc, session) {
     let description = 'Set values of the configuration inside the data directory.';
     return evmlc.command('config set').alias('c s')
@@ -19,102 +64,13 @@ function commandConfigSet(evmlc, session) {
         .option('-p, --port <port>', 'default port')
         .option('--from <from>', 'default from')
         .option('--gas <gas>', 'default gas')
-        .option('--gasprice <gasprice>', 'gas price')
+        .option('--gasPrice <gasprice>', 'gas price')
         .option('--keystore <path>', 'keystore path')
         .option('--pwd <path>', 'password path')
         .types({
         string: ['h', 'host', 'from', 'keystore', 'pwd']
     })
-        .action((args) => {
-        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                let interactive = args.options.interactive || session.interactive;
-                let questions = [];
-                function populateQuestions(object) {
-                    for (let key in object) {
-                        if (object.hasOwnProperty(key)) {
-                            if (typeof object[key] === 'object') {
-                                populateQuestions(object[key]);
-                            }
-                            else {
-                                questions.push({
-                                    name: key,
-                                    default: object[key],
-                                    type: 'input',
-                                    message: `${key}: `
-                                });
-                            }
-                        }
-                    }
-                }
-                populateQuestions(session.config.data);
-                if (interactive) {
-                    let answers = yield inquirer.prompt(questions);
-                    args.options.host = answers.host;
-                    args.options.port = answers.port;
-                    args.options.from = answers.from;
-                    args.options.gas = answers.gas;
-                    args.options.gasprice = answers.gasPrice;
-                    args.options.keystore = answers.keystore;
-                    args.options.password = answers.password;
-                }
-                if (!Object.keys(args.options).length) {
-                    Globals_1.default.error('No options provided. To enter interactive mode use: -i, --interactive.');
-                }
-                else {
-                    for (let prop in args.options) {
-                        if (prop.toLowerCase() === 'host') {
-                            if (session.config.data.connection.host !== args.options[prop]) {
-                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                            }
-                            session.config.data.connection.host = args.options[prop];
-                        }
-                        if (prop.toLowerCase() === 'port') {
-                            if (session.config.data.connection.port !== args.options[prop]) {
-                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                            }
-                            session.config.data.connection.port = args.options[prop];
-                        }
-                        if (prop.toLowerCase() === 'from') {
-                            if (session.config.data.defaults.from !== args.options[prop]) {
-                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                            }
-                            session.config.data.defaults.from = args.options[prop];
-                        }
-                        if (prop.toLowerCase() === 'gas') {
-                            if (session.config.data.defaults.gas !== args.options[prop]) {
-                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                            }
-                            session.config.data.defaults.gas = args.options[prop];
-                        }
-                        if (prop.toLowerCase() === 'gasprice') {
-                            if (session.config.data.defaults.gasPrice !== args.options[prop]) {
-                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                            }
-                            session.config.data.defaults.gasPrice = args.options[prop];
-                        }
-                        if (prop.toLowerCase() === 'keystore') {
-                            if (session.config.data.storage.keystore !== args.options[prop]) {
-                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                            }
-                            session.config.data.storage.keystore = args.options[prop];
-                        }
-                        if (prop.toLowerCase() === 'password') {
-                            if (session.config.data.storage.password !== args.options[prop]) {
-                                Globals_1.default.success(`Updated '${(prop)}' with value ${(args.options[prop])}.`);
-                            }
-                            session.config.data.storage.password = args.options[prop];
-                        }
-                    }
-                    session.config.save();
-                }
-            }
-            catch (err) {
-                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
-            }
-            resolve();
-        }));
-    });
+        .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandConfigSet;
 ;

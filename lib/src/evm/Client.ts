@@ -23,13 +23,8 @@ let request = (tx, options): Promise<string> => {
             response.on('end', () => resolve(data));
             response.on('error', (err) => reject(err));
         });
-
-        req.on('error', (err) => {
-            reject(err);
-        });
-
+        req.on('error', (err) =>  reject(err));
         if (tx) req.write(tx);
-
         req.end();
     });
 };
@@ -50,10 +45,10 @@ export default class Client {
             .catch(() => error('Could not fetch account.'));
     }
 
-    public testConnection(): Promise<boolean | void> {
+    public testConnection(): Promise<boolean | null> {
         return request(null, this._constructOptions('GET', '/info'))
             .then(() => true)
-            .catch(() => error('Could connect to node.'));
+            .catch(() => null);
     }
 
     public getAccounts(): Promise<BaseAccount[] | void> {
@@ -74,10 +69,10 @@ export default class Client {
             .catch(() => error('Could not fetch accounts.'));
     }
 
-    public getInfo(): Promise<Object | void> {
+    public getInfo(): Promise<Object | null> {
         return request(null, this._constructOptions('GET', '/info'))
             .then((response: string) => JSONBig.parse(response))
-            .catch(() => error('Could not fetch information.'));
+            .catch(() => null);
     }
 
     public call(tx: string): Promise<string | void> {
@@ -97,10 +92,10 @@ export default class Client {
             .then((response) => response)
     }
 
-    public getReceipt(txHash: string): Promise<TXReceipt | void> {
+    public getReceipt(txHash: string): Promise<TXReceipt | null> {
         return request(null, this._constructOptions('GET', `/tx/${txHash}`))
             .then((response: string) => JSONBig.parse(response))
-            .catch(() => error(`Could not fetch receipt for hash: ${txHash}`));
+            .catch(() => null);
     }
 
     private _constructOptions(method, path: string) {

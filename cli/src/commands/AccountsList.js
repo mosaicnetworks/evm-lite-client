@@ -7,53 +7,103 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const JSONBig = require("json-bigint");
-const ASCIITable = require("ascii-table");
-const Globals_1 = require("../utils/Globals");
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var _this = this;
+exports.__esModule = true;
+var ASCIITable = require("ascii-table");
+var Staging_1 = require("../classes/Staging");
+exports.stage = function (args, session) {
+    return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+        var _a, error, success, remote, verbose, formatted, table, connection, accounts, _b, _i, accounts_1, account;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    _a = Staging_1["default"].getStagingFunctions(args), error = _a.error, success = _a.success;
+                    remote = args.options.remote || false;
+                    verbose = args.options.verbose || false;
+                    formatted = args.options.formatted || false;
+                    table = new ASCIITable();
+                    connection = null;
+                    if (!(verbose || remote)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, session.connect(args.options.host, args.options.port)];
+                case 1:
+                    connection = _c.sent();
+                    if (!connection) {
+                        resolve(error(Staging_1["default"].ERRORS.INVALID_CONNECTION));
+                        return [2 /*return*/];
+                    }
+                    _c.label = 2;
+                case 2:
+                    if (!remote) return [3 /*break*/, 4];
+                    return [4 /*yield*/, connection.api.getAccounts()];
+                case 3:
+                    _b = _c.sent();
+                    return [3 /*break*/, 6];
+                case 4: return [4 /*yield*/, session.keystore.all(verbose, connection)];
+                case 5:
+                    _b = _c.sent();
+                    _c.label = 6;
+                case 6:
+                    accounts = _b;
+                    if (!accounts || !accounts.length) {
+                        resolve(success([]));
+                        return [2 /*return*/];
+                    }
+                    if (!formatted) {
+                        resolve(success(accounts));
+                        return [2 /*return*/];
+                    }
+                    (verbose) ? table.setHeading('Address', 'Balance', 'Nonce') : table.setHeading('Address');
+                    for (_i = 0, accounts_1 = accounts; _i < accounts_1.length; _i++) {
+                        account = accounts_1[_i];
+                        (verbose) ? table.addRow(account.address, account.balance, account.nonce) : table.addRow(account.address);
+                    }
+                    resolve(success(table));
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+};
 function commandAccountsList(evmlc, session) {
-    let description = 'List all accounts in the local keystore directory provided by the configuration file. This command will ' +
+    var description = 'List all accounts in the local keystore directory provided by the configuration file. This command will ' +
         'also get a balance and nonce for all the accounts from the node if a valid connection is established.';
     return evmlc.command('accounts list').alias('a l')
         .description(description)
         .option('-f, --formatted', 'format output')
+        .option('-v, --verbose', 'verbose output (fetches balance & nonce from node)')
         .option('-r, --remote', 'list remote accounts')
         .option('-h, --host <ip>', 'override config parameter host')
         .option('-p, --port <port>', 'override config parameter port')
         .types({
         string: ['h', 'host']
     })
-        .action((args) => {
-        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            let connection = yield session.connect(args.options.host, args.options.port);
-            if (!connection)
-                resolve();
-            let formatted = args.options.formatted || false;
-            let remote = args.options.remote || false;
-            let accounts = [];
-            let accountsTable = new ASCIITable().setHeading('#', 'Address', 'Balance', 'Nonce');
-            if (!remote) {
-                accounts = (yield session.keystore.decrypt(connection)).map(account => account.toBaseAccount());
-            }
-            else {
-                accounts = yield connection.api.getAccounts();
-            }
-            if (!accounts || !accounts.length) {
-                Globals_1.default.warning('No accounts.');
-            }
-            else {
-                if (formatted) {
-                    let counter = 1;
-                    for (let account of accounts) {
-                        accountsTable.addRow(counter, account.address, account.balance, account.nonce);
-                        counter++;
-                    }
-                }
-                Globals_1.default.success((formatted) ? accountsTable.toString() : JSONBig.stringify(accounts));
-            }
-            resolve();
-        }));
-    });
+        .action(function (args) { return Staging_1.execute(exports.stage, args, session); });
 }
-exports.default = commandAccountsList;
+exports["default"] = commandAccountsList;
 ;

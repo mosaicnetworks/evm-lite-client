@@ -1,5 +1,7 @@
 import * as path from "path";
 import * as Chalk from "chalk";
+import * as Vorpal from "vorpal";
+import Session from "../classes/Session";
 
 
 export interface BaseAccount {
@@ -29,9 +31,34 @@ export interface TXReceipt {
     contractAddress: string,
     logs: [],
     logsBloom: string,
-    failed: boolean
+    status: number
 }
 
+interface KDFEncryption {
+    ciphertext: string,
+    ciperparams: {
+        iv: string
+    }
+    cipher: string,
+    kdf: string,
+    kdfparams: {
+        dklen: number,
+        salt: string,
+        n: number,
+        r: number,
+        p: number
+    }
+    mac: string
+}
+
+export interface v3JSONKeyStore {
+    version: number,
+    id: string,
+    address: string,
+    crypto: KDFEncryption,
+}
+
+export type CommandFunction = (evmlc: Vorpal, session: Session) => Vorpal.Command;
 
 export default class Globals {
 

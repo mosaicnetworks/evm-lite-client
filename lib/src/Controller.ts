@@ -8,7 +8,7 @@ import * as JSONBig from 'json-bigint'
 import * as fs from "fs";
 import * as solidityCompiler from 'solc'
 
-import {ABI, BaseAccount, BaseTX, SolidityCompilerOutput, TXReceipt} from "./evm/utils/Interfaces";
+import {ABI, BaseTX, SolidityCompilerOutput} from "./evm/utils/Interfaces";
 
 import SolidityContract from "./evm/SolidityContract";
 import Client from "./evm/Client";

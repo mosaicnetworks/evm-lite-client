@@ -8,13 +8,8 @@ function commandLogsClear(evmlc, session) {
         .hidden()
         .action((args) => {
         return new Promise((resolve) => {
-            try {
-                fs.writeFileSync(session.logpath, '');
-                Globals_1.default.success('Logs cleared.');
-            }
-            catch (err) {
-                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
-            }
+            fs.writeFileSync(session.logpath, '');
+            Globals_1.default.success('Logs cleared.');
             resolve();
         });
     });

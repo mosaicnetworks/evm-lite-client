@@ -28,7 +28,7 @@ This removes all dependencies for Client and CLI and also removes the symlink.
 
 If the `make` was successful you should now be able to run `evmlc`:
 
-```console
+```bash
 $ evmlc
 
   A Command Line Interface to interact with EVM-Lite.
@@ -60,44 +60,49 @@ following items:
  - **config.toml**: where global options are specified. These values may be
                     overwritten by CLI flags.
  - **keystore**: where all encrypted account keys are stored.
- - **pwd.txt**: password file to decrypt keys.
 
 Example config.toml:
  ```toml
-[connection]
+[defaults]
 host = "127.0.0.1"
 port = "8080"
-
-[defaults]
 from = ""
 gas = 100000.0
-gasPrice = 0.0
-
-[storage]
-keystore = "/home/user/.evmlc/keystore"
-password = "/home/user/.evmlc/pwd.txt"
+gasprice = 0.0
+keystore = "[...]/.evmlc/keystore"
+interactive = true
  ```
 
 The easiest way to manage configuration is through the `config` command in
 interactive mode.
 
-```console
+```bash
 $ evmlc i
-Entered interactive mode with configuration file: [...]/.evmlc/config.toml
-evmlc$
+  _______     ____  __       _     _ _          ____ _     ___
+ | ____\ \   / /  \/  |     | |   (_) |_ ___   / ___| |   |_ _|
+ |  _|  \ \ / /| |\/| |_____| |   | | __/ _ \ | |   | |    | |
+ | |___  \ V / | |  | |_____| |___| | ||  __/ | |___| |___ | |
+ |_____|  \_/  |_|  |_|     |_____|_|\__\___|  \____|_____|___|
 
+ Mode:        Interactive
+ Data Dir:    [...]/.evmlc
+ Config File: [...]/.evmlc/config.toml
+ Keystore:    [...]/.evmlc/keystore
+
+evmlc$
 ```
 To change default configuration values run `config set` or `c s`. You will be
 taken to an interactive prompt to change connection and default values.
 
-```console
+```bash
 evmlc$ config set
 
 ? Host:  127.0.0.1
 ? Port:  8080
-? Default From Address:
-? Default Gas:  0
-? Default Gas Price:  0
+? From:  none
+? Gas:  100000
+? Gasprice:  0
+? Keystore:  [...]/.evmlc/keystore
 ```
 
 ## Commands
@@ -105,8 +110,7 @@ By default all commands will output raw JSON unless the `-f, --formatted` flag
 is provided. A connection to the node is not required unless stated in each
 command.
 
-The global flag `-d, --datadir` specifies the directory where `keystore`,
-`pwd.txt` and `config.toml` are stored unless overwritten by specific flags.
+The global flag `-d, --datadir` specifies the directory where `keystore` and `config.toml` are stored unless overwritten by specific flags.
 Note that if this flag is not provided, it will default to `~/.evmlc`.
 
 ## Getting Started
@@ -118,27 +122,39 @@ through creating accounts, making transfers, and viewing account information.
 
 ```bash
 user:~$ evmlc i
-Entered interactive mode with data directory: /home/user/.evmlc
+  _______     ____  __       _     _ _          ____ _     ___
+ | ____\ \   / /  \/  |     | |   (_) |_ ___   / ___| |   |_ _|
+ |  _|  \ \ / /| |\/| |_____| |   | | __/ _ \ | |   | |    | |
+ | |___  \ V / | |  | |_____| |___| | ||  __/ | |___| |___ | |
+ |_____|  \_/  |_|  |_|     |_____|_|\__\___|  \____|_____|___|
+
+ Mode:        Interactive
+ Data Dir:    [...]/.evmlc
+ Config File: [...]/.evmlc/config.toml
+ Keystore:    [...]/.evmlc/keystore
+
 evmlc$
 ```
 
 ### 2) Create an account
 
-While still in interactive mode, type the command `accounts create` and select
-the default options in the prompt:
+While still in interactive mode, type the command `accounts create -v` (`-v` specifies verbose output) and select
+the default option for keystore and then type in a password to encrypt the account:
 
 ```bash
-evmlc$ accounts create
-? Enter keystore output path:  /home/user/.evmlc/keystore
-? Enter password file path:  /home/user/.evmlc/pwd.txt
-{"version":3,"id":"f62fe161-0870-4553-9cf2-3155b19d4b59","address":"477f22b53038b745bb039653b91bdaa88c8bf94d","crypto":{"ciphertext":"XXX","cipherparams":{"iv":"26807046432c098a51a563393dcd91fa"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"XXX","n":8192,"r":8,"p":1},"mac":"XXX"}}
-evmlc$
+evmlc$ accounts create -v
+
+? Enter keystore output path:  [...]/.evmlc/keystore
+? Enter a password:  [hidden]
+? Re-enter password:  [hidden]
+
+{"version":3,"id":"9097a7d3-511d-4e7d-83b0-b9bd6d46f21e","address":"477f22b53038b745bb039653b91bdaa88c8bf94d","crypto":{"ciphertext":"3172d22e2f3b8da53ad3b86f6e1cffbb1126d47ae6b563a0183ba885faf4170b","cipherparams":{"iv":"1120717f7eb46693418beeafe953f5a5"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"5623f5a14730e28be73e9ef23fabf68ed8d51d1db5d162afb8a33b1123bfda64","n":8192,"r":8,"p":1},"mac":"05ca13958cf4bee53167d9c45a93dbdb33f822c41c80776465c8c5b422be7127"}}
 ```
 
 #### What happened?
 
 It created an account with address `477f22b53038b745bb039653b91bdaa88c8bf94d`,
-and added the corresponding keyfile, password protected with the password file,
+and added the corresponding keyfile, password protected with the password you provided,
 in the keystore directory
 
 #### What is an account?
@@ -194,6 +210,7 @@ account:
 
 ```bash
 user:~$ evml solo --genesis 477f22b53038b745bb039653b91bdaa88c8bf94d
+
 DEBU[0000] Config                                        Base="{/home/user/.evm-lite debug}" Eth="&{/home/user/.evm-lite/eth/genesis.json /home/user/.evm-lite/eth/keystore /home/user/.evm-lite/eth/pwd.txt /home/user/.evm-lite/eth/chaindata :8080 128}"
 DEBU[0000] Config                                        Eth="&{/home/user/.evm-lite/eth/genesis.json /home/user/.evm-lite/eth/keystore /home/user/.evm-lite/eth/pwd.txt /home/user/.evm-lite/eth/chaindata :8080 128}" genesis=477f22b53038b745bb039653b91bdaa88c8bf94d
 DEBU[0000] Writing genesis file
@@ -203,7 +220,6 @@ DEBU[0000] Committed                                     root=0x1aa38473e2f6fc5a
 DEBU[0000] Reset WAS
 DEBU[0000] Reset TxPool
 INFO[0000] serving api...
-
 ```
 
 This booted the node and assigned a lot of coins to our account. By default,
@@ -215,16 +231,16 @@ How many coins where assigned to the account? let's check!
 
 ### 4) List accounts
 
-Back in the interactive `evmlc` session, type `accounts list -f`
+Back in the interactive `evmlc` session, type `accounts list -f -v` (formatted, verbose output)
 
 ```bash
-evmlc$ accounts list -f
+evmlc$ accounts list -f -v
+
 .----------------------------------------------------------------------------------------.
 | # |                  Address                   |            Balance            | Nonce |
 |---|--------------------------------------------|-------------------------------|-------|
 | 1 | 0x477F22b53038b745BB039653b91bdaA88c8bF94d | 1,337,000,000,000,000,000,000 |     0 |
 '----------------------------------------------------------------------------------------'
-evmlc$
 ```
 
 The command went through the accounts in the keystore, connected to the node to
@@ -234,11 +250,13 @@ retrieve the corresponding balance, and displayed it nicely on the screen.
 ### 5) Create another account
 
 ```bash
-evmlc$ accounts create
-? Enter keystore output path:  /home/user/.evmlc/keystore
-? Enter password file path:  /home/user/.evmlc/pwd.txt
+evmlc$ accounts create -v
+
+? Enter keystore output path:  [...]/.evmlc/keystore
+? Enter a password:  [hidden]
+? Re-enter password:  [hidden]
+
 {"version":3,"id":"1cd4f6fc-5d66-49b9-b3b2-f0ba0798450c","address":"988456018729c15a6914a2c5ba1a753f76ec36dc","crypto":{"ciphertext":"XXX","cipherparams":{"iv":"421d86663e8cd0915ab0bbedb0e14d96"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"XXX","n":8192,"r":8,"p":1},"mac":"XXX"}}
-evmlc$
 ```
 
 This one has the address `988456018729c15a6914a2c5ba1a753f76ec36dc`
@@ -250,14 +268,16 @@ account to the second account.
 
 ```bash
 evmlc$ transfer
+
 ? From:  0x477F22b53038b745BB039653b91bdaA88c8bF94d
+? Enter password:  [hidden]
 ? To 988456018729c15a6914a2c5ba1a753f76ec36dc
 ? Value:  100
 ? Gas:  25000
 ? Gas Price:  0
+
 {"txHash":"0xa64b35b2228f00d9b5ba01fcd4c8bcd1c89b33d8b5fd917ea2c4d4de2a7d43ea"}
 Transaction submitted.
-evmlc$
 ```
 
 #### What happened?
@@ -288,14 +308,14 @@ computational step.
 ### 7) Check accounts again
 
 ```bash
-evmlc$ accounts list -f
+evmlc$ accounts list -f -v
+
 .----------------------------------------------------------------------------------------.
 | # |                  Address                   |            Balance            | Nonce |
 |---|--------------------------------------------|-------------------------------|-------|
 | 1 | 0x477F22b53038b745BB039653b91bdaA88c8bF94d | 1,336,999,999,999,999,999,900 |     1 |
 | 2 | 0x988456018729C15A6914A2c5bA1A753F76eC36Dc |                           100 |     0 |
 '----------------------------------------------------------------------------------------'
-evmlc$
 ```
 
 ### Conclusion

@@ -9,25 +9,20 @@ function commandLogsShow(evmlc, session) {
         .hidden()
         .action((args) => {
         return new Promise((resolve) => {
-            try {
-                let interactive = session.interactive || false;
-                let current = args.options.session || false;
-                if (current) {
-                    if (interactive) {
-                        for (let log of session.logs) {
-                            log.show();
-                        }
-                    }
-                    else {
-                        Globals_1.default.warning('Cannot print session log when not in interactive mode.');
+            let interactive = session.interactive || false;
+            let current = args.options.session || false;
+            if (current) {
+                if (interactive) {
+                    for (let log of session.logs) {
+                        log.show();
                     }
                 }
                 else {
-                    Globals_1.default.info(fs.readFileSync(session.logpath, 'utf8'));
+                    Globals_1.default.warning('Cannot print session log when not in interactive mode.');
                 }
             }
-            catch (err) {
-                (typeof err === 'object') ? console.log(err) : Globals_1.default.error(err);
+            else {
+                Globals_1.default.info(fs.readFileSync(session.logpath, 'utf8'));
             }
             resolve();
         });
