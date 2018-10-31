@@ -71,7 +71,7 @@ exports.stage = (args, session) => {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
                 return;
             }
-            args.options.old = fs.readFileSync(args.options.old, 'utf8');
+            args.options.old = fs.readFileSync(args.options.old, 'utf8').trim();
         }
         let decrypted = null;
         try {
@@ -98,7 +98,7 @@ exports.stage = (args, session) => {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
                 return;
             }
-            args.options.new = fs.readFileSync(args.options.new, 'utf8');
+            args.options.new = fs.readFileSync(args.options.new, 'utf8').trim();
         }
         if (args.options.old === args.options.new) {
             resolve(error(Staging_1.default.ERRORS.OTHER, 'New password is the same as old.'));

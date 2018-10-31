@@ -73,7 +73,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            args.options.old = fs.readFileSync(args.options.old, 'utf8');
+            args.options.old = fs.readFileSync(args.options.old, 'utf8').trim();
         }
 
         let decrypted: Account = null;
@@ -105,7 +105,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            args.options.new = fs.readFileSync(args.options.new, 'utf8');
+            args.options.new = fs.readFileSync(args.options.new, 'utf8').trim();
         }
 
         if (args.options.old === args.options.new) {

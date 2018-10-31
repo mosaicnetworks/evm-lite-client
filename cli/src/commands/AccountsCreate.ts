@@ -54,7 +54,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
+            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
         }
 
         args.options.output = args.options.output || session.config.data.defaults.keystore;
