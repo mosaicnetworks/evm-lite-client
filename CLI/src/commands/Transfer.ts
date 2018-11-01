@@ -101,7 +101,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         try {
             decrypted = Account.decrypt(keystore, args.options.pwd);
         } catch (err) {
-            resolve(error(Staging.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));
+            resolve(error(Staging.ERRORS.DECRYPTION, 'Failed decryption of account.'));
             return;
         }
 
