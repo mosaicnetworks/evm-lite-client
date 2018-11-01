@@ -3,9 +3,9 @@ clean: clean-cli clean-lib unlink
 
 build: build-lib build-cli
 link:
-	bash -c "cd cli && npm link && cd .."
+	bash -c "cd CLI && npm link && cd .."
 unlink:
-	bash -c "cd cli && npm unlink && cd .."
+	bash -c "cd CLI && npm unlink && cd .."
 
 # Build CLI dependencies
 build-cli:
