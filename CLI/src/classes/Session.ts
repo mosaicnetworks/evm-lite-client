@@ -3,9 +3,9 @@ import * as path from "path";
 import {Controller} from "../../../Library";
 
 import Config from "./Config";
+import Database from "./Database";
 import DataDirectory from "./DataDirectory";
 import Keystore from "./Keystore";
-import Database from "./Database";
 import Log from "./Log";
 
 
@@ -36,10 +36,10 @@ export default class Session {
         this.keystore = this.config.getOrCreateKeystore();
     }
 
-    connect(forcedHost: string, forcedPort: number): Promise<Controller> {
-        let host: string = forcedHost || this.config.data.defaults.host || '127.0.0.1';
-        let port: number = forcedPort || this.config.data.defaults.port || 8080;
-        let node = new Controller(host, port);
+    public connect(forcedHost: string, forcedPort: number): Promise<Controller> {
+        const host: string = forcedHost || this.config.data.defaults.host || '127.0.0.1';
+        const port: number = forcedPort || this.config.data.defaults.port || 8080;
+        const node = new Controller(host, port);
 
         return node.api.testConnection()
             .then((success: boolean) => {
@@ -58,8 +58,8 @@ export default class Session {
             })
     };
 
-    log(): Log {
-        let log = new Log(this.logpath);
+    public log(): Log {
+        const log = new Log(this.logpath);
         this.logs.push(log);
         return log;
     }

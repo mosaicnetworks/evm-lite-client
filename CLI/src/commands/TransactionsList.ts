@@ -4,11 +4,11 @@
  * @date 2018
  */
 
-import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
+import * as Vorpal from "vorpal";
 
-import {TXReceipt} from "../utils/Globals";
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
+import {TXReceipt} from "../utils/Globals";
 
 import Session from "../classes/Session";
 
@@ -27,19 +27,19 @@ import Session from "../classes/Session";
  */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let connection = await session.connect(args.options.host, args.options.port);
+        const connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION));
             return;
         }
 
-        let formatted = args.options.formatted || false;
-        let verbose = args.options.verbose || false;
-        let table = new ASCIITable();
+        const formatted = args.options.formatted || false;
+        const verbose = args.options.verbose || false;
+        const table = new ASCIITable();
 
-        let transactions = session.database.transactions.all();
+        const transactions = session.database.transactions.all();
         if (!transactions.length) {
             resolve(success([]));
             return;
@@ -57,12 +57,12 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             table.setHeading('From', 'To', 'Value', 'Status');
         }
 
-        for (let tx of transactions) {
-            let txDate = new Date(tx.date);
-            let receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
+        for (const tx of transactions) {
+            const txDate = new Date(tx.date);
+            const receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
 
-            let date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
-            let time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
+            const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
+            const time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
 
             if (verbose) {
                 table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice,
@@ -97,7 +97,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandTransactionsList(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'Lists all submitted transactions with the status.';
 
     return evmlc.command('transactions list').alias('t l')

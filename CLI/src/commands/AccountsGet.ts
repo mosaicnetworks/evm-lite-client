@@ -4,9 +4,9 @@
  * @date 2018
  */
 
-import * as Vorpal from "vorpal";
-import * as inquirer from 'inquirer';
 import * as ASCIITable from 'ascii-table';
+import * as inquirer from 'inquirer';
+import * as Vorpal from "vorpal";
 
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
@@ -28,27 +28,27 @@ import Session from "../classes/Session";
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let connection = await session.connect(args.options.host, args.options.port);
+        const connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION));
             return;
         }
 
-        let interactive = args.options.interactive || session.interactive;
-        let formatted = args.options.formatted || false;
-        let questions = [
+        const interactive = args.options.interactive || session.interactive;
+        const formatted = args.options.formatted || false;
+        const questions = [
             {
+                message: 'Address: ',
                 name: 'address',
-                type: 'input',
                 required: true,
-                message: 'Address: '
+                type: 'input'
             }
         ];
 
         if (interactive && !args.address) {
-            let {address} = await inquirer.prompt(questions);
+            const {address} = await inquirer.prompt(questions);
             args.address = address;
         }
 
@@ -57,13 +57,13 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        let account = await connection.api.getAccount(args.address);
+        const account = await connection.api.getAccount(args.address);
         if (!account) {
             resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not fetch account: ' + args.address));
             return;
         }
 
-        let table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
+        const table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
         if (formatted) {
             table.addRow(account.address, account.balance, account.nonce);
         }
@@ -91,7 +91,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandAccountsGet(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'Gets account balance and nonce from a node with a valid connection.';
 
     return evmlc.command('accounts get [address]').alias('a g')

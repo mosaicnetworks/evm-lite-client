@@ -7,11 +7,11 @@ import {stage} from '../../src/commands/AccountsUpdate';
 import {otherPwdPath, pwdPath, session} from "../stage";
 
 import Staging, {Message, StagedOutput} from "../../src/classes/Staging";
-import {v3JSONKeyStore} from "../../src/utils/Globals";
+import {V3JSONKeyStore} from "../../src/utils/Globals";
 
 
 const assert = Chai.assert;
-let account: v3JSONKeyStore;
+let account: V3JSONKeyStore;
 
 describe('command: accounts update', () => {
     it('should return error as no address was provided', async () => {

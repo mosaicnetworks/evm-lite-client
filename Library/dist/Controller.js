@@ -12,7 +12,7 @@ const SolidityContract_1 = require("./evm/SolidityContract");
 const Client_1 = require("./evm/Client");
 const Transaction_1 = require("./evm/Transaction");
 /**
- * The root class to interactive with EVM-Lite.
+ * The root class to interact with EVM-Lite.
  */
 class Controller {
     /**

@@ -7,11 +7,11 @@ import {stage} from '../../src/commands/Transfer';
 import {otherPwdPath, pwdPath, session} from "../stage";
 
 import Staging, {Message, StagedOutput, Args} from "../../src/classes/Staging";
-import {v3JSONKeyStore} from "../../src/utils/Globals";
+import {V3JSONKeyStore} from "../../src/utils/Globals";
 
 
 const assert = Chai.assert;
-let account: v3JSONKeyStore;
+let account: V3JSONKeyStore;
 
 describe('command: transfer', () => {
     it('should return error as connection is not valid', async () => {

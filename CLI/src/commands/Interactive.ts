@@ -5,7 +5,7 @@ import Session from "../classes/Session";
 
 export default function commandInteractive(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'Enter into interactive mode with data directory provided by --datadir, -d or default.';
 
     return evmlc.command('interactive').alias('i')

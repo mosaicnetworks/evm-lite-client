@@ -4,8 +4,8 @@
  * @date 2018
  */
 
-import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
+import * as Vorpal from "vorpal";
 
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
@@ -26,32 +26,33 @@ import Session from "../classes/Session";
  */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let interactive = args.options.interactive || session.interactive;
-        let questions = [];
+        const interactive = args.options.interactive || session.interactive;
+        const questions = [];
 
         function populateQuestions(object) {
-            for (let key in object) {
+            for (const key in object) {
                 if (object.hasOwnProperty(key)) {
                     if (typeof object[key] === 'object') {
                         populateQuestions(object[key]);
                     } else {
                         questions.push({
-                            name: key,
                             default: object[key],
+                            message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `,
+                            name: key,
                             type: 'input',
-                            message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `
                         });
                     }
                 }
             }
         }
+
         populateQuestions(session.config.data);
 
         if (interactive) {
-            let answers = await inquirer.prompt(questions);
-            for (let key in answers) {
+            const answers = await inquirer.prompt(questions);
+            for (const key in answers) {
                 if (answers.hasOwnProperty(key)) {
                     args.options[key.toLowerCase()] = answers[key];
                 }
@@ -63,7 +64,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        for (let key in args.options) {
+        for (const key in args.options) {
             if (args.options.hasOwnProperty(key)) {
                 if (session.config.data.defaults[key] !== args.options[key] && key !== 'interactive') {
                     session.config.data.defaults[key] = args.options[key]
@@ -71,7 +72,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             }
         }
 
-        let saved = await session.config.save();
+        const saved = await session.config.save();
 
         resolve(success(saved ? 'Configuration saved.' : 'No changes detected.'));
     });
@@ -96,7 +97,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandConfigSet(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'Set values of the configuration inside the data directory.';
 
     return evmlc.command('config set').alias('c s')

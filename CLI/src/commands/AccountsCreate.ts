@@ -4,15 +4,15 @@
  * @date 2018
  */
 
-import * as Vorpal from "vorpal";
-import * as inquirer from 'inquirer';
 import * as fs from "fs";
+import * as inquirer from 'inquirer';
 import * as JSONBig from 'json-bigint';
+import * as Vorpal from "vorpal";
 
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
-import Session from "../classes/Session";
 import Keystore from "../classes/Keystore";
+import Session from "../classes/Session";
 
 /**
  * Should return either a Staged error or success.
@@ -30,31 +30,31 @@ import Keystore from "../classes/Keystore";
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let interactive = !args.options.pwd || session.interactive;
-        let verbose = args.options.verbose || false;
-        let questions = [
+        const interactive = !args.options.pwd || session.interactive;
+        const verbose = args.options.verbose || false;
+        const questions = [
             {
-                name: 'output',
-                message: 'Enter keystore output path: ',
                 default: session.keystore.path,
+                message: 'Enter keystore output path: ',
+                name: 'output',
                 type: 'input'
             },
             {
-                name: 'password',
                 message: 'Enter a password: ',
+                name: 'password',
                 type: 'password'
             },
             {
-                name: 'verifyPassword',
                 message: 'Re-enter password: ',
+                name: 'verifyPassword',
                 type: 'password'
             }
         ];
 
         if (interactive) {
-            let {output, password, verifyPassword} = await inquirer.prompt(questions);
+            const {output, password, verifyPassword} = await inquirer.prompt(questions);
             if (!(password && verifyPassword && (password === verifyPassword))) {
                 resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
@@ -86,7 +86,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        let account = JSONBig.parse(Keystore.create(args.options.output, args.options.pwd));
+        const account = JSONBig.parse(Keystore.create(args.options.output, args.options.pwd));
         resolve(success(verbose ? account : `0x${account.address}`));
     })
 };
@@ -113,7 +113,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandAccountsCreate(evmlc: Vorpal, session: Session): Vorpal.Command {
 
-    let description =
+    const description =
         'Allows you to create and encrypt accounts locally. Created accounts will either be placed in the' +
         ' keystore folder inside the data directory provided by the global --datadir, -d flag or if no flag is' +
         ' provided, in the keystore specified in the configuration file.';

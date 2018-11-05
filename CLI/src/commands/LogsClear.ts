@@ -1,8 +1,8 @@
-import * as Vorpal from "vorpal";
 import * as fs from "fs";
+import * as Vorpal from "vorpal";
 
-import Globals from "../utils/Globals";
 import Session from "../classes/Session";
+import Globals from "../utils/Globals";
 
 
 export default function commandLogsClear(evmlc: Vorpal, session: Session) {

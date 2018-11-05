@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var Chai = require("chai");
 var AccountsCreate = require("../../src/commands/AccountsCreate");
 var Transfer_1 = require("../../src/commands/Transfer");
@@ -58,8 +58,8 @@ describe('command: transfer', function () {
                     return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].ERROR);
-                    assert.equal(result.subtype, Staging_1["default"].ERRORS.INVALID_CONNECTION);
+                    assert.equal(result.type, Staging_1.default.ERROR);
+                    assert.equal(result.subtype, Staging_1.default.ERRORS.INVALID_CONNECTION);
                     return [2 /*return*/];
             }
         });
@@ -78,8 +78,8 @@ describe('command: transfer', function () {
                     return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].ERROR);
-                    assert.equal(result.subtype, Staging_1["default"].ERRORS.BLANK_FIELD);
+                    assert.equal(result.type, Staging_1.default.ERROR);
+                    assert.equal(result.subtype, Staging_1.default.ERRORS.BLANK_FIELD);
                     return [2 /*return*/];
             }
         });
@@ -99,8 +99,8 @@ describe('command: transfer', function () {
                     return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].ERROR);
-                    assert.equal(result.subtype, Staging_1["default"].ERRORS.FILE_NOT_FOUND);
+                    assert.equal(result.type, Staging_1.default.ERROR);
+                    assert.equal(result.subtype, Staging_1.default.ERRORS.FILE_NOT_FOUND);
                     return [2 /*return*/];
             }
         });
@@ -121,8 +121,8 @@ describe('command: transfer', function () {
                     return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].ERROR);
-                    assert.equal(result.subtype, Staging_1["default"].ERRORS.FILE_NOT_FOUND);
+                    assert.equal(result.type, Staging_1.default.ERROR);
+                    assert.equal(result.subtype, Staging_1.default.ERRORS.FILE_NOT_FOUND);
                     return [2 /*return*/];
             }
         });
@@ -141,7 +141,7 @@ describe('command: transfer', function () {
                     return [4 /*yield*/, AccountsCreate.stage(createArgs, stage_1.session)];
                 case 1:
                     createResult = _a.sent();
-                    assert.equal(createResult.type, Staging_1["default"].SUCCESS);
+                    assert.equal(createResult.type, Staging_1.default.SUCCESS);
                     account = createResult.message;
                     args = {
                         options: {
@@ -154,8 +154,8 @@ describe('command: transfer', function () {
                     return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
                 case 2:
                     result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].ERROR);
-                    assert.equal(result.subtype, Staging_1["default"].ERRORS.DECRYPTION);
+                    assert.equal(result.type, Staging_1.default.ERROR);
+                    assert.equal(result.subtype, Staging_1.default.ERRORS.DECRYPTION);
                     return [2 /*return*/];
             }
         });
@@ -176,8 +176,8 @@ describe('command: transfer', function () {
                     return [4 /*yield*/, Transfer_1.stage(args, stage_1.session)];
                 case 1:
                     result = _a.sent();
-                    assert.equal(result.type, Staging_1["default"].ERROR);
-                    assert.equal(result.subtype, Staging_1["default"].ERRORS.BLANK_FIELD);
+                    assert.equal(result.type, Staging_1.default.ERROR);
+                    assert.equal(result.subtype, Staging_1.default.ERRORS.BLANK_FIELD);
                     return [2 /*return*/];
             }
         });

@@ -4,10 +4,10 @@
  * @date 2018
  */
 
-import * as Vorpal from "vorpal";
-import * as inquirer from 'inquirer';
 import * as fs from "fs";
+import * as inquirer from 'inquirer';
 import * as JSONBig from 'json-bigint';
+import * as Vorpal from "vorpal";
 
 import {Account} from "../../../Library"
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
@@ -29,40 +29,40 @@ import Session from "../classes/Session";
  */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let interactive = args.options.interactive || session.interactive;
-        let accounts = await session.keystore.all();
-        let addressQ = [
+        const interactive = args.options.interactive || session.interactive;
+        const accounts = await session.keystore.all();
+        const addressQ = [
             {
-                name: 'address',
-                type: 'list',
+                choices: accounts.map((account) => account.address),
                 message: 'Address: ',
-                choices: accounts.map((account) => account.address)
+                name: 'address',
+                type: 'list'
             }
         ];
-        let passwordQ = [
+        const passwordQ = [
             {
-                name: 'password',
-                type: 'password',
                 message: 'Enter current password: ',
+                name: 'password',
+                type: 'password'
             }
         ];
-        let newPasswordQ = [
+        const newPasswordQ = [
             {
+                message: 'Enter a new password: ',
                 name: 'password',
                 type: 'password',
-                message: 'Enter a new password: ',
             },
             {
+                message: 'Re-enter new password: ',
                 name: 'verifyPassword',
                 type: 'password',
-                message: 'Re-enter new password: ',
             }
         ];
 
         if (interactive && !args.address) {
-            let {address} = await inquirer.prompt(addressQ);
+            const {address} = await inquirer.prompt(addressQ);
             args.address = address;
         }
 
@@ -71,14 +71,14 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        let keystore = session.keystore.get(args.address);
+        const keystore = session.keystore.get(args.address);
         if (!keystore) {
             resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address.`));
             return;
         }
 
         if (!args.options.old) {
-            let {password} = await inquirer.prompt(passwordQ);
+            const {password} = await inquirer.prompt(passwordQ);
             args.options.old = password.trim();
         } else {
             if (!Staging.exists(args.options.old)) {
@@ -106,7 +106,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!args.options.new) {
-            let {password, verifyPassword} = await inquirer.prompt(newPasswordQ);
+            const {password, verifyPassword} = await inquirer.prompt(newPasswordQ);
             if (!(password && verifyPassword && (password === verifyPassword))) {
                 resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
@@ -131,7 +131,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        let newKeystore = decrypted.encrypt(args.options.new);
+        const newKeystore = decrypted.encrypt(args.options.new);
 
         fs.writeFileSync(session.keystore.find(args.address), JSONBig.stringify(newKeystore));
         resolve(success(newKeystore));
@@ -158,7 +158,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandAccountsUpdate(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'Update the password for a local account. Previous password must be known.';
 
     return evmlc.command('accounts update [address]').alias('a u')

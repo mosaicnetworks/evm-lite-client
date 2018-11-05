@@ -4,8 +4,8 @@
  * @date 2018
  */
 
-import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
+import * as Vorpal from "vorpal";
 
 import {Controller} from "../../../Library"
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
@@ -28,12 +28,12 @@ import Session from "../classes/Session";
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let remote = args.options.remote || false;
-        let verbose = args.options.verbose || false;
-        let formatted = args.options.formatted || false;
-        let table = new ASCIITable();
+        const remote = args.options.remote || false;
+        const verbose = args.options.verbose || false;
+        const formatted = args.options.formatted || false;
+        const table = new ASCIITable();
 
         let connection: Controller = null;
         if (verbose || remote) {
@@ -44,7 +44,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             }
         }
 
-        let accounts = remote ? await connection.api.getAccounts() : await session.keystore.all(verbose, connection);
+        const accounts = remote ? await connection.api.getAccounts() : await session.keystore.all(verbose, connection);
         if (!accounts || !accounts.length) {
             resolve(success([]));
             return;
@@ -56,7 +56,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         (verbose) ? table.setHeading('Address', 'Balance', 'Nonce') : table.setHeading('Address');
-        for (let account of accounts) {
+        for (const account of accounts) {
             (verbose) ? table.addRow(account.address, account.balance, account.nonce) : table.addRow(account.address);
         }
 
@@ -86,7 +86,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandAccountsList(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'List all accounts in the local keystore directory provided by the configuration file. This command will ' +
         'also get a balance and nonce for all the accounts from the node if a valid connection is established.';
 

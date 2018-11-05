@@ -4,5 +4,5 @@
     "clean:lib": "rm -rf Library/node_modules && rm -rf Library/package-lock.json",
     "build:lib": "cd Library && npm install && cd ..",
     "build:cli": "cd CLI && npm install && npm link && cd .."
-  }
+  },
 }

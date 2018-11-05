@@ -1,6 +1,7 @@
-import * as path from "path";
 import * as Chalk from "chalk";
+import * as path from "path";
 import * as Vorpal from "vorpal";
+
 import Session from "../classes/Session";
 
 
@@ -51,7 +52,7 @@ interface KDFEncryption {
     mac: string
 }
 
-export interface v3JSONKeyStore {
+export interface V3JSONKeyStore {
     version: number,
     id: string,
     address: string,
@@ -62,38 +63,35 @@ export type CommandFunction = (evmlc: Vorpal, session: Session) => Vorpal.Comman
 
 export default class Globals {
 
-    static evmlcDir: string = path.join(require('os').homedir(), '.evmlc');
+    public static evmlcDir: string = path.join(require('os').homedir(), '.evmlc');
 
-    constructor() {
-    }
-
-    static success(message: any): void {
+    public static success(message: any): void {
         console.log(Chalk.default.green(message));
     }
 
-    static warning(message: any): void {
+    public static warning(message: any): void {
         console.log(Chalk.default.yellow(message));
     }
 
-    static error(message: any): void {
+    public static error(message: any): void {
         console.log(Chalk.default.red(message));
     }
 
-    static info(message: any): void {
+    public static info(message: any): void {
         console.log(Chalk.default.blue(message));
     }
 
-    static isEquivalentObjects(objectA: any, objectB: any) {
+    public static isEquivalentObjects(objectA: any, objectB: any) {
 
-        let aProps = Object.getOwnPropertyNames(objectA);
-        let bProps = Object.getOwnPropertyNames(objectB);
+        const aProps = Object.getOwnPropertyNames(objectA);
+        const bProps = Object.getOwnPropertyNames(objectB);
 
         if (aProps.length !== bProps.length) {
             return false;
         }
 
         for (let i = 0; i < aProps.length; i++) {
-            let propName = aProps[i];
+            const propName = aProps[i];
 
             if (typeof objectA[propName] === 'object' && typeof objectB[propName] === 'object') {
                 if (!Globals.isEquivalentObjects(objectA[propName], objectB[propName])) {
@@ -105,6 +103,9 @@ export default class Globals {
         }
 
         return true;
+    }
+
+    constructor() {
     }
 
 }

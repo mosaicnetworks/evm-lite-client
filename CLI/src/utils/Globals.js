@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const path = require("path");
 const Chalk = require("chalk");
+const path = require("path");
 class Globals {
     constructor() {
     }
@@ -18,13 +18,13 @@ class Globals {
         console.log(Chalk.default.blue(message));
     }
     static isEquivalentObjects(objectA, objectB) {
-        let aProps = Object.getOwnPropertyNames(objectA);
-        let bProps = Object.getOwnPropertyNames(objectB);
+        const aProps = Object.getOwnPropertyNames(objectA);
+        const bProps = Object.getOwnPropertyNames(objectB);
         if (aProps.length !== bProps.length) {
             return false;
         }
         for (let i = 0; i < aProps.length; i++) {
-            let propName = aProps[i];
+            const propName = aProps[i];
             if (typeof objectA[propName] === 'object' && typeof objectB[propName] === 'object') {
                 if (!Globals.isEquivalentObjects(objectA[propName], objectB[propName])) {
                     return false;
