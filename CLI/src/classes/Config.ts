@@ -13,6 +13,7 @@ export default class Config {
 
     public data: any;
     public path: string;
+
     private _initialData: any;
 
     constructor(public datadir: string, public filename: string) {
@@ -22,16 +23,10 @@ export default class Config {
         this.path = path.join(datadir, filename);
 
         if (Staging.exists(this.path)) {
-            let tomlData: string = Config.readFile(this.path);
+            let tomlData: string = fs.readFileSync(this.path, 'utf8');
 
             this.data = toml.parse(tomlData);
             this._initialData = toml.parse(tomlData);
-        }
-    }
-
-    static readFile(path: string): string {
-        if (Staging.exists(path)) {
-            return fs.readFileSync(path, 'utf8');
         }
     }
 
@@ -56,24 +51,28 @@ export default class Config {
         return tomlify.toToml(this.data, {spaces: 2})
     }
 
-    save(): boolean {
-        if (Globals.isEquivalentObjects(this.data, this._initialData)) {
-            return false;
-        } else {
-            let list = this.path.split('/');
-            list.pop();
+    async save(): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            if (Globals.isEquivalentObjects(this.data, this._initialData)) {
+                resolve(false);
+            } else {
+                let list = this.path.split('/');
+                list.pop();
 
-            let configFileDir = list.join('/');
+                let configFileDir = list.join('/');
 
-            if (!Staging.exists(configFileDir)) {
-                mkdir.mkdirp(configFileDir);
+                if (!Staging.exists(configFileDir)) {
+                    mkdir.mkdirp(configFileDir);
+                }
+
+                fs.writeFile(this.path, this.toTOML(), (err) => {
+                    if (!err) {
+                        this._initialData = toml.parse(this.toTOML());
+                    }
+                    resolve(!err);
+                });
             }
-
-            fs.writeFileSync(this.path, this.toTOML());
-            this._initialData = toml.parse(this.toTOML());
-
-            return true;
-        }
+        });
     }
 
     getOrCreateKeystore(): Keystore {

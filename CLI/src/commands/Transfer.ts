@@ -146,7 +146,6 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         tx.chainId = 1;
         tx.nonce = (await session.keystore.fetch(decrypted.address, connection)).nonce;
 
-        console.log(tx);
         try {
             let signed = await decrypted.signTransaction(tx);
 
@@ -155,9 +154,9 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             tx.txHash = response.txHash;
 
             session.database.transactions.add(tx);
-            session.database.save();
+            await session.database.save();
 
-            resolve(success(`Transaction submitted with hash: ${tx.txHash}`));
+            resolve(success(`Transaction submitted: ${tx.txHash}`));
         } catch (e) {
             resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
         }

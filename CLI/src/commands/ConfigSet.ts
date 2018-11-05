@@ -71,7 +71,9 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             }
         }
 
-        resolve(success(session.config.save() ? 'Configuration saved.' : 'No changes detected.'));
+        let saved = await session.config.save();
+
+        resolve(success(saved ? 'Configuration saved.' : 'No changes detected.'));
     });
 };
 

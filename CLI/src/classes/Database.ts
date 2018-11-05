@@ -27,8 +27,10 @@ export default class Database {
         }
     }
 
-    save() {
-        this._data.transactions = this.transactions.all();
-        fs.writeFileSync(this.path, JSONBig.stringify(this._data));
+    async save(): Promise<boolean> {
+        return new Promise<boolean>(resolve => {
+            this._data.transactions = this.transactions.all();
+            fs.writeFile(this.path, JSONBig.stringify(this._data), (err) => resolve(!err));
+        });
     }
 }
