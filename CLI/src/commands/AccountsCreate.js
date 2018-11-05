@@ -40,7 +40,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var fs = require("fs");
 var inquirer = require("inquirer");
 var JSONBig = require("json-bigint");
@@ -65,12 +65,12 @@ exports.stage = function (args, session) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _a = Staging_1.default.getStagingFunctions(args), error = _a.error, success = _a.success;
+                    _a = Staging_1["default"].getStagingFunctions(args), error = _a.error, success = _a.success;
                     interactive = !args.options.pwd || session.interactive;
                     verbose = args.options.verbose || false;
                     questions = [
                         {
-                            default: session.keystore.path,
+                            "default": session.keystore.path,
                             message: 'Enter keystore output path: ',
                             name: 'output',
                             type: 'input'
@@ -91,34 +91,34 @@ exports.stage = function (args, session) {
                 case 1:
                     _b = _c.sent(), output = _b.output, password = _b.password, verifyPassword = _b.verifyPassword;
                     if (!(password && verifyPassword && (password === verifyPassword))) {
-                        resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
+                        resolve(error(Staging_1["default"].ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                         return [2 /*return*/];
                     }
                     args.options.pwd = password.trim();
                     args.options.output = output;
                     return [3 /*break*/, 3];
                 case 2:
-                    if (!Staging_1.default.exists(args.options.pwd)) {
-                        resolve(error(Staging_1.default.ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
+                    if (!Staging_1["default"].exists(args.options.pwd)) {
+                        resolve(error(Staging_1["default"].ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
                         return [2 /*return*/];
                     }
-                    if (Staging_1.default.isDirectory(args.options.pwd)) {
-                        resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
+                    if (Staging_1["default"].isDirectory(args.options.pwd)) {
+                        resolve(error(Staging_1["default"].ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
                         return [2 /*return*/];
                     }
                     args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
                     _c.label = 3;
                 case 3:
                     args.options.output = args.options.output || session.config.data.defaults.keystore;
-                    if (!Staging_1.default.exists(args.options.output)) {
-                        resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
+                    if (!Staging_1["default"].exists(args.options.output)) {
+                        resolve(error(Staging_1["default"].ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
                         return [2 /*return*/];
                     }
-                    if (!Staging_1.default.isDirectory(args.options.output)) {
-                        resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
+                    if (!Staging_1["default"].isDirectory(args.options.output)) {
+                        resolve(error(Staging_1["default"].ERRORS.IS_FILE, 'Output path is not a directory.'));
                         return [2 /*return*/];
                     }
-                    account = JSONBig.parse(Keystore_1.default.create(args.options.output, args.options.pwd));
+                    account = JSONBig.parse(Keystore_1["default"].create(args.options.output, args.options.pwd));
                     resolve(success(verbose ? account : "0x" + account.address));
                     return [2 /*return*/];
             }
@@ -159,5 +159,5 @@ function commandAccountsCreate(evmlc, session) {
     })
         .action(function (args) { return Staging_1.execute(exports.stage, args, session); });
 }
-exports.default = commandAccountsCreate;
+exports["default"] = commandAccountsCreate;
 ;

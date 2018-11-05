@@ -1,10 +1,10 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var path = require("path");
+exports.__esModule = true;
 var fs = require("fs");
+var path = require("path");
 var Session_1 = require("../src/classes/Session");
 exports.datadir = path.join(__dirname, './assets');
-exports.session = new Session_1.default(exports.datadir);
+exports.session = new Session_1["default"](exports.datadir);
 exports.pwdPath = path.join(exports.datadir, 'pwd.txt');
 exports.password = fs.readFileSync(exports.pwdPath, 'utf8').trim();
 exports.otherPwdPath = path.join(exports.datadir, 'other_pwd.txt');

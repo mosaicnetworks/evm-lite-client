@@ -36,8 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 exports.__esModule = true;
-var Chai = require("chai");
 var ASCIITable = require("ascii-table");
+var Chai = require("chai");
 var AccountsList_1 = require("../../src/commands/AccountsList");
 var stage_1 = require("../stage");
 var Staging_1 = require("../../src/classes/Staging");
@@ -50,9 +50,9 @@ describe('command: accounts list', function () {
                 case 0:
                     args = {
                         options: {
-                            verbose: true,
                             host: '127.0.0.1',
-                            port: '1234'
+                            port: '1234',
+                            verbose: true
                         }
                     };
                     return [4 /*yield*/, AccountsList_1.stage(args, stage_1.session)];
@@ -71,10 +71,10 @@ describe('command: accounts list', function () {
                 case 0:
                     args = {
                         options: {
-                            verbose: true,
                             formatted: true,
                             host: '127.0.0.1',
-                            port: '8080'
+                            port: '8080',
+                            verbose: true
                         }
                     };
                     return [4 /*yield*/, AccountsList_1.stage(args, stage_1.session)];

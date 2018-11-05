@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var path = require("path");
 var Library_1 = require("../../../Library");
 var Database_1 = require("./Database");
@@ -11,8 +11,8 @@ var Session = /** @class */ (function () {
         this.connection = null;
         this.logs = [];
         this.logpath = path.join(dataDirPath, 'logs');
-        this.directory = new DataDirectory_1.default(dataDirPath);
-        this.database = new Database_1.default(path.join(dataDirPath, 'db.json'));
+        this.directory = new DataDirectory_1["default"](dataDirPath);
+        this.database = new Database_1["default"](path.join(dataDirPath, 'db.json'));
         this.config = this.directory.createAndGetConfig();
         this.keystore = this.config.getOrCreateKeystore();
     }
@@ -39,10 +39,10 @@ var Session = /** @class */ (function () {
     };
     ;
     Session.prototype.log = function () {
-        var log = new Log_1.default(this.logpath);
+        var log = new Log_1["default"](this.logpath);
         this.logs.push(log);
         return log;
     };
     return Session;
 }());
-exports.default = Session;
+exports["default"] = Session;

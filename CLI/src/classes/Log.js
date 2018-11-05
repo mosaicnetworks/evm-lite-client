@@ -1,11 +1,11 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var fs = require("fs");
 var DataDirectory_1 = require("./DataDirectory");
 var Log = /** @class */ (function () {
     function Log(path) {
         this.path = path;
-        DataDirectory_1.default.createOrReadFile(this.path, '');
+        DataDirectory_1["default"].createOrReadFile(this.path, '');
         this.log = "";
         this.command = "";
     }
@@ -35,4 +35,4 @@ var Log = /** @class */ (function () {
     };
     return Log;
 }());
-exports.default = Log;
+exports["default"] = Log;

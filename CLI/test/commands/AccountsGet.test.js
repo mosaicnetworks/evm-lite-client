@@ -112,9 +112,9 @@ describe('Command: accounts get', function () {
                     args = {
                         address: '0x3d906545a6f4e20062fe1e08760cfdbead0d1d96',
                         options: {
+                            formatted: true,
                             host: '127.0.0.1',
-                            port: '8080',
-                            formatted: true
+                            port: '8080'
                         }
                     };
                     return [4 /*yield*/, AccountsGet_1.stage(args, stage_1.session)];

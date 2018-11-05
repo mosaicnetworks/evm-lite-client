@@ -34,7 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var fs = require("fs");
 var JSONBig = require("json-bigint");
 var DataDirectory_1 = require("./DataDirectory");
@@ -42,12 +42,12 @@ var Transactions_1 = require("./Transactions");
 var Database = /** @class */ (function () {
     function Database(path) {
         this.path = path;
-        this.data = JSONBig.parse(DataDirectory_1.default.createOrReadFile(path, JSONBig.stringify(Database.initial())));
-        this.transactions = new Transactions_1.default(this.path, this.data.transactions);
+        this.data = JSONBig.parse(DataDirectory_1["default"].createOrReadFile(path, JSONBig.stringify(Database.initial())));
+        this.transactions = new Transactions_1["default"](this.path, this.data.transactions);
     }
     Database.initial = function () {
         return {
-            transactions: [],
+            transactions: []
         };
     };
     Database.prototype.save = function () {
@@ -63,4 +63,4 @@ var Database = /** @class */ (function () {
     };
     return Database;
 }());
-exports.default = Database;
+exports["default"] = Database;

@@ -34,7 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var fs = require("fs");
 var mkdir = require("mkdirp");
 var path = require("path");
@@ -48,16 +48,16 @@ var Config = /** @class */ (function () {
     function Config(datadir, filename) {
         this.datadir = datadir;
         this.filename = filename;
-        this.data = Config.default(this.datadir);
-        this.initialData = Config.default(this.datadir);
+        this.data = Config["default"](this.datadir);
+        this.initialData = Config["default"](this.datadir);
         this.path = path.join(datadir, filename);
-        if (Staging_1.default.exists(this.path)) {
+        if (Staging_1["default"].exists(this.path)) {
             var tomlData = fs.readFileSync(this.path, 'utf8');
             this.data = toml.parse(tomlData);
             this.initialData = toml.parse(tomlData);
         }
     }
-    Config.default = function (datadir) {
+    Config["default"] = function (datadir) {
         return {
             defaults: {
                 from: '',
@@ -65,12 +65,12 @@ var Config = /** @class */ (function () {
                 gasprice: 0,
                 host: '127.0.0.1',
                 keystore: path.join(datadir, 'keystore'),
-                port: '8080',
+                port: '8080'
             }
         };
     };
     Config.defaultTOML = function (datadir) {
-        return tomlify.toToml(Config.default(datadir), { spaces: 2 });
+        return tomlify.toToml(Config["default"](datadir), { spaces: 2 });
     };
     Config.prototype.toTOML = function () {
         return tomlify.toToml(this.data, { spaces: 2 });
@@ -80,14 +80,14 @@ var Config = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (resolve) {
-                        if (Globals_1.default.isEquivalentObjects(_this.data, _this.initialData)) {
+                        if (Globals_1["default"].isEquivalentObjects(_this.data, _this.initialData)) {
                             resolve(false);
                         }
                         else {
                             var list = _this.path.split('/');
                             list.pop();
                             var configFileDir = list.join('/');
-                            if (!Staging_1.default.exists(configFileDir)) {
+                            if (!Staging_1["default"].exists(configFileDir)) {
                                 mkdir.mkdirp(configFileDir);
                             }
                             fs.writeFile(_this.path, _this.toTOML(), function (err) {
@@ -102,9 +102,9 @@ var Config = /** @class */ (function () {
         });
     };
     Config.prototype.getOrCreateKeystore = function () {
-        DataDirectory_1.default.createDirectoryIfNotExists(this.data.defaults.keystore);
-        return new Keystore_1.default(this.data.defaults.keystore);
+        DataDirectory_1["default"].createDirectoryIfNotExists(this.data.defaults.keystore);
+        return new Keystore_1["default"](this.data.defaults.keystore);
     };
     return Config;
 }());
-exports.default = Config;
+exports["default"] = Config;

@@ -40,7 +40,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var fs = require("fs");
 var inquirer = require("inquirer");
 var JSONBig = require("json-bigint");
@@ -65,7 +65,7 @@ exports.stage = function (args, session) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _a = Staging_1.default.getStagingFunctions(args), error = _a.error, success = _a.success;
+                    _a = Staging_1["default"].getStagingFunctions(args), error = _a.error, success = _a.success;
                     interactive = args.options.interactive || session.interactive;
                     return [4 /*yield*/, session.keystore.all()];
                 case 1:
@@ -89,12 +89,12 @@ exports.stage = function (args, session) {
                         {
                             message: 'Enter a new password: ',
                             name: 'password',
-                            type: 'password',
+                            type: 'password'
                         },
                         {
                             message: 'Re-enter new password: ',
                             name: 'verifyPassword',
-                            type: 'password',
+                            type: 'password'
                         }
                     ];
                     if (!(interactive && !args.address)) return [3 /*break*/, 3];
@@ -105,12 +105,12 @@ exports.stage = function (args, session) {
                     _c.label = 3;
                 case 3:
                     if (!args.address) {
-                        resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address.'));
+                        resolve(error(Staging_1["default"].ERRORS.BLANK_FIELD, 'Provide a non-empty address.'));
                         return [2 /*return*/];
                     }
                     keystore = session.keystore.get(args.address);
                     if (!keystore) {
-                        resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, "Cannot find keystore file of address."));
+                        resolve(error(Staging_1["default"].ERRORS.FILE_NOT_FOUND, "Cannot find keystore file of address."));
                         return [2 /*return*/];
                     }
                     if (!!args.options.old) return [3 /*break*/, 5];
@@ -120,12 +120,12 @@ exports.stage = function (args, session) {
                     args.options.old = password.trim();
                     return [3 /*break*/, 6];
                 case 5:
-                    if (!Staging_1.default.exists(args.options.old)) {
-                        resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
+                    if (!Staging_1["default"].exists(args.options.old)) {
+                        resolve(error(Staging_1["default"].ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
                         return [2 /*return*/];
                     }
-                    if (Staging_1.default.isDirectory(args.options.old)) {
-                        resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
+                    if (Staging_1["default"].isDirectory(args.options.old)) {
+                        resolve(error(Staging_1["default"].ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
                         return [2 /*return*/];
                     }
                     args.options.old = fs.readFileSync(args.options.old, 'utf8').trim();
@@ -136,36 +136,36 @@ exports.stage = function (args, session) {
                         decrypted = Library_1.Account.decrypt(keystore, args.options.old);
                     }
                     catch (err) {
-                        resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));
+                        resolve(error(Staging_1["default"].ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));
                         return [2 /*return*/];
                     }
-                    if (!!args.options.new) return [3 /*break*/, 8];
+                    if (!!args.options["new"]) return [3 /*break*/, 8];
                     return [4 /*yield*/, inquirer.prompt(newPasswordQ)];
                 case 7:
                     _b = _c.sent(), password = _b.password, verifyPassword = _b.verifyPassword;
                     if (!(password && verifyPassword && (password === verifyPassword))) {
-                        resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
+                        resolve(error(Staging_1["default"].ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                         return [2 /*return*/];
                     }
-                    args.options.new = password.trim();
+                    args.options["new"] = password.trim();
                     return [3 /*break*/, 9];
                 case 8:
-                    if (!Staging_1.default.exists(args.options.new)) {
-                        resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
+                    if (!Staging_1["default"].exists(args.options["new"])) {
+                        resolve(error(Staging_1["default"].ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
                         return [2 /*return*/];
                     }
-                    if (Staging_1.default.isDirectory(args.options.new)) {
-                        resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
+                    if (Staging_1["default"].isDirectory(args.options["new"])) {
+                        resolve(error(Staging_1["default"].ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
                         return [2 /*return*/];
                     }
-                    args.options.new = fs.readFileSync(args.options.new, 'utf8').trim();
+                    args.options["new"] = fs.readFileSync(args.options["new"], 'utf8').trim();
                     _c.label = 9;
                 case 9:
-                    if (args.options.old === args.options.new) {
-                        resolve(error(Staging_1.default.ERRORS.OTHER, 'New password is the same as old.'));
+                    if (args.options.old === args.options["new"]) {
+                        resolve(error(Staging_1["default"].ERRORS.OTHER, 'New password is the same as old.'));
                         return [2 /*return*/];
                     }
-                    newKeystore = decrypted.encrypt(args.options.new);
+                    newKeystore = decrypted.encrypt(args.options["new"]);
                     fs.writeFileSync(session.keystore.find(args.address), JSONBig.stringify(newKeystore));
                     resolve(success(newKeystore));
                     return [2 /*return*/];
@@ -203,5 +203,5 @@ function commandAccountsUpdate(evmlc, session) {
     })
         .action(function (args) { return Staging_1.execute(exports.stage, args, session); });
 }
-exports.default = commandAccountsUpdate;
+exports["default"] = commandAccountsUpdate;
 ;

@@ -40,7 +40,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var fs = require("fs");
 var inquirer = require("inquirer");
 var JSONBig = require("json-bigint");
@@ -65,12 +65,12 @@ exports.stage = function (args, session) {
         return __generator(this, function (_e) {
             switch (_e.label) {
                 case 0:
-                    _a = Staging_1.default.getStagingFunctions(args), error = _a.error, success = _a.success;
+                    _a = Staging_1["default"].getStagingFunctions(args), error = _a.error, success = _a.success;
                     return [4 /*yield*/, session.connect(args.options.host, args.options.port)];
                 case 1:
                     connection = _e.sent();
                     if (!connection) {
-                        resolve(error(Staging_1.default.ERRORS.INVALID_CONNECTION));
+                        resolve(error(Staging_1["default"].ERRORS.INVALID_CONNECTION));
                         return [2 /*return*/];
                     }
                     interactive = args.options.interactive || session.interactive;
@@ -82,39 +82,39 @@ exports.stage = function (args, session) {
                             choices: accounts.map(function (account) { return account.address; }),
                             message: 'From: ',
                             name: 'from',
-                            type: 'list',
+                            type: 'list'
                         }
                     ];
                     passwordQ = [
                         {
                             message: 'Enter password: ',
                             name: 'password',
-                            type: 'password',
+                            type: 'password'
                         }
                     ];
                     restOfQs = [
                         {
                             message: 'To',
                             name: 'to',
-                            type: 'input',
+                            type: 'input'
                         },
                         {
-                            default: '100',
+                            "default": '100',
                             message: 'Value: ',
                             name: 'value',
-                            type: 'input',
+                            type: 'input'
                         },
                         {
-                            default: session.config.data.defaults.gas || 100000,
+                            "default": session.config.data.defaults.gas || 100000,
                             message: 'Gas: ',
                             name: 'gas',
-                            type: 'input',
+                            type: 'input'
                         },
                         {
-                            default: session.config.data.defaults.gasPrice || 0,
+                            "default": session.config.data.defaults.gasPrice || 0,
                             message: 'Gas Price: ',
                             name: 'gasPrice',
-                            type: 'input',
+                            type: 'input'
                         }
                     ];
                     tx = {};
@@ -126,12 +126,12 @@ exports.stage = function (args, session) {
                     _e.label = 4;
                 case 4:
                     if (!args.options.from) {
-                        resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, '`From` address cannot be blank.'));
+                        resolve(error(Staging_1["default"].ERRORS.BLANK_FIELD, '`From` address cannot be blank.'));
                         return [2 /*return*/];
                     }
                     keystore = session.keystore.get(args.options.from);
                     if (!keystore) {
-                        resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, "Cannot find keystore file of address: " + tx.from + "."));
+                        resolve(error(Staging_1["default"].ERRORS.FILE_NOT_FOUND, "Cannot find keystore file of address: " + tx.from + "."));
                         return [2 /*return*/];
                     }
                     if (!!args.options.pwd) return [3 /*break*/, 6];
@@ -141,12 +141,12 @@ exports.stage = function (args, session) {
                     args.options.pwd = password;
                     return [3 /*break*/, 7];
                 case 6:
-                    if (!Staging_1.default.exists(args.options.pwd)) {
-                        resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
+                    if (!Staging_1["default"].exists(args.options.pwd)) {
+                        resolve(error(Staging_1["default"].ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
                         return [2 /*return*/];
                     }
-                    if (Staging_1.default.isDirectory(args.options.pwd)) {
-                        resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
+                    if (Staging_1["default"].isDirectory(args.options.pwd)) {
+                        resolve(error(Staging_1["default"].ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
                         return [2 /*return*/];
                     }
                     args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
@@ -157,7 +157,7 @@ exports.stage = function (args, session) {
                         decrypted = Library_1.Account.decrypt(keystore, args.options.pwd);
                     }
                     catch (err) {
-                        resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account.'));
+                        resolve(error(Staging_1["default"].ERRORS.DECRYPTION, 'Failed decryption of account.'));
                         return [2 /*return*/];
                     }
                     if (!interactive) return [3 /*break*/, 9];
@@ -176,7 +176,7 @@ exports.stage = function (args, session) {
                     tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
                     tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
                     if ((!tx.to) || !tx.value) {
-                        resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
+                        resolve(error(Staging_1["default"].ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
                         return [2 /*return*/];
                     }
                     tx.chainId = 1;
@@ -203,7 +203,7 @@ exports.stage = function (args, session) {
                     return [3 /*break*/, 16];
                 case 15:
                     e_1 = _e.sent();
-                    resolve(error(Staging_1.default.ERRORS.OTHER, (e_1.text) ? e_1.text : e_1.message));
+                    resolve(error(Staging_1["default"].ERRORS.OTHER, (e_1.text) ? e_1.text : e_1.message));
                     return [3 /*break*/, 16];
                 case 16: return [2 /*return*/];
             }
@@ -244,9 +244,9 @@ function commandTransfer(evmlc, session) {
         .option('--pwd <password>', 'password file path')
         .option('-p, --port <port>', 'override config parameter port')
         .types({
-        string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd'],
+        string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd']
     })
         .action(function (args) { return Staging_1.execute(exports.stage, args, session); });
 }
-exports.default = commandTransfer;
+exports["default"] = commandTransfer;
 ;

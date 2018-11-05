@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var Transactions = /** @class */ (function () {
     function Transactions(dbPath, transactions) {
         this.dbPath = dbPath;
@@ -36,4 +36,4 @@ var Transactions = /** @class */ (function () {
     };
     return Transactions;
 }());
-exports.default = Transactions;
+exports["default"] = Transactions;

@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var ASCIITable = require("ascii-table");
 var fs = require("fs");
 var JSONBig = require("json-bigint");
@@ -53,7 +53,7 @@ var Staging = /** @class */ (function () {
         return {
             args: args,
             message: message,
-            type: Staging.SUCCESS,
+            type: Staging.SUCCESS
         };
     };
     Staging.error = function (args, subtype, message) {
@@ -62,7 +62,7 @@ var Staging = /** @class */ (function () {
             args: args,
             message: message,
             subtype: subtype,
-            type: Staging.ERROR,
+            type: Staging.ERROR
         };
     };
     Staging.getStagingFunctions = function (args) {
@@ -83,11 +83,11 @@ var Staging = /** @class */ (function () {
         IS_DIRECTORY: 'Should not be a directory',
         IS_FILE: 'Should be a directory',
         OTHER: 'Something went wrong',
-        PATH_NOT_EXIST: 'Path(s) should exist',
+        PATH_NOT_EXIST: 'Path(s) should exist'
     };
     return Staging;
 }());
-exports.default = Staging;
+exports["default"] = Staging;
 exports.execute = function (fn, args, session) {
     return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
         var output, message;
@@ -109,7 +109,7 @@ exports.execute = function (fn, args, session) {
                     else {
                         message = output.subtype + '.';
                     }
-                    Globals_1.default[output.type]("" + (message.charAt(0).toUpperCase() + message.slice(1)));
+                    Globals_1["default"][output.type]("" + (message.charAt(0).toUpperCase() + message.slice(1)));
                     resolve();
                     return [2 /*return*/];
             }
