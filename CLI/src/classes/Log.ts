@@ -3,44 +3,44 @@ import DataDirectory from "./DataDirectory";
 
 export default class Log {
 
-    private _command: string;
-    private _log: string;
+    private command: string;
+    private log: string;
 
     constructor(readonly path: string) {
         DataDirectory.createOrReadFile(this.path, '');
 
-        this._log = ``;
-        this._command = ``;
+        this.log = ``;
+        this.command = ``;
     }
 
-    withCommand(command: string): this {
-        let today = new Date();
-        let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-        let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    public withCommand(command: string): this {
+        const today = new Date();
+        const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
-        this._log += `[${date} ${time}] `;
-        this._log += command;
-        this._command = command;
+        this.log += `[${date} ${time}] `;
+        this.log += command;
+        this.command = command;
         return this
     }
 
-    append(keyword: string, description: string): this {
+    public append(keyword: string, description: string): this {
         this._append(`${keyword}: ${description}`);
         return this;
     }
 
-    show(): void {
-        console.log(this._log);
+    public show(): void {
+        console.log(this.log);
     }
 
-    write(): this {
-        let previous = fs.readFileSync(this.path, 'utf8') + '\n';
-        fs.writeFileSync(this.path, previous + this._log);
+    public write(): this {
+        const previous = fs.readFileSync(this.path, 'utf8') + '\n';
+        fs.writeFileSync(this.path, previous + this.log);
         return this;
     }
 
     private _append(text: string): void {
-        this._log += `\n${text}`
+        this.log += `\n${text}`
     }
 
 }

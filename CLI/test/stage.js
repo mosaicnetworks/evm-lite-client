@@ -1,7 +1,7 @@
 "use strict";
 exports.__esModule = true;
-var path = require("path");
 var fs = require("fs");
+var path = require("path");
 var Session_1 = require("../src/classes/Session");
 exports.datadir = path.join(__dirname, './assets');
 exports.session = new Session_1["default"](exports.datadir);

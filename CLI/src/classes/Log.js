@@ -6,16 +6,16 @@ class Log {
     constructor(path) {
         this.path = path;
         DataDirectory_1.default.createOrReadFile(this.path, '');
-        this._log = ``;
-        this._command = ``;
+        this.log = ``;
+        this.command = ``;
     }
     withCommand(command) {
-        let today = new Date();
-        let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-        let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        this._log += `[${date} ${time}] `;
-        this._log += command;
-        this._command = command;
+        const today = new Date();
+        const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        this.log += `[${date} ${time}] `;
+        this.log += command;
+        this.command = command;
         return this;
     }
     append(keyword, description) {
@@ -23,15 +23,15 @@ class Log {
         return this;
     }
     show() {
-        console.log(this._log);
+        console.log(this.log);
     }
     write() {
-        let previous = fs.readFileSync(this.path, 'utf8') + '\n';
-        fs.writeFileSync(this.path, previous + this._log);
+        const previous = fs.readFileSync(this.path, 'utf8') + '\n';
+        fs.writeFileSync(this.path, previous + this.log);
         return this;
     }
     _append(text) {
-        this._log += `\n${text}`;
+        this.log += `\n${text}`;
     }
 }
 exports.default = Log;

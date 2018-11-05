@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const Library_1 = require("../../../Library");
-const DataDirectory_1 = require("./DataDirectory");
 const Database_1 = require("./Database");
+const DataDirectory_1 = require("./DataDirectory");
 const Log_1 = require("./Log");
 class Session {
     constructor(dataDirPath) {
@@ -17,9 +17,9 @@ class Session {
         this.keystore = this.config.getOrCreateKeystore();
     }
     connect(forcedHost, forcedPort) {
-        let host = forcedHost || this.config.data.defaults.host || '127.0.0.1';
-        let port = forcedPort || this.config.data.defaults.port || 8080;
-        let node = new Library_1.Controller(host, port);
+        const host = forcedHost || this.config.data.defaults.host || '127.0.0.1';
+        const port = forcedPort || this.config.data.defaults.port || 8080;
+        const node = new Library_1.Controller(host, port);
         return node.api.testConnection()
             .then((success) => {
             if (success) {
@@ -38,7 +38,7 @@ class Session {
     }
     ;
     log() {
-        let log = new Log_1.default(this.logpath);
+        const log = new Log_1.default(this.logpath);
         this.logs.push(log);
         return log;
     }

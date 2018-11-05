@@ -1,38 +1,56 @@
-import * as Vorpal from "vorpal";
+/**
+ * @file AccountsCreate.ts
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
+import * as Vorpal from "vorpal";
 
-import {TXReceipt} from "../utils/Globals";
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
+import {TXReceipt} from "../utils/Globals";
 
 import Session from "../classes/Session";
 
-
+/**
+ * Should return either a Staged error or success.
+ *
+ * @remarks
+ * This staging function will parse all the arguments of the `transactions get` command
+ * and resolve a success or an error.
+ *
+ * @param args - Arguments to the command.
+ * @param session - Controls the session of the CLI instance.
+ * @returns An object specifying a success or an error.
+ *
+ * @alpha
+ */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let connection = await session.connect(args.options.host, args.options.port);
+        const connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION,));
             return;
         }
 
-        let table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
-        let interactive = args.options.interactive || session.interactive;
-        let formatted = args.options.formatted || false;
-        let questions = [
+        const table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
+        const interactive = args.options.interactive || session.interactive;
+        const formatted = args.options.formatted || false;
+        const questions = [
             {
+                message: 'Transaction Hash: ',
                 name: 'hash',
-                type: 'input',
                 required: true,
-                message: 'Transaction Hash: '
+                type: 'input',
             }
         ];
 
         if (interactive && !args.hash) {
-            let {hash} = await inquirer.prompt(questions);
+            const {hash} = await inquirer.prompt(questions);
             args.hash = hash;
         }
 
@@ -41,7 +59,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        let receipt: TXReceipt = await connection.api.getReceipt(args.hash);
+        const receipt: TXReceipt = await connection.api.getReceipt(args.hash);
         if (!receipt) {
             resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
             return;
@@ -55,7 +73,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        for (let key in receipt) {
+        for (const key in receipt) {
             if (receipt.hasOwnProperty(key)) {
                 if (key !== 'status') {
                     table.addRow(key, receipt[key]);
@@ -65,7 +83,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             }
         }
 
-        let tx = session.database.transactions.get(args.hash);
+        const tx = session.database.transactions.get(args.hash);
         if (!tx) {
             resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
             return;
@@ -80,9 +98,27 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
     });
 };
 
+/**
+ * Should construct a Vorpal.Command instance for the command `transactions get`.
+ *
+ * @remarks
+ * Allows you to get transaction details such as `gas`, `gasprice`, `status`, `to` etc. using a
+ * transaction hash.
+ *
+ * Usage: `transactions get --formatted 0xf4d71b947c7d870332b849b489a8f4dcdca166f9c485963b473724eab9eaee62`
+ *
+ * Here we have requested the details of the transaction with hash the specified hash and asked that the
+ * data is formatted into an ASCII table.
+ *
+ * @param evmlc - The CLI instance.
+ * @param session - Controls the session of the CLI instance.
+ * @returns The Vorpal.Command instance of `accounts create`.
+ *
+ * @alpha
+ */
 export default function commandTransactionsGet(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'Gets a transaction using its hash.';
 
     return evmlc.command('transactions get [hash]').alias('t g')

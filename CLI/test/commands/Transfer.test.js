@@ -134,8 +134,8 @@ describe('command: transfer', function () {
                 case 0:
                     createArgs = {
                         options: {
-                            verbose: true,
-                            pwd: stage_1.pwdPath
+                            pwd: stage_1.pwdPath,
+                            verbose: true
                         }
                     };
                     return [4 /*yield*/, AccountsCreate.stage(createArgs, stage_1.session)];

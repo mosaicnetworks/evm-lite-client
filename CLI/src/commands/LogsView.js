@@ -9,11 +9,11 @@ function commandLogsShow(evmlc, session) {
         .hidden()
         .action((args) => {
         return new Promise((resolve) => {
-            let interactive = session.interactive || false;
-            let current = args.options.session || false;
+            const interactive = session.interactive || false;
+            const current = args.options.session || false;
             if (current) {
                 if (interactive) {
-                    for (let log of session.logs) {
+                    for (const log of session.logs) {
                         log.show();
                     }
                 }

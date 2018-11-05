@@ -13,7 +13,7 @@ function commandTest(evmlc, session) {
         .hidden()
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-            console.log(session.logs);
+            // console.log(session.logs);
             resolve();
         }));
     })

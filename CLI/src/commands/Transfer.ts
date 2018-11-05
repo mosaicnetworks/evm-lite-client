@@ -1,71 +1,89 @@
-import * as Vorpal from "vorpal";
-import * as inquirer from 'inquirer';
+/**
+ * @file AccountsCreate.ts
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as fs from "fs";
+import * as inquirer from 'inquirer';
 import * as JSONBig from 'json-bigint';
+import * as Vorpal from "vorpal";
 
 import {Account} from "../../../Library"
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
 
-
+/**
+ * Should return either a Staged error or success.
+ *
+ * @remarks
+ * This staging function will parse all the arguments of the `transfer` command
+ * and resolve a success or an error.
+ *
+ * @param args - Arguments to the command.
+ * @param session - Controls the session of the CLI instance.
+ * @returns An object specifying a success or an error.
+ *
+ * @alpha
+ */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let connection = await session.connect(args.options.host, args.options.port);
+        const connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION));
             return;
         }
 
-        let interactive = args.options.interactive || session.interactive;
-        let accounts = await session.keystore.all();
-        let fromQ = [
+        const interactive = args.options.interactive || session.interactive;
+        const accounts = await session.keystore.all();
+        const fromQ = [
             {
+                choices: accounts.map((account) => account.address),
+                message: 'From: ',
                 name: 'from',
                 type: 'list',
-                message: 'From: ',
-                choices: accounts.map((account) => account.address)
             }
         ];
-        let passwordQ = [
+        const passwordQ = [
             {
+                message: 'Enter password: ',
                 name: 'password',
                 type: 'password',
-                message: 'Enter password: ',
             }
         ];
-        let restOfQs = [
+        const restOfQs = [
             {
+                message: 'To',
                 name: 'to',
                 type: 'input',
-                message: 'To'
             },
             {
+                default: '100',
+                message: 'Value: ',
                 name: 'value',
                 type: 'input',
-                default: '100',
-                message: 'Value: '
             },
             {
+                default: session.config.data.defaults.gas || 100000,
+                message: 'Gas: ',
                 name: 'gas',
                 type: 'input',
-                default: session.config.data.defaults.gas || 100000,
-                message: 'Gas: '
             },
             {
+                default: session.config.data.defaults.gasPrice || 0,
+                message: 'Gas Price: ',
                 name: 'gasPrice',
                 type: 'input',
-                default: session.config.data.defaults.gasPrice || 0,
-                message: 'Gas Price: '
             }
         ];
-        let tx: any = {};
+        const tx: any = {};
 
         if (interactive) {
-            let {from} = await inquirer.prompt(fromQ);
+            const {from} = await inquirer.prompt(fromQ);
             args.options.from = from;
         }
 
@@ -74,14 +92,14 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        let keystore = session.keystore.get(args.options.from);
+        const keystore = session.keystore.get(args.options.from);
         if (!keystore) {
             resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
             return;
         }
 
         if (!args.options.pwd) {
-            let {password} = await inquirer.prompt(passwordQ);
+            const {password} = await inquirer.prompt(passwordQ);
             args.options.pwd = password;
         } else {
             if (!Staging.exists(args.options.pwd)) {
@@ -106,7 +124,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (interactive) {
-            let answers = await inquirer.prompt(restOfQs);
+            const answers = await inquirer.prompt(restOfQs);
 
             args.options.to = answers.to;
             args.options.value = answers.value;
@@ -128,18 +146,17 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         tx.chainId = 1;
         tx.nonce = (await session.keystore.fetch(decrypted.address, connection)).nonce;
 
-        console.log(tx);
         try {
-            let signed = await decrypted.signTransaction(tx);
+            const signed = await decrypted.signTransaction(tx);
 
-            let response = JSONBig.parse(await connection.api.sendRawTx(signed.rawTransaction));
+            const response = JSONBig.parse(await connection.api.sendRawTx(signed.rawTransaction));
 
             tx.txHash = response.txHash;
 
             session.database.transactions.add(tx);
-            session.database.save();
+            await session.database.save();
 
-            resolve(success(`Transaction submitted with hash: ${tx.txHash}`));
+            resolve(success(`Transaction submitted: ${tx.txHash}`));
         } catch (e) {
             resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
         }
@@ -147,9 +164,28 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
     });
 };
 
+/**
+ * Should construct a Vorpal.Command instance for the command `transfer`.
+ *
+ * @remarks
+ * Allows you to transfer token(s) from one account to another.
+ *
+ * Usage: `transfer --from 0x583560ee73713a6554c463bd02349841cd79f6e2 --to 0x546756ee73713a6554c463bd02349841cd79f6e2
+ * --value 200 --pwd ~/pwd.txt --gas 1000000 --gasprice 0`
+ *
+ * Here we have requested the transfer of `200` tokens to the specified address from
+ * `0x583560ee73713a6554c463bd02349841cd79f6e2`. The default `gas` and `gasprice` can be set in the configuration file
+ * to be used for all transfers.
+ *
+ * @param evmlc - The CLI instance.
+ * @param session - Controls the session of the CLI instance.
+ * @returns The Vorpal.Command instance of `accounts create`.
+ *
+ * @alpha
+ */
 export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
         ' configuration file.';
 

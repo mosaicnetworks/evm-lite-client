@@ -1,6 +1,6 @@
+import * as ASCIITable from 'ascii-table';
 import * as Chai from 'chai';
 import * as Vorpal from "vorpal";
-import * as ASCIITable from 'ascii-table';
 
 import {stage} from '../../src/commands/AccountsList';
 import {session} from "../stage";
@@ -12,29 +12,29 @@ const assert = Chai.assert;
 
 describe('command: accounts list', () => {
     it('should return error as verbose requires a valid connection to a node', async () => {
-        let args: Vorpal.Args = {
+        const args: Vorpal.Args = {
             options: {
-                verbose: true,
                 host: '127.0.0.1',
                 port: '1234',
+                verbose: true,
             }
         };
-        let result: StagedOutput<Message> = await stage(args, session);
+        const result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.ERROR);
         assert.equal(result.subtype, Staging.ERRORS.INVALID_CONNECTION);
     });
 
     it('should return ASCIITable with verbose and formatted with valid connection', async () => {
-        let args: Vorpal.Args = {
+        const args: Vorpal.Args = {
             options: {
-                verbose: true,
                 formatted: true,
                 host: '127.0.0.1',
                 port: '8080',
+                verbose: true,
             }
         };
-        let result: StagedOutput<Message> = await stage(args, session);
+        const result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
 
@@ -42,13 +42,13 @@ describe('command: accounts list', () => {
     });
 
     it('should return list of BaseAccounts even without a valid connection', async () => {
-        let args: Vorpal.Args = {
+        const args: Vorpal.Args = {
             options: {
                 host: '127.0.0.1',
                 port: '1234',
             }
         };
-        let result: StagedOutput<Message> = await stage(args, session);
+        const result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
 
@@ -56,14 +56,14 @@ describe('command: accounts list', () => {
     });
 
     it('should return ASCIITable even without a valid connection', async () => {
-        let args: Vorpal.Args = {
+        const args: Vorpal.Args = {
             options: {
                 formatted: true,
                 host: '127.0.0.1',
                 port: '1234',
             }
         };
-        let result: StagedOutput<Message> = await stage(args, session);
+        const result: StagedOutput<Message> = await stage(args, session);
 
         assert.equal(result.type, Staging.SUCCESS);
 

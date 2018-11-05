@@ -36,8 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 exports.__esModule = true;
-var Chai = require("chai");
 var ASCIITable = require("ascii-table");
+var Chai = require("chai");
 var Info_1 = require("../../src/commands/Info");
 var stage_1 = require("../stage");
 var Staging_1 = require("../../src/classes/Staging");

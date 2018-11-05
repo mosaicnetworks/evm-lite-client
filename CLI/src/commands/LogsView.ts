@@ -1,8 +1,8 @@
-import * as Vorpal from "vorpal";
 import * as fs from "fs";
+import * as Vorpal from "vorpal";
 
-import Globals from "../utils/Globals";
 import Session from "../classes/Session";
+import Globals from "../utils/Globals";
 
 
 export default function commandLogsShow(evmlc: Vorpal, session: Session) {
@@ -12,12 +12,12 @@ export default function commandLogsShow(evmlc: Vorpal, session: Session) {
         .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>((resolve) => {
-                let interactive = session.interactive || false;
-                let current = args.options.session || false;
+                const interactive = session.interactive || false;
+                const current = args.options.session || false;
 
                 if (current) {
                     if (interactive) {
-                        for (let log of session.logs) {
+                        for (const log of session.logs) {
                             log.show();
                         }
                     } else {

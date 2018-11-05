@@ -20,7 +20,7 @@ interface DefaultTXOptions extends BaseTX {
 }
 
 /**
- * The root class to interactive with EVM-Lite.
+ * The root class to interact with EVM-Lite.
  */
 export default class Controller {
 

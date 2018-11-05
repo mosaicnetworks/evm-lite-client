@@ -1,41 +1,44 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
-const toml = require("toml");
-const tomlify = require("tomlify-j0.4");
 const mkdir = require("mkdirp");
 const path = require("path");
+const toml = require("toml");
+const tomlify = require("tomlify-j0.4");
 const Globals_1 = require("../utils/Globals");
-const Keystore_1 = require("./Keystore");
 const DataDirectory_1 = require("./DataDirectory");
+const Keystore_1 = require("./Keystore");
 const Staging_1 = require("./Staging");
 class Config {
     constructor(datadir, filename) {
         this.datadir = datadir;
         this.filename = filename;
         this.data = Config.default(this.datadir);
-        this._initialData = Config.default(this.datadir);
+        this.initialData = Config.default(this.datadir);
         this.path = path.join(datadir, filename);
         if (Staging_1.default.exists(this.path)) {
-            let tomlData = Config.readFile(this.path);
+            const tomlData = fs.readFileSync(this.path, 'utf8');
             this.data = toml.parse(tomlData);
-            this._initialData = toml.parse(tomlData);
-        }
-    }
-    static readFile(path) {
-        if (Staging_1.default.exists(path)) {
-            return fs.readFileSync(path, 'utf8');
+            this.initialData = toml.parse(tomlData);
         }
     }
     static default(datadir) {
         return {
             defaults: {
-                host: '127.0.0.1',
-                port: '8080',
                 from: '',
                 gas: 100000,
                 gasprice: 0,
+                host: '127.0.0.1',
                 keystore: path.join(datadir, 'keystore'),
+                port: '8080',
             }
         };
     }
@@ -46,20 +49,27 @@ class Config {
         return tomlify.toToml(this.data, { spaces: 2 });
     }
     save() {
-        if (Globals_1.default.isEquivalentObjects(this.data, this._initialData)) {
-            return false;
-        }
-        else {
-            let list = this.path.split('/');
-            list.pop();
-            let configFileDir = list.join('/');
-            if (!Staging_1.default.exists(configFileDir)) {
-                mkdir.mkdirp(configFileDir);
-            }
-            fs.writeFileSync(this.path, this.toTOML());
-            this._initialData = toml.parse(this.toTOML());
-            return true;
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => {
+                if (Globals_1.default.isEquivalentObjects(this.data, this.initialData)) {
+                    resolve(false);
+                }
+                else {
+                    const list = this.path.split('/');
+                    list.pop();
+                    const configFileDir = list.join('/');
+                    if (!Staging_1.default.exists(configFileDir)) {
+                        mkdir.mkdirp(configFileDir);
+                    }
+                    fs.writeFile(this.path, this.toTOML(), (err) => {
+                        if (!err) {
+                            this.initialData = toml.parse(this.toTOML());
+                        }
+                        resolve(!err);
+                    });
+                }
+            });
+        });
     }
     getOrCreateKeystore() {
         DataDirectory_1.default.createDirectoryIfNotExists(this.data.defaults.keystore);

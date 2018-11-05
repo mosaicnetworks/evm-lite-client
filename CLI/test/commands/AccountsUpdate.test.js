@@ -87,8 +87,8 @@ describe('command: accounts update', function () {
                 case 0:
                     createArgs = {
                         options: {
-                            verbose: true,
-                            pwd: stage_1.pwdPath
+                            pwd: stage_1.pwdPath,
+                            verbose: true
                         }
                     };
                     return [4 /*yield*/, AccountsCreate.stage(createArgs, stage_1.session)];
@@ -99,8 +99,8 @@ describe('command: accounts update', function () {
                     args = {
                         address: account.address,
                         options: {
-                            old: stage_1.otherPwdPath,
-                            "new": stage_1.pwdPath
+                            "new": stage_1.pwdPath,
+                            old: stage_1.otherPwdPath
                         }
                     };
                     return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];
@@ -140,8 +140,8 @@ describe('command: accounts update', function () {
                     args = {
                         address: account.address,
                         options: {
-                            old: stage_1.pwdPath,
-                            "new": 'does_not_exist'
+                            "new": 'does_not_exist',
+                            old: stage_1.pwdPath
                         }
                     };
                     return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];
@@ -161,8 +161,8 @@ describe('command: accounts update', function () {
                     args = {
                         address: account.address,
                         options: {
-                            old: stage_1.pwdPath,
-                            "new": stage_1.otherPwdPath
+                            "new": stage_1.otherPwdPath,
+                            old: stage_1.pwdPath
                         }
                     };
                     return [4 /*yield*/, AccountsUpdate_1.stage(args, stage_1.session)];

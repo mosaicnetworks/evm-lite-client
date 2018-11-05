@@ -72,8 +72,8 @@ describe('Command: accounts create', function () {
                 case 0:
                     args = {
                         options: {
-                            verbose: true,
-                            pwd: stage_1.pwdPath
+                            pwd: stage_1.pwdPath,
+                            verbose: true
                         }
                     };
                     return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];
@@ -114,8 +114,8 @@ describe('Command: accounts create', function () {
                 case 0:
                     args = {
                         options: {
-                            pwd: stage_1.pwdPath,
-                            output: '/directory_xyz/not_here'
+                            output: '/directory_xyz/not_here',
+                            pwd: stage_1.pwdPath
                         }
                     };
                     return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];
@@ -153,8 +153,8 @@ describe('Command: accounts create', function () {
                 case 0:
                     args = {
                         options: {
-                            pwd: stage_1.pwdPath,
-                            output: stage_1.pwdPath
+                            output: stage_1.pwdPath,
+                            pwd: stage_1.pwdPath
                         }
                     };
                     return [4 /*yield*/, AccountsCreate_1.stage(args, stage_1.session)];

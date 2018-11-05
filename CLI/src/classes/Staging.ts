@@ -1,22 +1,22 @@
 import * as ASCIITable from 'ascii-table';
-import * as JSONBig from 'json-bigint';
 import * as fs from "fs";
+import * as JSONBig from 'json-bigint';
 
-import Globals, {BaseAccount, SentTx, TXReceipt, v3JSONKeyStore} from "../utils/Globals";
+import Globals, {BaseAccount, SentTx, TXReceipt, V3JSONKeyStore} from "../utils/Globals";
 
 import Session from "./Session";
 
 
-export type Args = {
+export interface Args {
     [key: string]: any;
     options: {
         [key: string]: any;
     };
 }
 
-export type Message = SentTx[] | BaseAccount[] | TXReceipt | v3JSONKeyStore | ASCIITable | Object | string;
+export type Message = SentTx[] | BaseAccount[] | TXReceipt | V3JSONKeyStore | ASCIITable | object | string;
 
-export type StagedOutput<Message> = {
+export interface StagedOutput<Message> {
     type: string;
     subtype?: string;
     args: Args,
@@ -28,60 +28,60 @@ export type StagingFunction = (args: Args, session: Session) => Promise<StagedOu
 
 
 export default class Staging {
-    static ERROR = 'error';
-    static SUCCESS = 'success';
-    static ERRORS = {
+    public static ERROR = 'error';
+    public static SUCCESS = 'success';
+    public static ERRORS = {
         BLANK_FIELD: 'Field(s) should not be blank',
+        DECRYPTION: 'Failed decryption',
         DIRECTORY_NOT_EXIST: 'Directory should exist',
-        PATH_NOT_EXIST: 'Path(s) should exist',
-        IS_FILE: 'Should be a directory',
-        IS_DIRECTORY: 'Should not be a directory',
+        FETCH_FAILED: 'Could not fetch data',
         FILE_NOT_FOUND: 'Cannot find file',
         INVALID_CONNECTION: 'Invalid connection',
-        FETCH_FAILED: 'Could not fetch data',
-        DECRYPTION: 'Failed decryption',
+        IS_DIRECTORY: 'Should not be a directory',
+        IS_FILE: 'Should be a directory',
         OTHER: 'Something went wrong',
+        PATH_NOT_EXIST: 'Path(s) should exist',
     };
 
-    constructor() {
-    }
-
-    static exists(path: string): boolean {
+    public static exists(path: string): boolean {
         return fs.existsSync(path);
     }
 
-    static isDirectory(path: string): boolean {
+    public static isDirectory(path: string): boolean {
         return fs.lstatSync(path).isDirectory();
     }
 
-    static success(args: Args, message: Message) {
+    public static success(args: Args, message: Message) {
         return {
+            args,
+            message,
             type: Staging.SUCCESS,
-            args: args,
-            message: message
         }
     }
 
-    static error(args: Args, subtype: string, message: Message = null) {
+    public static error(args: Args, subtype: string, message: Message = null) {
         return {
+            args,
+            message,
+            subtype,
             type: Staging.ERROR,
-            subtype: subtype,
-            args: args,
-            message: message
         }
     }
 
-    static getStagingFunctions(args: Args): { error: (subtype: string, message?: Message) => StagedOutput<Message>, success: (message: Message) => StagedOutput<Message> } {
+    public static getStagingFunctions(args: Args): { error: (subtype: string, message?: Message) => StagedOutput<Message>, success: (message: Message) => StagedOutput<Message> } {
         return {
             error: Staging.error.bind(null, args),
             success: Staging.success.bind(null, args)
         }
     }
+
+    constructor() {
+    }
 }
 
 export const execute = (fn: StagingFunction, args: Args, session: Session): Promise<void> => {
     return new Promise<void>(async (resolve) => {
-        let output: StagedOutput<Message> = await fn(args, session);
+        const output: StagedOutput<Message> = await fn(args, session);
         let message: string;
 
         if (output.message) {

@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Transactions {
-    constructor(dbPath, _transactions) {
+    constructor(dbPath, transactions) {
         this.dbPath = dbPath;
-        this._transactions = _transactions;
+        this.transactions = transactions;
         this.sort();
     }
     all() {
-        return this._transactions;
+        return this.transactions;
     }
     add(tx) {
         delete tx.chainId;
@@ -17,19 +17,19 @@ class Transactions {
         tx.gasPrice = parseInt(tx.gasPrice, 16);
         tx.nonce = parseInt(tx.nonce, 16);
         tx.date = new Date();
-        this._transactions.push(tx);
+        this.transactions.push(tx);
         this.sort();
     }
     get(hash) {
         if (!hash.startsWith('0x')) {
             hash = `0x${hash}`;
         }
-        return this._transactions.filter(tx => {
+        return this.transactions.filter(tx => {
             return hash === tx.txHash;
         })[0] || null;
     }
     sort() {
-        this._transactions.sort(function (a, b) {
+        this.transactions.sort((a, b) => {
             // @ts-ignore
             return new Date(b.date) - new Date(a.date);
         });

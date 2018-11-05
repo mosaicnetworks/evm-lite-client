@@ -23,7 +23,7 @@ class DataDirectory {
         return fs.readFileSync(path, 'utf8');
     }
     createAndGetConfig() {
-        let configFilePath = path.join(this.path, 'config.toml');
+        const configFilePath = path.join(this.path, 'config.toml');
         DataDirectory.createOrReadFile(configFilePath, Config_1.default.defaultTOML(this.path));
         return new Config_1.default(this.path, 'config.toml');
     }

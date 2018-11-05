@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * @file AccountsCreate.ts
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -10,23 +15,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = require("inquirer");
 const Staging_1 = require("../classes/Staging");
+/**
+ * Should return either a Staged error or success.
+ *
+ * @remarks
+ * This staging function will parse all the arguments of the `config set` command
+ * and resolve a success or an error.
+ *
+ * @param args - Arguments to the command.
+ * @param session - Controls the session of the CLI instance.
+ * @returns An object specifying a success or an error.
+ *
+ * @alpha
+ */
 exports.stage = (args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-        let { error, success } = Staging_1.default.getStagingFunctions(args);
-        let interactive = args.options.interactive || session.interactive;
-        let questions = [];
+        const { error, success } = Staging_1.default.getStagingFunctions(args);
+        const interactive = args.options.interactive || session.interactive;
+        const questions = [];
         function populateQuestions(object) {
-            for (let key in object) {
+            for (const key in object) {
                 if (object.hasOwnProperty(key)) {
                     if (typeof object[key] === 'object') {
                         populateQuestions(object[key]);
                     }
                     else {
                         questions.push({
-                            name: key,
                             default: object[key],
+                            message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `,
+                            name: key,
                             type: 'input',
-                            message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `
                         });
                     }
                 }
@@ -34,8 +52,8 @@ exports.stage = (args, session) => {
         }
         populateQuestions(session.config.data);
         if (interactive) {
-            let answers = yield inquirer.prompt(questions);
-            for (let key in answers) {
+            const answers = yield inquirer.prompt(questions);
+            for (const key in answers) {
                 if (answers.hasOwnProperty(key)) {
                     args.options[key.toLowerCase()] = answers[key];
                 }
@@ -45,18 +63,36 @@ exports.stage = (args, session) => {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'No options provided.'));
             return;
         }
-        for (let key in args.options) {
+        for (const key in args.options) {
             if (args.options.hasOwnProperty(key)) {
                 if (session.config.data.defaults[key] !== args.options[key] && key !== 'interactive') {
                     session.config.data.defaults[key] = args.options[key];
                 }
             }
         }
-        resolve(success(session.config.save() ? 'Configuration saved.' : 'No changes detected.'));
+        const saved = yield session.config.save();
+        resolve(success(saved ? 'Configuration saved.' : 'No changes detected.'));
     }));
 };
+/**
+ * Should construct a Vorpal.Command instance for the command `config set`.
+ *
+ * @remarks
+ * Allows you to set EVM-Lite CLI configuration settings through the CLI. Can be done interactively.
+ *
+ * Usage: `config set --host 5.5.5.1`
+ *
+ * Here we have executed a command to change the default host to connect to for any command
+ * through the CLI to `5.5.5.1`.
+ *
+ * @param evmlc - The CLI instance.
+ * @param session - Controls the session of the CLI instance.
+ * @returns The Vorpal.Command instance of `accounts get`.
+ *
+ * @alpha
+ */
 function commandConfigSet(evmlc, session) {
-    let description = 'Set values of the configuration inside the data directory.';
+    const description = 'Set values of the configuration inside the data directory.';
     return evmlc.command('config set').alias('c s')
         .description(description)
         .option('-i, --interactive', 'enter into interactive command')

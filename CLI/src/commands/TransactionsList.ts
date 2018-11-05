@@ -1,27 +1,45 @@
-import * as Vorpal from "vorpal";
-import * as ASCIITable from 'ascii-table';
+/**
+ * @file AccountsCreate.ts
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
 
-import {TXReceipt} from "../utils/Globals";
+import * as ASCIITable from 'ascii-table';
+import * as Vorpal from "vorpal";
+
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
+import {TXReceipt} from "../utils/Globals";
 
 import Session from "../classes/Session";
 
-
+/**
+ * Should return either a Staged error or success.
+ *
+ * @remarks
+ * This staging function will parse all the arguments of the `transactions get` command
+ * and resolve a success or an error.
+ *
+ * @param args - Arguments to the command.
+ * @param session - Controls the session of the CLI instance.
+ * @returns An object specifying a success or an error.
+ *
+ * @alpha
+ */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
-        let {error, success} = Staging.getStagingFunctions(args);
+        const {error, success} = Staging.getStagingFunctions(args);
 
-        let connection = await session.connect(args.options.host, args.options.port);
+        const connection = await session.connect(args.options.host, args.options.port);
         if (!connection) {
             resolve(error(Staging.ERRORS.INVALID_CONNECTION));
             return;
         }
 
-        let formatted = args.options.formatted || false;
-        let verbose = args.options.verbose || false;
-        let table = new ASCIITable();
+        const formatted = args.options.formatted || false;
+        const verbose = args.options.verbose || false;
+        const table = new ASCIITable();
 
-        let transactions = session.database.transactions.all();
+        const transactions = session.database.transactions.all();
         if (!transactions.length) {
             resolve(success([]));
             return;
@@ -39,12 +57,12 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             table.setHeading('From', 'To', 'Value', 'Status');
         }
 
-        for (let tx of transactions) {
-            let txDate = new Date(tx.date);
-            let receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
+        for (const tx of transactions) {
+            const txDate = new Date(tx.date);
+            const receipt: TXReceipt = await connection.api.getReceipt(tx.txHash);
 
-            let date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
-            let time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
+            const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
+            const time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
 
             if (verbose) {
                 table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice,
@@ -59,9 +77,27 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
     });
 };
 
+/**
+ * Should construct a Vorpal.Command instance for the command `transactions list`.
+ *
+ * @remarks
+ * Allows you list all the transactions sent using the CLI and each of its details..
+ *
+ * Usage: `transactions list --formatted --verbose`
+ *
+ * Here we have executed a command to list all the transactions sent with the CLI and
+ * asked for the `verbose` output of the data which then should be formatted into an
+ * ASCII table specified by `formatted`.
+ *
+ * @param evmlc - The CLI instance.
+ * @param session - Controls the session of the CLI instance.
+ * @returns The Vorpal.Command instance of `accounts create`.
+ *
+ * @alpha
+ */
 export default function commandTransactionsList(evmlc: Vorpal, session: Session) {
 
-    let description =
+    const description =
         'Lists all submitted transactions with the status.';
 
     return evmlc.command('transactions list').alias('t l')

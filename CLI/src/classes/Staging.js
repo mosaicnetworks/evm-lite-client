@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
-const JSONBig = require("json-bigint");
 const fs = require("fs");
+const JSONBig = require("json-bigint");
 const Globals_1 = require("../utils/Globals");
 class Staging {
     constructor() {
@@ -23,17 +23,17 @@ class Staging {
     }
     static success(args, message) {
         return {
+            args,
+            message,
             type: Staging.SUCCESS,
-            args: args,
-            message: message
         };
     }
     static error(args, subtype, message = null) {
         return {
+            args,
+            message,
+            subtype,
             type: Staging.ERROR,
-            subtype: subtype,
-            args: args,
-            message: message
         };
     }
     static getStagingFunctions(args) {
@@ -47,20 +47,20 @@ Staging.ERROR = 'error';
 Staging.SUCCESS = 'success';
 Staging.ERRORS = {
     BLANK_FIELD: 'Field(s) should not be blank',
+    DECRYPTION: 'Failed decryption',
     DIRECTORY_NOT_EXIST: 'Directory should exist',
-    PATH_NOT_EXIST: 'Path(s) should exist',
-    IS_FILE: 'Should be a directory',
-    IS_DIRECTORY: 'Should not be a directory',
+    FETCH_FAILED: 'Could not fetch data',
     FILE_NOT_FOUND: 'Cannot find file',
     INVALID_CONNECTION: 'Invalid connection',
-    FETCH_FAILED: 'Could not fetch data',
-    DECRYPTION: 'Failed decryption',
+    IS_DIRECTORY: 'Should not be a directory',
+    IS_FILE: 'Should be a directory',
     OTHER: 'Something went wrong',
+    PATH_NOT_EXIST: 'Path(s) should exist',
 };
 exports.default = Staging;
 exports.execute = (fn, args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-        let output = yield fn(args, session);
+        const output = yield fn(args, session);
         let message;
         if (output.message) {
             switch (typeof output.message) {

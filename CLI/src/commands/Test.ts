@@ -8,7 +8,7 @@ export default function commandTest(evmlc: Vorpal, session: Session) {
         .hidden()
         .action((args: Vorpal.Args): Promise<void> => {
             return new Promise<void>(async resolve => {
-                console.log(session.logs);
+                // console.log(session.logs);
                 resolve();
             });
         })
