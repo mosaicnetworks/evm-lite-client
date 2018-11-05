@@ -1,3 +1,9 @@
+/**
+ * @file AccountsCreate.ts
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 import * as fs from "fs";
@@ -8,7 +14,19 @@ import Staging, {execute, Message, StagedOutput, StagingFunction} from "../class
 
 import Session from "../classes/Session";
 
-
+/**
+ * Should return either a Staged error or success.
+ *
+ * @remarks
+ * This staging function will parse all the arguments of the `transfer` command
+ * and resolve a success or an error.
+ *
+ * @param args - Arguments to the command.
+ * @param session - Controls the session of the CLI instance.
+ * @returns An object specifying a success or an error.
+ *
+ * @alpha
+ */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
@@ -147,6 +165,25 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
     });
 };
 
+/**
+ * Should construct a Vorpal.Command instance for the command `transfer`.
+ *
+ * @remarks
+ * Allows you to transfer token(s) from one account to another.
+ *
+ * Usage: `transfer --from 0x583560ee73713a6554c463bd02349841cd79f6e2 --to 0x546756ee73713a6554c463bd02349841cd79f6e2
+ * --value 200 --pwd ~/pwd.txt --gas 1000000 --gasprice 0`
+ *
+ * Here we have requested the transfer of `200` tokens to the specified address from
+ * `0x583560ee73713a6554c463bd02349841cd79f6e2`. The default `gas` and `gasprice` can be set in the configuration file
+ * to be used for all transfers.
+ *
+ * @param evmlc - The CLI instance.
+ * @param session - Controls the session of the CLI instance.
+ * @returns The Vorpal.Command instance of `accounts create`.
+ *
+ * @alpha
+ */
 export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
     let description =

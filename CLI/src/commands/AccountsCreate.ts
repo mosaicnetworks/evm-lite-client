@@ -1,3 +1,9 @@
+/**
+ * @file AccountsCreate.ts
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as Vorpal from "vorpal";
 import * as inquirer from 'inquirer';
 import * as fs from "fs";
@@ -8,6 +14,19 @@ import Staging, {execute, Message, StagedOutput, StagingFunction} from "../class
 import Session from "../classes/Session";
 import Keystore from "../classes/Keystore";
 
+/**
+ * Should return either a Staged error or success.
+ *
+ * @remarks
+ * This staging function will parse all the arguments of the `accounts create` command
+ * and resolve a success or an error.
+ *
+ * @param args - Arguments to the command.
+ * @param session - Controls the session of the CLI instance.
+ * @returns An object specifying a success or an error.
+ *
+ * @alpha
+ */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
@@ -41,7 +60,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 return;
             }
 
-            args.options.pwd = password;
+            args.options.pwd = password.trim();
             args.options.output = output;
         } else {
             if (!Staging.exists(args.options.pwd)) {
@@ -72,6 +91,26 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
     })
 };
 
+/**
+ * Should construct a Vorpal.Command instance for the command `accounts create`.
+ *
+ * @remarks
+ * Allows you to create and encrypt accounts locally. Created accounts will either be placed
+ * in the keystore folder provided by default config file (located at `~/.evmlc/config.toml`)
+ * or the config file located in the `--datadir, -d` flag.
+ *
+ * Usage: `accounts create --verbose --output ~/datadir/keystore --pwd ~/datadir/pwd.txt`
+ *
+ * Here we have specified to create the account file in `~/datadir/keystore`, encrypt
+ * with the `~/datadir/pwd.txt` and once that is done, provide the verbose output of
+ * the created account.
+ *
+ * @param evmlc - The CLI instance.
+ * @param session - Controls the session of the CLI instance.
+ * @returns The Vorpal.Command instance of `accounts create`.
+ *
+ * @alpha
+ */
 export default function commandAccountsCreate(evmlc: Vorpal, session: Session): Vorpal.Command {
 
     let description =

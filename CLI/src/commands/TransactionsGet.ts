@@ -1,3 +1,9 @@
+/**
+ * @file AccountsCreate.ts
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as Vorpal from "vorpal";
 import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
@@ -7,7 +13,19 @@ import Staging, {execute, Message, StagedOutput, StagingFunction} from "../class
 
 import Session from "../classes/Session";
 
-
+/**
+ * Should return either a Staged error or success.
+ *
+ * @remarks
+ * This staging function will parse all the arguments of the `transactions get` command
+ * and resolve a success or an error.
+ *
+ * @param args - Arguments to the command.
+ * @param session - Controls the session of the CLI instance.
+ * @returns An object specifying a success or an error.
+ *
+ * @alpha
+ */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
     return new Promise<StagedOutput<Message>>(async (resolve) => {
 
@@ -80,6 +98,24 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
     });
 };
 
+/**
+ * Should construct a Vorpal.Command instance for the command `transactions get`.
+ *
+ * @remarks
+ * Allows you to get transaction details such as `gas`, `gasprice`, `status`, `to` etc. using a
+ * transaction hash.
+ *
+ * Usage: `transactions get --formatted 0xf4d71b947c7d870332b849b489a8f4dcdca166f9c485963b473724eab9eaee62`
+ *
+ * Here we have requested the details of the transaction with hash the specified hash and asked that the
+ * data is formatted into an ASCII table.
+ *
+ * @param evmlc - The CLI instance.
+ * @param session - Controls the session of the CLI instance.
+ * @returns The Vorpal.Command instance of `accounts create`.
+ *
+ * @alpha
+ */
 export default function commandTransactionsGet(evmlc: Vorpal, session: Session) {
 
     let description =

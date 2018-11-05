@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+/**
+ * @file AccountsCreate.ts
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
+
 import * as Vorpal from "vorpal";
 import * as mkdir from 'mkdirp';
 import * as figlet from 'figlet';
@@ -25,7 +31,7 @@ import Clear from "./commands/Clear";
 import Test from "./commands/Test";
 import Info from "./commands/Info";
 
-const __VERSION__ = '0.1.1';
+const __VERSION = '0.1.1';
 const init = (): Promise<void> => {
     return new Promise<void>(resolve => {
         if (!Staging.exists(Globals.evmlcDir)) {
@@ -38,6 +44,10 @@ const init = (): Promise<void> => {
 
 /**
  * EVM-Lite Command Line Interface
+ *
+ * You can enter interactive mode by using the command `interactive, i`.
+ * Running any command will provide you with a step by step dialogue to executing
+ * that command with the respective options.
  */
 init()
     .then(() => {
@@ -65,7 +75,7 @@ init()
         return session;
     })
     .then((session: Session) => {
-        const evmlc = new Vorpal().version(__VERSION__);
+        const evmlc = new Vorpal().version(__VERSION);
 
         [
             AccountsUpdate,
