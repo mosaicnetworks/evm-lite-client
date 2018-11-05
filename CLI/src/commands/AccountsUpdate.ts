@@ -79,7 +79,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         if (!args.options.old) {
             let {password} = await inquirer.prompt(passwordQ);
-            args.options.old = password;
+            args.options.old = password.trim();
         } else {
             if (!Staging.exists(args.options.old)) {
                 resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
@@ -111,7 +111,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
             }
-            args.options.new = password;
+            args.options.new = password.trim();
         } else {
             if (!Staging.exists(args.options.new)) {
                 resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
