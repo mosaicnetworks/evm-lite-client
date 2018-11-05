@@ -47,6 +47,7 @@ const init = () => {
  * that command with the respective options.
  */
 init()
+    // configure data directory path
     .then(() => {
     let dataDirPath = Globals_1.default.evmlcDir;
     if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
@@ -64,6 +65,7 @@ init()
     }
     return session;
 })
+    // add commands
     .then((session) => {
     const evmlc = new Vorpal().version(__VERSION);
     [
@@ -90,6 +92,7 @@ init()
         session
     };
 })
+    // parse interactive and non interactive commands
     .then((cli) => __awaiter(this, void 0, void 0, function* () {
     if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
         console.log(figlet.textSync('EVM-Lite CLI', {}));
@@ -113,4 +116,5 @@ init()
         cli.instance.parse(process.argv);
     }
 }))
+    // catch errors.
     .catch(err => console.log(err));

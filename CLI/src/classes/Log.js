@@ -1,38 +1,37 @@
 "use strict";
-exports.__esModule = true;
-var fs = require("fs");
-var DataDirectory_1 = require("./DataDirectory");
-var Log = /** @class */ (function () {
-    function Log(path) {
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = require("fs");
+const DataDirectory_1 = require("./DataDirectory");
+class Log {
+    constructor(path) {
         this.path = path;
-        DataDirectory_1["default"].createOrReadFile(this.path, '');
-        this.log = "";
-        this.command = "";
+        DataDirectory_1.default.createOrReadFile(this.path, '');
+        this.log = ``;
+        this.command = ``;
     }
-    Log.prototype.withCommand = function (command) {
-        var today = new Date();
-        var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        this.log += "[" + date + " " + time + "] ";
+    withCommand(command) {
+        const today = new Date();
+        const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        this.log += `[${date} ${time}] `;
         this.log += command;
         this.command = command;
         return this;
-    };
-    Log.prototype.append = function (keyword, description) {
-        this._append(keyword + ": " + description);
+    }
+    append(keyword, description) {
+        this._append(`${keyword}: ${description}`);
         return this;
-    };
-    Log.prototype.show = function () {
+    }
+    show() {
         console.log(this.log);
-    };
-    Log.prototype.write = function () {
-        var previous = fs.readFileSync(this.path, 'utf8') + '\n';
+    }
+    write() {
+        const previous = fs.readFileSync(this.path, 'utf8') + '\n';
         fs.writeFileSync(this.path, previous + this.log);
         return this;
-    };
-    Log.prototype._append = function (text) {
-        this.log += "\n" + text;
-    };
-    return Log;
-}());
-exports["default"] = Log;
+    }
+    _append(text) {
+        this.log += `\n${text}`;
+    }
+}
+exports.default = Log;

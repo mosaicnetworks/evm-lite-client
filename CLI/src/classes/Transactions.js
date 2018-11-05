@@ -1,15 +1,15 @@
 "use strict";
-exports.__esModule = true;
-var Transactions = /** @class */ (function () {
-    function Transactions(dbPath, transactions) {
+Object.defineProperty(exports, "__esModule", { value: true });
+class Transactions {
+    constructor(dbPath, transactions) {
         this.dbPath = dbPath;
         this.transactions = transactions;
         this.sort();
     }
-    Transactions.prototype.all = function () {
+    all() {
         return this.transactions;
-    };
-    Transactions.prototype.add = function (tx) {
+    }
+    add(tx) {
         delete tx.chainId;
         delete tx.data;
         tx.value = parseInt(tx.value, 16);
@@ -19,21 +19,20 @@ var Transactions = /** @class */ (function () {
         tx.date = new Date();
         this.transactions.push(tx);
         this.sort();
-    };
-    Transactions.prototype.get = function (hash) {
+    }
+    get(hash) {
         if (!hash.startsWith('0x')) {
-            hash = "0x" + hash;
+            hash = `0x${hash}`;
         }
-        return this.transactions.filter(function (tx) {
+        return this.transactions.filter(tx => {
             return hash === tx.txHash;
         })[0] || null;
-    };
-    Transactions.prototype.sort = function () {
-        this.transactions.sort(function (a, b) {
+    }
+    sort() {
+        this.transactions.sort((a, b) => {
             // @ts-ignore
             return new Date(b.date) - new Date(a.date);
         });
-    };
-    return Transactions;
-}());
-exports["default"] = Transactions;
+    }
+}
+exports.default = Transactions;

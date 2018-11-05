@@ -7,112 +7,75 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+Object.defineProperty(exports, "__esModule", { value: true });
+const ASCIITable = require("ascii-table");
+const fs = require("fs");
+const JSONBig = require("json-bigint");
+const Globals_1 = require("../utils/Globals");
+class Staging {
+    constructor() {
     }
-};
-var _this = this;
-exports.__esModule = true;
-var ASCIITable = require("ascii-table");
-var fs = require("fs");
-var JSONBig = require("json-bigint");
-var Globals_1 = require("../utils/Globals");
-var Staging = /** @class */ (function () {
-    function Staging() {
-    }
-    Staging.exists = function (path) {
+    static exists(path) {
         return fs.existsSync(path);
-    };
-    Staging.isDirectory = function (path) {
+    }
+    static isDirectory(path) {
         return fs.lstatSync(path).isDirectory();
-    };
-    Staging.success = function (args, message) {
+    }
+    static success(args, message) {
         return {
-            args: args,
-            message: message,
-            type: Staging.SUCCESS
+            args,
+            message,
+            type: Staging.SUCCESS,
         };
-    };
-    Staging.error = function (args, subtype, message) {
-        if (message === void 0) { message = null; }
+    }
+    static error(args, subtype, message = null) {
         return {
-            args: args,
-            message: message,
-            subtype: subtype,
-            type: Staging.ERROR
+            args,
+            message,
+            subtype,
+            type: Staging.ERROR,
         };
-    };
-    Staging.getStagingFunctions = function (args) {
+    }
+    static getStagingFunctions(args) {
         return {
             error: Staging.error.bind(null, args),
             success: Staging.success.bind(null, args)
         };
-    };
-    Staging.ERROR = 'error';
-    Staging.SUCCESS = 'success';
-    Staging.ERRORS = {
-        BLANK_FIELD: 'Field(s) should not be blank',
-        DECRYPTION: 'Failed decryption',
-        DIRECTORY_NOT_EXIST: 'Directory should exist',
-        FETCH_FAILED: 'Could not fetch data',
-        FILE_NOT_FOUND: 'Cannot find file',
-        INVALID_CONNECTION: 'Invalid connection',
-        IS_DIRECTORY: 'Should not be a directory',
-        IS_FILE: 'Should be a directory',
-        OTHER: 'Something went wrong',
-        PATH_NOT_EXIST: 'Path(s) should exist'
-    };
-    return Staging;
-}());
-exports["default"] = Staging;
-exports.execute = function (fn, args, session) {
-    return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
-        var output, message;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, fn(args, session)];
-                case 1:
-                    output = _a.sent();
-                    if (output.message) {
-                        switch (typeof output.message) {
-                            case 'string':
-                                message = output.message;
-                                break;
-                            case 'object':
-                                message = (output.message instanceof ASCIITable) ? output.message.toString() : JSONBig.stringify(output.message);
-                                break;
-                        }
-                    }
-                    else {
-                        message = output.subtype + '.';
-                    }
-                    Globals_1["default"][output.type]("" + (message.charAt(0).toUpperCase() + message.slice(1)));
-                    resolve();
-                    return [2 /*return*/];
+    }
+}
+Staging.ERROR = 'error';
+Staging.SUCCESS = 'success';
+Staging.ERRORS = {
+    BLANK_FIELD: 'Field(s) should not be blank',
+    DECRYPTION: 'Failed decryption',
+    DIRECTORY_NOT_EXIST: 'Directory should exist',
+    FETCH_FAILED: 'Could not fetch data',
+    FILE_NOT_FOUND: 'Cannot find file',
+    INVALID_CONNECTION: 'Invalid connection',
+    IS_DIRECTORY: 'Should not be a directory',
+    IS_FILE: 'Should be a directory',
+    OTHER: 'Something went wrong',
+    PATH_NOT_EXIST: 'Path(s) should exist',
+};
+exports.default = Staging;
+exports.execute = (fn, args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        const output = yield fn(args, session);
+        let message;
+        if (output.message) {
+            switch (typeof output.message) {
+                case 'string':
+                    message = output.message;
+                    break;
+                case 'object':
+                    message = (output.message instanceof ASCIITable) ? output.message.toString() : JSONBig.stringify(output.message);
+                    break;
             }
-        });
-    }); });
+        }
+        else {
+            message = output.subtype + '.';
+        }
+        Globals_1.default[output.type](`${message.charAt(0).toUpperCase() + message.slice(1)}`);
+        resolve();
+    }));
 };

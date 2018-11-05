@@ -50,6 +50,7 @@ const init = (): Promise<void> => {
  * that command with the respective options.
  */
 init()
+    // configure data directory path
     .then(() => {
         let dataDirPath: string = Globals.evmlcDir;
 
@@ -74,6 +75,7 @@ init()
 
         return session;
     })
+    // add commands
     .then((session: Session) => {
         const evmlc = new Vorpal().version(__VERSION);
 
@@ -102,6 +104,7 @@ init()
             session
         }
     })
+    // parse interactive and non interactive commands
     .then(async (cli: { instance: Vorpal, session: Session }) => {
         if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
             console.log(figlet.textSync('EVM-Lite CLI', {}));
@@ -128,4 +131,5 @@ init()
             cli.instance.parse(process.argv);
         }
     })
+    // catch errors.
     .catch(err => console.log(err));

@@ -7,7 +7,7 @@ import DataDirectory from "./DataDirectory";
 import Transactions from "./Transactions";
 
 
-interface ISchema {
+interface Schema {
     transactions: SentTx[],
 }
 
@@ -20,7 +20,7 @@ export default class Database {
     }
 
     public transactions: Transactions;
-    public readonly data: ISchema;
+    public readonly data: Schema;
 
     constructor(readonly path: string) {
         this.data = JSONBig.parse(DataDirectory.createOrReadFile(path, JSONBig.stringify(Database.initial())));
