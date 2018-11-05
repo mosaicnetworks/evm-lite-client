@@ -1,0 +1,7 @@
+node_modules
+test
+CHANGELOG.md
+src/*.ts
+docs
+tsconfig.json
+.npmignore
