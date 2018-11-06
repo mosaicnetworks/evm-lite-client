@@ -44,7 +44,7 @@ export default class Session {
         return node.api.testConnection()
             .then((success: boolean) => {
                 if (success) {
-                    if (this.connection) {
+                    if (this.connection && this.connection.api.host === host && this.connection.api.port === port) {
                         return this.connection
                     }
 

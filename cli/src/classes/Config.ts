@@ -68,8 +68,11 @@ export default class Config {
                     if (!err) {
                         this.initialData = toml.parse(this.toTOML());
                     }
+
+
                     resolve(!err);
                 });
+
             }
         });
     }
