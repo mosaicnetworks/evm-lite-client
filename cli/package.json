@@ -1,0 +1,38 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**/*.js || true"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ascii-table": "0.0.9",
+    "chalk": "^2.4.1",
+    "figlet": "^1.2.0",
+    "inquirer": "latest",
+    "json-bigint": "^0.3.0",
+    "mkdirp": "^0.5.1",
+    "toml": "^2.3.3",
+    "tomlify-j0.4": "^3.0.0",
+    "vorpal": "^1.12.0"
+  },
+  "bin": {
+    "evmlc": "./src/evmlc.js"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.6",
+    "@types/chalk": "^2.2.0",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.11.0",
+    "@types/vorpal": "^1.11.0",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typescript": "^3.1.6"
+  }
+}
